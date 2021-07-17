@@ -4,3 +4,5 @@ find_package(Boost
 		log
 	REQUIRED
 )
+
+add_subdirectory(dependencies/memory-allocators)

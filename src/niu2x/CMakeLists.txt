@@ -12,11 +12,15 @@ target_sources(niu2x PRIVATE
 )
 
 include(dependent_prebuilt)
-include(find_dependencies)
 
 dependent_prebuilt(
 	TARGET niu2x 
-	LIBS luajit
+	LIBS 
+		luajit 
+)
+
+target_link_libraries(niu2x PRIVATE
+	memory-allocators
 )
 
 include(GenerateExportHeader)
@@ -26,3 +30,7 @@ generate_export_header(niu2x
 	DEPRECATED_MACRO_NAME DEPRECATED_API
 	INCLUDE_GUARD_NAME NIU2X_API_H
 )
+
+
+include(warning_as_error)
+warning_as_error_enable(niu2x)

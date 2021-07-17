@@ -9,8 +9,8 @@ namespace niu2x {
 
 class API lua_engine : private boost::noncopyable{
 public:
-	lua_engine() ;
-	~lua_engine() ;
+    lua_engine();
+    ~lua_engine();
 };
 
 }
