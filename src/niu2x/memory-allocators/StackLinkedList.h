@@ -5,19 +5,21 @@ template <class T>
 class StackLinkedList {
 public:
     struct Node {
-        T data;
-        Node* next;
+        T     data;
+        Node *next;
     };
-    
-    Node* head;
+
+    Node *head;
+
 public:
-    StackLinkedList() = default;
+    StackLinkedList() {
+        head = nullptr;
+    }
     StackLinkedList(StackLinkedList &stackLinkedList) = delete;
-    void push(Node * newNode);
-    Node* pop();
+    void  push(Node *newNode);
+    Node *pop();
 };
 
 #include "StackLinkedListImpl.h"
 
 #endif /* STACKLINKEDLIST_H */
-

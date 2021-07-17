@@ -5,4 +5,3 @@ find_package(Boost
 	REQUIRED
 )
 
-add_subdirectory(dependencies/memory-allocators)

@@ -5,16 +5,18 @@ template <class T>
 class DoublyLinkedList {
 public:
     struct Node {
-        T data;
-        Node* previous;
-        Node* next;
+        T     data;
+        Node *previous;
+        Node *next;
     };
-    Node* head;
+    Node *head;
+
 public:
     DoublyLinkedList();
 
-    void insert(Node* previousNode, Node* newNode);
-    void remove(Node* deleteNode);
+    void insert(Node *previousNode, Node *newNode);
+    void remove(Node *deleteNode);
+
 private:
     DoublyLinkedList(DoublyLinkedList &doublyLinkedList);
 };
@@ -22,4 +24,3 @@ private:
 #include "DoublyLinkedListImpl.h"
 
 #endif /* DOUBLYLINKEDLIST_H */
-

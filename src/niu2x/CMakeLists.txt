@@ -20,7 +20,7 @@ dependent_prebuilt(
 )
 
 target_link_libraries(niu2x PRIVATE
-	memory-allocators
+	dl
 )
 
 include(GenerateExportHeader)

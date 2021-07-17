@@ -13,15 +13,20 @@ function(dependent_prebuilt)
     foreach(libname IN LISTS P_LIBS)
         target_include_directories(${P_TARGET} PRIVATE 
             ${depdir}/${libname}/include
-        )
-        set(libdir ${depdir}/${libname}/lib/${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR})
+        )   
+
+        string(TOLOWER ${CMAKE_SYSTEM_NAME} system_name)
+
+        set(libdir ${depdir}/${libname}/lib/${system_name}/${CMAKE_SYSTEM_PROCESSOR})
         target_link_directories(${P_TARGET} PRIVATE 
             ${libdir}
         )
 
         file(GLOB_RECURSE libfiles PATTERN "${libdir}/*") 
         target_link_libraries(${P_TARGET} PRIVATE
-            ${libfiles}
+            # -Wl,--whole-archive 
+            ${libfiles} 
+            # -Wl,--no-whole-archive
         )
     endforeach()
 endfunction()
