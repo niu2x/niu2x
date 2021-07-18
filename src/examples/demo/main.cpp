@@ -1,14 +1,18 @@
 #include <iostream>
 
+#define NX_LOG_LEVEL 5
+
 #include <niu2x/lua_engine.h>
 #include <niu2x/memory.h>
 
-using namespace niu2x;
+using namespace nx;
 
-int main() {
-    lua_engine l(1024 * 1024);
-
-    l.exec("print('hello lua')");
+int main()
+{
+    lua_engine l(32_k);
+    printf("n\n");
+    l.exec(R"STR(
+    )STR");
 
     return 0;
 }

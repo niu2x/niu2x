@@ -2,19 +2,17 @@
 #include <stdlib.h> /* malloc, free */
 
 CAllocator::CAllocator()
-: Allocator(0) {}
+: Allocator(0)
+{
+}
 
-void CAllocator::Init() {}
+void CAllocator::Init() { }
 
-CAllocator::~CAllocator() {}
+CAllocator::~CAllocator() { }
 
-void *CAllocator::Allocate(
-    const std::size_t size,
-    const std::size_t alignment) {
-    unused(alignment);
+void* CAllocator::Allocate(const std::size_t size, const std::size_t)
+{
     return malloc(size);
 }
 
-void CAllocator::Free(void *ptr) {
-    free(ptr);
-}
+void CAllocator::Free(void* ptr) { free(ptr); }

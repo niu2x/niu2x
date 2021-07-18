@@ -1,23 +1,20 @@
 #ifndef STACKLINKEDLIST_H
 #define STACKLINKEDLIST_H
 
-template <class T>
-class StackLinkedList {
+template <class T> class StackLinkedList {
 public:
     struct Node {
-        T     data;
-        Node *next;
+        T data;
+        Node* next;
     };
 
-    Node *head;
+    Node* head;
 
 public:
-    StackLinkedList() {
-        head = nullptr;
-    }
-    StackLinkedList(StackLinkedList &stackLinkedList) = delete;
-    void  push(Node *newNode);
-    Node *pop();
+    StackLinkedList() { head = nullptr; }
+    StackLinkedList(StackLinkedList& stackLinkedList) = delete;
+    void push(Node* newNode);
+    Node* pop();
 };
 
 #include "StackLinkedListImpl.h"

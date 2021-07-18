@@ -1,10 +1,10 @@
 #include "SinglyLinkedList.h"
 
-template <class T>
-SinglyLinkedList<T>::SinglyLinkedList() {}
+template <class T> SinglyLinkedList<T>::SinglyLinkedList() { }
 
 template <class T>
-void SinglyLinkedList<T>::insert(Node *previousNode, Node *newNode) {
+void SinglyLinkedList<T>::insert(Node* previousNode, Node* newNode)
+{
     if (previousNode == nullptr) {
         // Is the first node
         if (head != nullptr) {
@@ -18,17 +18,18 @@ void SinglyLinkedList<T>::insert(Node *previousNode, Node *newNode) {
         if (previousNode->next == nullptr) {
             // Is the last node
             previousNode->next = newNode;
-            newNode->next      = nullptr;
+            newNode->next = nullptr;
         } else {
             // Is a middle node
-            newNode->next      = previousNode->next;
+            newNode->next = previousNode->next;
             previousNode->next = newNode;
         }
     }
 }
 
 template <class T>
-void SinglyLinkedList<T>::remove(Node *previousNode, Node *deleteNode) {
+void SinglyLinkedList<T>::remove(Node* previousNode, Node* deleteNode)
+{
     if (previousNode == nullptr) {
         // Is the first node
         if (deleteNode->next == nullptr) {
