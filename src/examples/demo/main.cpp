@@ -9,10 +9,7 @@ using namespace nx;
 
 int main()
 {
-    lua_engine l(32_k);
-    printf("n\n");
-    l.exec(R"STR(
-    )STR");
-
+    lua_engine l(128_k);
+    l.dofile("main.lua");
     return 0;
 }

@@ -15,7 +15,8 @@ public:
     lua_engine(size_t memory_limit = 16 * 1024 * 1024);
     ~lua_engine();
 
-    void exec(const char*);
+    void dostring(const char*);
+    void dofile(const char*);
 
 private:
     lua_State* L;

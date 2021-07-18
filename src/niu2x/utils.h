@@ -17,6 +17,15 @@
 
 namespace nx {
 
+// limits
+struct limits {
+#define LIMIT(type, name, value) static constexpr type name = value;
+
+    LIMIT(size_t, max_path, 1024)
+
+#undef LIMIT
+};
+
 // unused
 inline void unused() { }
 

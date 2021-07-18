@@ -5,33 +5,34 @@
 
 namespace nx {
 
-namespace {
-
-    // clang-format off
-const char *level_colors[] = { 
-    "\x1b[94m", 
-    "\x1b[36m", 
-    "\x1b[33m", 
-    "\x1b[31m", 
-    "\x1b[35m"
+static const char* level_colors[] = {
+    "",
+    "\x1b[35m",
+    "\x1b[31m",
+    "\x1b[33m",
+    "\x1b[36m",
+    "\x1b[94m",
 };
 
-const char *level_names[] = {
-    "trace",
-    "debug",
-    "warning",
-    "error",
+static const char* level_names[] = {
+    "",
     "fatal",
+    "error",
+    "warning",
+    "debug",
+    "trace",
 };
-    // clang-format on
 
-} // namespace
+log::level log::current_level_ = log::level::trace;
 
 void log::write(
     level p_level, const char* filename, int line, const char* msg, ...)
 {
+    if (current_level_ < p_level)
+        return;
 
     int lvl = int(p_level);
+
     auto* fmt = "\x1b[0m\x1b[90m%s[%s] %s %d ";
     fprintf(stderr, fmt, level_colors[lvl], level_names[lvl], filename, line);
 

@@ -7,6 +7,8 @@ extern "C" {
 #include "lualib.h"
 }
 
+#include <niu2x/lua_bindings/openlib.h>
+
 namespace nx {
 
 static int panic(lua_State* L)
@@ -30,6 +32,7 @@ lua_engine::lua_engine(size_t memory_limit)
     if (L) {
         lua_atpanic(L, panic);
         luaL_openlibs(L);
+        lua_bindings::openlib_all(L);
     }
 }
 
@@ -61,9 +64,24 @@ void* lua_engine::mem_alloc(void* ud, void* ptr, size_t osize, size_t nsize)
     }
 }
 
-void lua_engine::exec(const char* code)
+void lua_engine::dostring(const char* code)
 {
     const int ret = luaL_dostring(L, code);
+    if (ret != LUA_OK) {
+        std::stringstream ss;
+        ss << "Lua Error: ";
+        ss << lua_tostring(L, -1);
+
+        auto error = ss.str();
+        NX_THROW(error.c_str());
+
+        lua_pop(L, 1);
+    }
+}
+
+void lua_engine::dofile(const char* file)
+{
+    const int ret = luaL_dofile(L, file);
     if (ret != LUA_OK) {
         std::stringstream ss;
         ss << "Lua Error: ";
