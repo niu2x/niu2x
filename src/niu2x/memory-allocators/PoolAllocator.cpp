@@ -30,6 +30,7 @@ PoolAllocator::~PoolAllocator() { free(m_start_ptr); }
 void* PoolAllocator::Allocate(
     const std::size_t allocationSize, const std::size_t)
 {
+    (void)allocationSize;
     assert(allocationSize == this->m_chunkSize
         && "Allocation size must be equal to chunk size");
 

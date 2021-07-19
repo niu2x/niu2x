@@ -9,6 +9,12 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <functional>
 
 #include <boost/noncopyable.hpp>
 
@@ -78,5 +84,10 @@ private:
 } // namespace nx
 
 #define NX_THROW(message) throw nx::exception((message), __FILE__, __LINE__)
+
+#define NX_ASSERT(condition, message) \
+if(!(condition)){   \
+    NX_THROW((message)); \
+}
 
 #endif
