@@ -1,6 +1,8 @@
 #ifndef NX_UTILS_H
 #define NX_UTILS_H
 
+#include <string.h>
+
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -20,6 +22,7 @@
 
 #include <niu2x/api.h>
 #include <niu2x/log.h>
+#include <niu2x/misc/constexpr.h>
 
 namespace nx {
 
@@ -46,11 +49,18 @@ inline void unused(FirstParam&& first_param, Params&&... params)
 using noncopyable = boost::noncopyable;
 
 // literals
-inline size_t operator"" _k(const char* n) { return atoi(n) << 10; }
-
-inline size_t operator"" _m(const char* n) { return atoi(n) << 20; }
-
-inline size_t operator"" _g(const char* n) { return atoi(n) << 30; }
+inline constexpr size_t operator"" _k(const char* n)
+{
+    return misc::stoi(n) << 10;
+}
+inline constexpr size_t operator"" _m(const char* n)
+{
+    return misc::stoi(n) << 20;
+}
+inline constexpr size_t operator"" _g(const char* n)
+{
+    return misc::stoi(n) << 30;
+}
 
 // math utils
 template <class T> inline T min(const T& a, const T& b)

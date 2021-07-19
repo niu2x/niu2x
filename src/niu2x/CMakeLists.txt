@@ -17,6 +17,7 @@ dependent_prebuilt(
 	TARGET niu2x 
 	LIBS 
 		luajit 
+		zlib
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

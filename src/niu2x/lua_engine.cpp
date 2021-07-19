@@ -18,8 +18,7 @@ static int panic(lua_State* L)
     ss << "Lua Panic:(";
     ss << (s ? s : "?");
     ss << ")";
-    std::string error = ss.str();
-    NX_THROW(error.c_str());
+    NX_THROW(ss.str().c_str());
     return 0;
 }
 
@@ -72,10 +71,7 @@ void lua_engine::dostring(const char* code)
         ss << "Lua Error: ";
         ss << lua_tostring(L, -1);
         lua_pop(L, 1);
-
-        auto error = ss.str();
-        NX_THROW(error.c_str());
-
+        NX_THROW(ss.str().c_str());
     }
 }
 
@@ -87,9 +83,8 @@ void lua_engine::dofile(const char* file)
         ss << "Lua Error: ";
         ss << lua_tostring(L, -1);
         lua_pop(L, 1);
-        
-        auto error = ss.str();
-        NX_THROW(error.c_str());
+
+        NX_THROW(ss.str().c_str());
     }
 }
 

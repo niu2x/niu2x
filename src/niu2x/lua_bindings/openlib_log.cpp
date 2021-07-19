@@ -1,5 +1,9 @@
 #include "openlib.h"
 
+#if !defined(_WIN32) || !defined(_WIN64)
+    #define strncpy_s strncpy
+#endif
+
 namespace nx::lua_bindings {
 
 static char source[limits::max_path] = { 0 };
