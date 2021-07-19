@@ -19,8 +19,16 @@ dependent_prebuilt(
 		luajit 
 )
 
-target_link_libraries(niu2x PRIVATE
-	dl
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+list(APPEND runtime dl)
+endif()
+
+target_link_libraries(niu2x PUBLIC
+	${runtime}
+)
+
+target_link_libraries(niu2x PUBLIC
+	Boost::headers
 )
 
 include(GenerateExportHeader)

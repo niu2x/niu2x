@@ -13,11 +13,11 @@ static void fetch_backtrace(lua_State* L)
     lua_pushnumber(L, 2); // debug getinfo 0
     lua_call(L, 1, 1); // debug result
     lua_getfield(L, -1, "source"); // debug result source
-    strcpy(source, lua_tostring(L, -1));
+    strncpy_s(source, lua_tostring(L, -1), NX_ARRAY_SIZE(source));
     lua_pop(L, 1); // debug result
 
     lua_getfield(L, -1, "currentline"); // debug result currentline
-    lineno = lua_tonumber(L, -1);
+    lineno = (int)lua_tonumber(L, -1);
     lua_pop(L, 3); // debug result
 }
 

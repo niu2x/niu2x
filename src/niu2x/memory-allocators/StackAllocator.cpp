@@ -2,6 +2,8 @@
 #include "Utils.h" /* CalculatePadding */
 #include <algorithm> /* max */
 #include <stdlib.h> /* malloc, free */
+
+#undef _DEBUG
 #ifdef _DEBUG
 #include <iostream>
 #endif

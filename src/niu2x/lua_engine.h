@@ -6,7 +6,7 @@
 #include <niu2x/memory.h>
 #include <niu2x/utils.h>
 
-class lua_State;
+struct lua_State;
 
 namespace nx {
 

@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h> /* malloc, free */
+
+#undef _DEBUG
 #ifdef _DEBUG
 #include <iostream>
 #endif
@@ -67,8 +69,8 @@ void PoolAllocator::Reset()
     m_used = 0;
     m_peak = 0;
     // Create a linked-list with all free positions
-    const int nChunks = m_totalSize / m_chunkSize;
-    for (int i = 0; i < nChunks; ++i) {
+    const size_t nChunks = m_totalSize / m_chunkSize;
+    for (size_t i = 0; i < nChunks; ++i) {
         std::size_t address = (std::size_t)m_start_ptr + i * m_chunkSize;
         m_freeList.push((Node*)address);
     }

@@ -57,6 +57,8 @@ template <class T> inline T max(const T& a, const T& b)
     return a > b ? a : b;
 }
 
+#define NX_ARRAY_SIZE(array) sizeof(array)/sizeof(array[0])
+
 // exception
 class exception : public std::exception {
 public:

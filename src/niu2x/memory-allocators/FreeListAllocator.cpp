@@ -5,6 +5,7 @@
 #include <limits> /* limits_max */
 #include <stdlib.h> /* malloc, free */
 
+#undef _DEBUG
 #ifdef _DEBUG
 #include <iostream>
 #endif
@@ -77,7 +78,7 @@ void* FreeListAllocator::Allocate(
     auto* allocationHeader
         = (FreeListAllocator::AllocationHeader*)(headerAddress);
     allocationHeader->blockSize = requiredSize;
-    allocationHeader->padding = alignmentPadding;
+    allocationHeader->padding = (char)alignmentPadding;
 
     m_used += requiredSize;
     m_peak = std::max(m_peak, m_used);

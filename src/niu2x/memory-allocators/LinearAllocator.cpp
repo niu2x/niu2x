@@ -3,6 +3,8 @@
 #include <algorithm> // max
 #include <cassert> /*assert		*/
 #include <stdlib.h> /* malloc, free */
+
+#undef _DEBUG
 #ifdef _DEBUG
 #include <iostream>
 #endif

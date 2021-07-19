@@ -16,8 +16,9 @@ function(dependent_prebuilt)
         )   
 
         string(TOLOWER ${CMAKE_SYSTEM_NAME} system_name)
+        string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} arch_name)
 
-        set(libdir ${depdir}/${libname}/lib/${system_name}/${CMAKE_SYSTEM_PROCESSOR})
+        set(libdir ${depdir}/${libname}/lib/${system_name}/${arch_name})
         target_link_directories(${P_TARGET} PRIVATE 
             ${libdir}
         )

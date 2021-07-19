@@ -1,6 +1,8 @@
 #ifndef NX_MEMORY_H
 #define NX_MEMORY_H
 
+#pragma warning( disable : 4275)
+
 #include <niu2x/memory-allocators/CAllocator.h>
 #include <niu2x/memory-allocators/FreeListAllocator.h>
 #include <niu2x/memory-allocators/LinearAllocator.h>
@@ -39,7 +41,7 @@ public:
 
 namespace details {
 
-    template <class T> class allocator_adapter {
+    template <class T> class API allocator_adapter {
     public:
         allocator_adapter(T& delegate)
         : delegate_(delegate)

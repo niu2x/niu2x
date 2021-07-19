@@ -71,11 +71,11 @@ void lua_engine::dostring(const char* code)
         std::stringstream ss;
         ss << "Lua Error: ";
         ss << lua_tostring(L, -1);
+        lua_pop(L, 1);
 
         auto error = ss.str();
         NX_THROW(error.c_str());
 
-        lua_pop(L, 1);
     }
 }
 
@@ -86,11 +86,10 @@ void lua_engine::dofile(const char* file)
         std::stringstream ss;
         ss << "Lua Error: ";
         ss << lua_tostring(L, -1);
-
+        lua_pop(L, 1);
+        
         auto error = ss.str();
         NX_THROW(error.c_str());
-
-        lua_pop(L, 1);
     }
 }
 
