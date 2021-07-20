@@ -23,6 +23,11 @@ function(dependent_prebuilt)
             ${libdir}
         )
 
+        set(platform_include ${depdir}/${libname}/platform_include/${system_name}/${arch_name})
+        target_include_directories(${P_TARGET} PRIVATE 
+            ${platform_include}
+        )  
+
         file(GLOB_RECURSE libfiles PATTERN "${libdir}/*") 
         target_link_libraries(${P_TARGET} PRIVATE
             # -Wl,--whole-archive 

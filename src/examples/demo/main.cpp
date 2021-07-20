@@ -5,6 +5,7 @@
 #include <niu2x/lua_engine.h>
 #include <niu2x/memory.h>
 #include <niu2x/io.h>
+#include <niu2x/misc/ringbuffer.h>
 
 using namespace nx;
 
@@ -22,7 +23,7 @@ int main()
             uint8_t c;
             io::status status;
 
-            while ((status = bs.get_elem(c)) != io::status::eof) {
+            while ((status = bs.get_elem(&c)) != io::status::eof) {
                 if (status == io::status::ok)
                     std::cout << c;
             }
@@ -30,22 +31,48 @@ int main()
 
         {
             io::byte_source bs(buffer.data(), buffer.size());
-            uint8_t c;
-            io::status status;
-
-            uint8_t buf[16];
-            size_t readn;
-
-            while ((status = bs.get(16, buf, &readn)) != io::status::eof) {
-                if (status == io::status::ok) {
-                    fwrite(buf, 1, readn, stdout);
-                }
-            }
+           	io::pipe(bs, io::sink_adapter<uint8_t, std::ostream>(std::cout));
+            
         }
 
     } catch (exception& e) {
         std::cerr << e.what() << std::endl;
     }
+
+    misc::ringbuffer<int, 5> ring;
+
+    for(int i = 0; i < 16; i +=4){
+    	int array[] = {i, i + 1, i + 2};
+	    ring.put(array, NX_ARRAY_SIZE(array), nullptr);
+    }
+
+	{
+		int c;
+		misc::rw_status status;
+		while((status = ring.get_elem(&c)) != misc::rw_status::eof){
+			if(status == misc::rw_status::ok){
+				std::cout << c << " "<< std::endl; 
+			}
+		}
+	}    
+
+
+
+	for(int i = 0; i < 16; i +=4){
+    	int array[] = {i, i + 1};
+	    ring.put(array, NX_ARRAY_SIZE(array), nullptr);
+    }
+
+	{
+		int c;
+		misc::rw_status status;
+		while((status = ring.get_elem(&c)) != misc::rw_status::eof){
+			if(status == misc::rw_status::ok){
+				std::cout << c << " "<< std::endl; 
+			}
+		}
+	}  
+
 
     return 0;
 }

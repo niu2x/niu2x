@@ -1,5 +1,5 @@
-#ifndef NX_UTILS_CONSTEXPR_H
-#define NX_UTILS_CONSTEXPR_H
+#ifndef NX_MISC_CONSTEXPR_H
+#define NX_MISC_CONSTEXPR_H
 
 namespace nx::misc {
 
