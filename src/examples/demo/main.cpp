@@ -75,8 +75,30 @@ int main()
 				std::cout << c << " "<< std::endl; 
 			}
 		}
-	}  
+    }
 
+    {
+        misc::ringbuffer<char, 8> rb;
+        rb.put_elem('a');
+        rb.put_elem('b');
+        rb.put_elem('c');
+        rb.put_elem('d');
+
+        rb.put_elem('a');
+        rb.put_elem('b');
+        rb.put_elem('c');
+        rb.put_elem('d');
+        rb.put_elem('1');
+        rb.put_elem('2');
+        rb.put_elem('3');
+        rb.put_elem('4');
+
+        auto ar = rb.continuous_elems();
+        std::cout.write(ar.base, ar.size);
+        rb.pop(4);
+        ar = rb.continuous_elems();
+        std::cout.write(ar.base, ar.size);
+    }
 
     return 0;
 }

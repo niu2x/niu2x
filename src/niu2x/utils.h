@@ -100,4 +100,16 @@ if(!(condition)){   \
     NX_THROW((message)); \
 }
 
+// memref
+
+// struct memref {
+//     void *ptr
+// };
+
+template <class T>
+struct arrayref {
+    T* base;
+    size_t size;
+};
+
 #endif

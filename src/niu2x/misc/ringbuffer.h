@@ -2,6 +2,7 @@
 #define NX_MISC_RINGBUFFER_H
 
 #include <niu2x/misc/rw_status.h>
+#include <niu2x/utils.h>
 
 namespace nx::misc {
 
@@ -75,6 +76,17 @@ public:
 	size_t size() const noexcept {
 		return minus(tail_ , head_);
 	}
+
+    void pop(size_t n) noexcept { head_ = add(head_, min(n, size())); }
+
+    arrayref<Elem> continuous_elems() noexcept
+    {
+        if (tail_ >= head_) {
+            return arrayref<Elem> { data_ + head_, tail_ - head_ };
+        } else {
+            return arrayref<Elem> { data_ + head_, Capacity - head_ };
+        }
+    }
 
 private:
 
