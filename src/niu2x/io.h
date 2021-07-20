@@ -67,7 +67,7 @@ public:
         // read_index_ += readn;
         // if (osize)
         //     *osize = readn;
-        // return status::ok;
+        return status::ok;
     }
 
 private:
@@ -170,6 +170,7 @@ void pipe(source<Elem> &src, sink<Elem> &dst, size_t chunk = 4_k) {
 // 	const size_t size_;
 // };
 
+extern API io::sink_adapter<uint8_t, std::ostream> cout;
 
 } // namespace nx::io
 

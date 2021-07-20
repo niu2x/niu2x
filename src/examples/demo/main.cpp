@@ -31,8 +31,7 @@ int main()
 
         {
             io::byte_source bs(buffer.data(), buffer.size());
-           	io::pipe(bs, io::sink_adapter<uint8_t, std::ostream>(std::cout));
-            
+            io::pipe(bs, io::cout);
         }
 
     } catch (exception& e) {
