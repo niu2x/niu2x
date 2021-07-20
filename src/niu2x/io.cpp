@@ -3,6 +3,7 @@
 namespace nx::io {
 
 io::sink_adapter<uint8_t, std::ostream> cout(std::cout);
+io::sink_adapter<uint8_t, std::ostream> cerr(std::cerr);
 
 static size_t file_size(FILE* fp) noexcept
 {

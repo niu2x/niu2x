@@ -34,6 +34,11 @@ int main()
             io::pipe(bs, io::cout);
         }
 
+        {
+            io::byte_source bs(buffer.data(), buffer.size());
+            io::pipe(bs, io::cerr);
+        }
+
     } catch (exception& e) {
         std::cerr << e.what() << std::endl;
     }

@@ -171,6 +171,7 @@ void pipe(source<Elem> &src, sink<Elem> &dst, size_t chunk = 4_k) {
 // };
 
 extern API io::sink_adapter<uint8_t, std::ostream> cout;
+extern API io::sink_adapter<uint8_t, std::ostream> cerr;
 
 } // namespace nx::io
 
