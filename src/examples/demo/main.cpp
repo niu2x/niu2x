@@ -31,7 +31,13 @@ int main()
 
         {
             io::byte_source bs(buffer.data(), buffer.size());
-            io::pipe(bs, io::cout);
+            bs | io::cout;
+        }
+
+        {
+
+            io::byte_source bs(buffer.data(), buffer.size());
+            io::pipe(bs, io::filter::hex_encode, io::cout);
         }
 
         {
@@ -79,9 +85,9 @@ int main()
 
     {
         misc::ringbuffer<char, 8> rb;
-        rb.put_elem('a');
-        rb.put_elem('b');
-        rb.put_elem('c');
+        rb.put_elem('A');
+        rb.put_elem('A');
+        rb.put_elem('A');
         rb.put_elem('d');
 
         rb.put_elem('a');

@@ -34,62 +34,17 @@ public:
 };
 
 template <class IE, class OE>
-class filter {
+class base_filter {
 public:
-    filter() {}
-    virtual ~filter() {}
+    using from_t = IE;
+    using to_t = OE;
 
-    virtual status cvt(const IE* input
-        , size_t isize
-        , size_t *consumed_isize
-        , OE* output
-        , size_t max_osize
-        , size_t* osize) = 0;
-};
+    base_filter() { }
+    virtual ~base_filter() { }
 
-template<class IE, class OE, size_t CHUNK=512>
-class filtered_source : public source<OE> {
-public:
-    filtered_source(source<IE>& src, const filter<IE, OE>& p_filter)
-    : src_(src)
-    , filter_(p_filter)
-    {
-    }
-    virtual ~filtered_source(){}
-
-    virtual status get(OE* output, size_t max, size_t* osize) override
-    {
-
-        size_t readn = 0;
-        if (obuf_.get(output, max, &readn) == status::ok) {
-            if (osize)
-                *osize = readn;
-            return status::ok;
-        }
-
-        if (ibuf_.size()) {
-            IE tmp_input[CHUNK];
-            IE tmp_output[CHUNK];
-            ibuf_.get(tmp_input, CHUNK, nullptr);
-        }
-
-        // size_t rest = (size_ - read_index_);
-        // if (rest == 0)
-        //     return status::eof;
-        // size_t readn = min(rest, max);
-        // memcpy(output, base_ + read_index_, sizeof(Elem) * readn);
-        // read_index_ += readn;
-        // if (osize)
-        //     *osize = readn;
-        return status::ok;
-    }
-
-private:
-    source<IE> &src_;
-    filter<IE, OE> filter_;
-
-    misc::ringbuffer<IE, CHUNK> ibuf_;
-    misc::ringbuffer<IE, CHUNK> obuf_;
+    virtual status cvt(const IE* input, size_t isize, size_t* consumed_isize,
+        OE* output, size_t max_osize, size_t* osize)
+        = 0;
 };
 
 template <class Elem> 
@@ -124,10 +79,6 @@ private:
     size_t read_index_;
 };
 
-using byte_source = bufsource<uint8_t>;
-
-
-
 
 
 template <class Elem, class Imp>
@@ -148,17 +99,19 @@ public:
     }
 private:
     std::ostream &delegate_;
-}; 
+};
 
-template<class Elem>
-void pipe(source<Elem> &src, sink<Elem> &dst, size_t chunk = 4_k) {
+template <class Elem, size_t CHUNK = 1_k>
+void pipe(source<Elem>& src, sink<Elem>& dst)
+{
     std::vector<Elem> buffer;
-    buffer.resize(chunk);
+    buffer.resize(CHUNK);
 
     size_t readn = 0;
     while(!readn){
         status s;
-        while( (s=src.get(buffer.data(), chunk, &readn)) == status::again);
+        while ((s = src.get(buffer.data(), CHUNK, &readn)) == status::again)
+            ;
         if(s == status::eof) break;
 
         auto* ptr = buffer.data();
@@ -173,59 +126,262 @@ void pipe(source<Elem> &src, sink<Elem> &dst, size_t chunk = 4_k) {
     }
 }
 
-// template<class IE, class OE>
-// void pipe(source<IE> &src, const filter<IE, OE>& flt, sink<OE> &dst, size_t
-// chunk = 4_k) {
-//     std::vector<IE> ibuf;
-//     ibuf.resize(chunk);
+template <class IE, class OE, class FILTER, size_t CHUNK = 1_k>
+void pipe(source<IE>& src, FILTER flt, sink<OE>& dst)
+{
+    misc::ringbuffer<IE, CHUNK> ibuf;
+    misc::ringbuffer<OE, CHUNK> obuf;
 
-//     std::vector<OE> obuf;
-//     obuf.resize(chunk);
+    bool src_eof = false;
+    bool dst_eof = false;
+    bool filter_eof = false;
 
-//     size_t ibuf_size = 0;
-//     size_t obuf_size = 0;
+    while (
+        (!src_eof || ibuf.size() || obuf.size() || !filter_eof) && (!dst_eof)) {
 
-//     size_t readn = 0;
+        while (!ibuf.full() && !src_eof) {
+            status s;
+            size_t readn = 0;
+            auto m = ibuf.continuous_slots();
+            while ((s = src.get(m.base, m.size, &readn)) == status::again)
+                ;
+            src_eof = s == status::eof;
+            if (!src_eof) {
+                ibuf.push(readn);
+            }
+        }
 
-//     while(true){
+        while (!obuf.full() && !ibuf.empty()) {
+            auto im = ibuf.continuous_elems();
+            auto om = obuf.continuous_slots();
 
-//         status s;
-//         while( (s=src.get(ibuf.data(), chunk, &readn)) == status::again);
-//         if(s == status::eof) break;
+            size_t readn = 0;
+            size_t writen = 0;
+            status s;
 
-//         while(readn){
-//             size_t icvtn, ocvtn;
-//             flt.cvt(ibuf.data(), readn, &cvtn, obuf.data(), chunk, &ocvtn);
-//         }
+            while ((s = flt.cvt(
+                        im.base, im.size, &readn, om.base, om.size, &writen))
+                == status::again)
+                ;
+            filter_eof = s == status::eof;
+            if (!filter_eof) {
+                ibuf.pop(readn);
+                obuf.push(writen);
+            }
+        }
 
-//         auto *ptr = buffer.data();
-//         while(readn){
-//             size_t writen = 0;
-//             while((s=dst.put(ptr, readn, &writen)) == status::again);
-//             if(s == status::eof) break;
-//             readn -= writen;
-//             ptr += writen;
-//         }
-//     }
-// }
-// template<class T>
-// class buffer {
-// public:
-// 	buffer(T * const base, size_t size)
-// 	:base_(base)
-// 	,size_(size)
-// 	{}
-// 	~buffer() {}
+        while (src_eof && ibuf.empty() && !obuf.full() && !filter_eof) {
+            auto om = obuf.continuous_slots();
 
-// 	data()
+            size_t writen = 0;
+            status s;
 
-// private:
-// 	T * const base_;
-// 	const size_t size_;
-// };
+            while ((s = flt.cvt(nullptr, 0, nullptr, om.base, om.size, &writen))
+                == status::again)
+                ;
+            filter_eof = s == status::eof;
+            if (!filter_eof) {
+                obuf.push(writen);
+            }
+        }
+
+        while (!obuf.empty() && !dst_eof) {
+            auto m = obuf.continuous_elems();
+            size_t writen = 0;
+            status s;
+            while ((s = dst.put(m.base, m.size, &writen)) == status::again)
+                ;
+            dst_eof = s == status::eof;
+            if (!dst_eof) {
+                obuf.pop(writen);
+            }
+        }
+    }
+}
 
 extern API io::sink_adapter<uint8_t, std::ostream> cout;
 extern API io::sink_adapter<uint8_t, std::ostream> cerr;
+
+using byte_source = bufsource<uint8_t>;
+
+namespace filter {
+
+template <class IE, class OE>
+class simple_filter : public base_filter<IE, OE> {
+public:
+    using converter = std::function<OE(const IE& c)>;
+
+    simple_filter(const converter& cvt)
+    : converter_(cvt)
+    {
+    }
+    virtual ~simple_filter() { }
+
+    virtual status cvt(const IE* input, size_t isize, size_t* consumed_isize,
+        OE* output, size_t max_osize, size_t* osize) override
+    {
+        unused(isize, max_osize);
+
+        if (isize) {
+            if (consumed_isize)
+                *consumed_isize = 1;
+            if (osize)
+                *osize = 1;
+            output[0] = converter_(input[0]);
+            return status::ok;
+        }
+        return status::eof;
+    }
+
+private:
+    converter converter_;
+};
+
+template <class FIRST_FILTER, class SECOND_FILTER, size_t CHUNK = 1_k>
+class concat_filter : public base_filter<typename FIRST_FILTER::from_t,
+                          typename SECOND_FILTER::to_t> {
+public:
+    using from_t = typename FIRST_FILTER::from_t;
+    using to_t = typename SECOND_FILTER::to_t;
+
+    using middle_t = typename FIRST_FILTER::to_t;
+
+    concat_filter(const FIRST_FILTER& first, const SECOND_FILTER& second)
+    : first_(first)
+    , second_(second)
+    , tmp_size_(0)
+    , first_eof_(false)
+    {
+    }
+    ~concat_filter() { }
+
+    virtual status cvt(const from_t* input, size_t isize,
+        size_t* consumed_isize, to_t* output, size_t max_osize,
+        size_t* osize) override
+    {
+
+        size_t first_readn;
+        size_t first_writen;
+        status first_status;
+
+        size_t second_readn;
+        size_t second_writen;
+        status second_status;
+
+        if (tmp_size_) {
+            first_status = status::ok;
+            first_writen = tmp_size_;
+            first_readn = 0;
+        } else {
+            if (first_eof_) {
+                first_status = status::eof;
+            } else {
+                first_status = first_.cvt(
+                    input, isize, &first_readn, tmp_, CHUNK, &first_writen);
+            }
+        }
+
+        switch (first_status) {
+            case status::ok: {
+                second_status = second_.cvt(tmp_, first_writen, &second_readn,
+                    output, max_osize, &second_writen);
+
+                switch (second_status) {
+                    case status::ok: {
+                        if (consumed_isize)
+                            *consumed_isize = first_readn;
+                        if (osize)
+                            *osize = second_writen;
+                        tmp_size_ = first_writen - second_readn;
+                        memcpy(tmp_, tmp_ + second_readn,
+                            sizeof(tmp_size_) * sizeof(middle_t));
+                        return status::ok;
+                    }
+
+                    case status::again: {
+                        tmp_size_ = first_writen;
+                        return status::again;
+                    }
+
+                    case status::eof: {
+                        // never goto here
+                        break;
+                    }
+                }
+            }
+
+            case status::again: {
+                return status::again;
+            }
+
+            case status::eof: {
+                first_eof_ = true;
+
+                size_t second_writen;
+                second_status = second_.cvt(
+                    nullptr, 0, nullptr, output, max_osize, &second_writen);
+
+                switch (second_status) {
+                    case status::ok: {
+                        if (consumed_isize)
+                            *consumed_isize = 0;
+                        if (osize)
+                            *osize = second_writen;
+                        return status::ok;
+                    }
+
+                    case status::again: {
+                        return status::again;
+                    }
+
+                    case status::eof: {
+                        return status::eof;
+                    }
+                }
+            }
+        }
+        return status::eof;
+    }
+
+private:
+    FIRST_FILTER first_;
+    SECOND_FILTER second_;
+    bool first_eof_;
+    middle_t tmp_[CHUNK];
+    size_t tmp_size_;
+};
+
+class API hex_encode_t : public base_filter<uint8_t, uint8_t> {
+public:
+    hex_encode_t() { }
+    ~hex_encode_t() { }
+    virtual status cvt(const uint8_t* input, size_t isize,
+        size_t* consumed_isize, uint8_t* output, size_t max_osize,
+        size_t* osize) override;
+};
+
+extern API simple_filter<uint8_t, uint8_t> lower;
+extern API simple_filter<uint8_t, uint8_t> upper;
+extern API simple_filter<uint8_t, uint8_t> inc;
+extern API hex_encode_t hex_encode;
+
+} // namespace filter
+
+template <class IE, class OE, size_t CHUNK = 1_k>
+void operator|(source<IE>& src, sink<OE>& dst)
+{
+    pipe(src, dst);
+}
+
+template <class FIRST_FILTER, class SECOND_FILTER>
+
+std::enable_if_t<
+    std::is_same_v<typename FIRST_FILTER::to_t, typename SECOND_FILTER::from_t>,
+    filter::concat_filter<FIRST_FILTER, SECOND_FILTER>>
+operator|(const FIRST_FILTER& a, const SECOND_FILTER& b)
+{
+    return filter::concat_filter(a, b);
+}
 
 } // namespace nx::io
 

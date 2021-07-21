@@ -78,6 +78,10 @@ public:
 	}
 
     void pop(size_t n) noexcept { head_ = add(head_, min(n, size())); }
+    void push(size_t n) noexcept
+    {
+        tail_ = add(tail_, min(n, Capacity - 1 - size()));
+    }
 
     arrayref<Elem> continuous_elems() noexcept
     {
@@ -87,6 +91,23 @@ public:
             return arrayref<Elem> { data_ + head_, Capacity - head_ };
         }
     }
+
+    arrayref<Elem> continuous_slots() noexcept
+    {
+        if (tail_ >= head_) {
+            if (head_) {
+                return arrayref<Elem> { data_ + tail_, Capacity - tail_ };
+            } else {
+                return arrayref<Elem> { data_ + tail_, Capacity - 1 - tail_ };
+            }
+        } else {
+            return arrayref<Elem> { data_ + tail_, head_ - tail_ - 1 };
+        }
+    }
+
+    bool full() const noexcept { return size() == Capacity - 1; }
+
+    bool empty() const noexcept { return !size(); }
 
 private:
 

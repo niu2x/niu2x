@@ -5,7 +5,9 @@ ColumnLimit: '80'
 ConstructorInitializerIndentWidth: '0'
 TabWidth: '4'
 UseTab: Never
+IndentCaseLabels: true
 FixNamespaceComments: true
 IndentPPDirectives: BeforeHash
 AlwaysBreakTemplateDeclarations: Yes
+NamespaceIndentation: None
 ...

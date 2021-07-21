@@ -32,3 +32,55 @@ void read_file(const char* pathname, std::vector<uint8_t>& output)
 }
 
 } // namespace nx::io
+
+namespace nx::io::filter {
+
+simple_filter<uint8_t, uint8_t> lower { [](const uint8_t& c) {
+    return tolower(c);
+} };
+
+simple_filter<uint8_t, uint8_t> upper { [](const uint8_t& c) {
+    return toupper(c);
+} };
+
+simple_filter<uint8_t, uint8_t> inc { [](const uint8_t& c) { return c + 1; } };
+
+static uint8_t hex(uint8_t digit)
+{
+    if (digit < 10)
+        return '0' + digit;
+    return 'a' + digit - 10;
+}
+
+status hex_encode_t::cvt(const uint8_t* input, size_t isize,
+    size_t* consumed_isize, uint8_t* output, size_t max_osize, size_t* osize)
+{
+
+    if (!isize)
+        return status::eof;
+
+    size_t readn = min(isize, max_osize >> 1);
+
+    if (readn) {
+
+        if (consumed_isize)
+            *consumed_isize = readn;
+        if (osize)
+            *osize = readn << 1;
+
+        for (const uint8_t* end = input + readn; input < end; input++) {
+            uint8_t c = *input;
+            *output++ = hex(c / 10);
+            *output++ = hex(c % 10);
+        }
+
+        return status::ok;
+
+    } else {
+        return status::again;
+    }
+}
+
+hex_encode_t hex_encode;
+
+} // namespace nx::io::filter
