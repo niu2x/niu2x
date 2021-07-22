@@ -2,9 +2,6 @@
 
 namespace nx::io {
 
-io::sink_adapter<uint8_t, std::ostream> cout(std::cout);
-io::sink_adapter<uint8_t, std::ostream> cerr(std::cerr);
-
 static size_t file_size(FILE* fp) noexcept
 {
     auto old_pos = ftell(fp);
@@ -84,3 +81,16 @@ status hex_encode_t::cvt(const uint8_t* input, size_t isize,
 hex_encode_t hex_encode;
 
 } // namespace nx::io::filter
+
+
+namespace nx::io::sink {
+
+    file::~file() {}
+    file::file(const char *pathname):
+    f_stream_(pathname)
+    ,adapter<uint8_t, std::ostream>(f_stream_)
+    {}
+
+    adapter<uint8_t, std::ostream> cout(std::cout);
+    adapter<uint8_t, std::ostream> cerr(std::cerr);
+}

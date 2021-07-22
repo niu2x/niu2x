@@ -1,12 +1,15 @@
 #ifndef NX_IO_H
 #define NX_IO_H
 
+#include <fstream>
+
 #include <niu2x/misc/ringbuffer.h>
 #include <niu2x/misc/rw_status.h>
 #include <niu2x/utils.h>
 
 #if defined(_WIN32) || defined(_WIN64)
     #pragma warning(disable : 4275)
+    #pragma warning(disable : 4251)
 #endif
 
 namespace nx::io {
@@ -15,18 +18,18 @@ void API read_file(const char *pathname, std::vector<uint8_t> &output);
 
 using status = misc::rw_status;
 
-template <class Elem> class source : private noncopyable {
+template <class Elem> class base_source : private noncopyable {
 public:
-    source() { }
-    virtual ~source() { }
+    base_source() { }
+    virtual ~base_source() { }
     status get_elem(Elem *elem) { return get(elem, 1, nullptr); }
     virtual status get(Elem* output, size_t max, size_t* osize) = 0;
 };
 
-template <class Elem> class sink : private noncopyable {
+template <class Elem> class base_sink : private noncopyable {
 public:
-    sink() { }
-    virtual ~sink() { }
+    base_sink() { }
+    virtual ~base_sink() { }
     status put_elem(const Elem& elem) {
         return put(&elem, 1, nullptr);
     }
@@ -48,7 +51,7 @@ public:
 };
 
 template <class Elem> 
-class bufsource : public source<Elem> {
+class bufsource : public base_source<Elem> {
 public:
     bufsource(const Elem* const base, size_t size)
     : base_(base)
@@ -80,29 +83,42 @@ private:
 };
 
 
+namespace sink {
+    template <class Elem, class Imp>
+    class adapter: public base_sink<Elem> {};
 
-template <class Elem, class Imp>
-class sink_adapter: public sink<Elem> {};
+    template <>
+    class API adapter<uint8_t, std::ostream>: public base_sink<uint8_t> {
+    public:
+        adapter(std::ostream& delegate)
+        :delegate_(delegate){}
+        virtual ~adapter() {}
+        virtual status put(const uint8_t* output, size_t isize, size_t* osize) {
+            delegate_.write(reinterpret_cast<const char*>(output), isize / 2 + 1);
+            if (osize)
+                *osize = isize / 2 + 1;
+            return status::ok;
+        }
+    private:
+        std::ostream &delegate_;
+    };
+
+    class API file: public adapter<uint8_t, std::ostream> {
+    public:
+        file(const char *pathname);
+        virtual ~file();
+    private:
+        std::ofstream f_stream_;
+    };
+
+    extern API adapter<uint8_t, std::ostream> cout;
+    extern API adapter<uint8_t, std::ostream> cerr;
+}
 
 
-template <>
-class API sink_adapter<uint8_t, std::ostream>: public sink<uint8_t> {
-public:
-    sink_adapter(std::ostream& delegate)
-    :delegate_(delegate){}
-    virtual ~sink_adapter() {}
-    virtual status put(const uint8_t* output, size_t isize, size_t* osize) {
-        delegate_.write(reinterpret_cast<const char*>(output), isize / 2 + 1);
-        if (osize)
-            *osize = isize / 2 + 1;
-        return status::ok;
-    }
-private:
-    std::ostream &delegate_;
-};
 
 template <class Elem, size_t CHUNK = 1_k>
-void pipe(source<Elem>& src, sink<Elem>& dst)
+void pipe(base_source<Elem>& src, base_sink<Elem>& dst)
 {
     std::vector<Elem> buffer;
     buffer.resize(CHUNK);
@@ -127,7 +143,7 @@ void pipe(source<Elem>& src, sink<Elem>& dst)
 }
 
 template <class IE, class OE, class FILTER, size_t CHUNK = 1_k>
-void pipe(source<IE>& src, FILTER flt, sink<OE>& dst)
+void pipe(base_source<IE>& src, FILTER flt, base_sink<OE>& dst)
 {
     misc::ringbuffer<IE, CHUNK> ibuf;
     misc::ringbuffer<OE, CHUNK> obuf;
@@ -199,8 +215,7 @@ void pipe(source<IE>& src, FILTER flt, sink<OE>& dst)
     }
 }
 
-extern API io::sink_adapter<uint8_t, std::ostream> cout;
-extern API io::sink_adapter<uint8_t, std::ostream> cerr;
+
 
 using byte_source = bufsource<uint8_t>;
 
@@ -368,7 +383,7 @@ extern API hex_encode_t hex_encode;
 } // namespace filter
 
 template <class IE, class OE, size_t CHUNK = 1_k>
-void operator|(source<IE>& src, sink<OE>& dst)
+void operator|(base_source<IE>& src, base_sink<OE>& dst)
 {
     pipe(src, dst);
 }

@@ -31,18 +31,24 @@ int main()
 
         {
             io::byte_source bs(buffer.data(), buffer.size());
-            bs | io::cout;
+            bs | io::sink::cout;
         }
 
         {
 
             io::byte_source bs(buffer.data(), buffer.size());
-            io::pipe(bs, io::filter::hex_encode, io::cout);
+            io::pipe(bs, io::filter::hex_encode, io::sink::cout);
         }
 
         {
             io::byte_source bs(buffer.data(), buffer.size());
-            io::pipe(bs, io::cerr);
+            io::pipe(bs, io::sink::cerr);
+        }
+
+        {
+        	io::sink::file f("./b.txt");
+        	io::byte_source bs(buffer.data(), buffer.size());
+            io::pipe(bs, f);
         }
 
     } catch (exception& e) {
