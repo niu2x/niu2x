@@ -93,22 +93,29 @@ namespace sink {
         adapter(std::ostream& delegate)
         :delegate_(delegate){}
         virtual ~adapter() {}
-        virtual status put(const uint8_t* output, size_t isize, size_t* osize) {
+        virtual status put(
+            const uint8_t* output, size_t isize, size_t* osize) override
+        {
             delegate_.write(reinterpret_cast<const char*>(output), isize / 2 + 1);
             if (osize)
                 *osize = isize / 2 + 1;
             return status::ok;
         }
+
     private:
         std::ostream &delegate_;
     };
 
-    class API file: public adapter<uint8_t, std::ostream> {
+    class API file : public base_sink<uint8_t> {
     public:
         file(const char *pathname);
         virtual ~file();
+        virtual status put(
+            const uint8_t* output, size_t isize, size_t* osize) override;
+
     private:
         std::ofstream f_stream_;
+        adapter<uint8_t, std::ostream> delegate_;
     };
 
     extern API adapter<uint8_t, std::ostream> cout;
@@ -375,14 +382,9 @@ public:
         size_t* osize) override;
 };
 
-extern API simple_filter<uint8_t, uint8_t> lower;
-extern API simple_filter<uint8_t, uint8_t> upper;
-extern API simple_filter<uint8_t, uint8_t> inc;
-extern API hex_encode_t hex_encode;
-
-class zlib_compress_t: public base_filter<uint8_t, uint8_t> {
+class API zlib_compress_t : public base_filter<uint8_t, uint8_t> {
 public:
-    zlib_compress_t();
+    zlib_compress_t(int level = -1);
     ~zlib_compress_t();
 
     zlib_compress_t(const zlib_compress_t &other);
@@ -393,9 +395,33 @@ public:
         size_t* osize) override;
 private:
     struct context;
-    context *ctx_;
+    std::unique_ptr<context> ctx_;
+    int level_;
 };
 
+class API zlib_uncompress_t : public base_filter<uint8_t, uint8_t> {
+public:
+    zlib_uncompress_t();
+    ~zlib_uncompress_t();
+
+    zlib_uncompress_t(const zlib_uncompress_t& other);
+    zlib_uncompress_t& operator=(const zlib_uncompress_t& other) = delete;
+
+    virtual status cvt(const uint8_t* input, size_t isize,
+        size_t* consumed_isize, uint8_t* output, size_t max_osize,
+        size_t* osize) override;
+
+private:
+    struct context;
+    std::unique_ptr<context> ctx_;
+};
+
+extern API simple_filter<uint8_t, uint8_t> lower;
+extern API simple_filter<uint8_t, uint8_t> upper;
+extern API simple_filter<uint8_t, uint8_t> inc;
+extern API hex_encode_t hex_encode;
+extern API zlib_compress_t zlib_compress;
+extern API zlib_uncompress_t zlib_uncompress;
 
 } // namespace filter
 

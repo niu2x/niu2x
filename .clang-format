@@ -10,4 +10,5 @@ FixNamespaceComments: true
 IndentPPDirectives: BeforeHash
 AlwaysBreakTemplateDeclarations: Yes
 NamespaceIndentation: None
+SortIncludes: false
 ...

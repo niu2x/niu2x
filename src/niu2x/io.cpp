@@ -67,8 +67,8 @@ status hex_encode_t::cvt(const uint8_t* input, size_t isize,
 
         for (const uint8_t* end = input + readn; input < end; input++) {
             uint8_t c = *input;
-            *output++ = hex(c / 10);
-            *output++ = hex(c % 10);
+            *output++ = hex(c >> 4);
+            *output++ = hex(c & 15);
         }
 
         return status::ok;
@@ -82,15 +82,22 @@ hex_encode_t hex_encode;
 
 } // namespace nx::io::filter
 
-
 namespace nx::io::sink {
 
-    file::~file() {}
-    file::file(const char *pathname):
-    f_stream_(pathname)
-    ,adapter<uint8_t, std::ostream>(f_stream_)
-    {}
+file::~file() { }
 
-    adapter<uint8_t, std::ostream> cout(std::cout);
-    adapter<uint8_t, std::ostream> cerr(std::cerr);
+file::file(const char* pathname)
+: f_stream_(pathname)
+, delegate_(f_stream_)
+{
 }
+
+status file::put(const uint8_t* output, size_t isize, size_t* osize)
+{
+    return delegate_.put(output, isize, osize);
+}
+
+adapter<uint8_t, std::ostream> cout(std::cout);
+adapter<uint8_t, std::ostream> cerr(std::cerr);
+
+} // namespace nx::io::sink

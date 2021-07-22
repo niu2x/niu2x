@@ -51,65 +51,18 @@ int main()
             io::pipe(bs, f);
         }
 
+        {
+            std::cout << "\n: ";
+            char message[] = "HHHHHHHH";
+            io::byte_source bs((uint8_t*)(&message), 8);
+
+            io::pipe(bs, io::filter::zlib_compress | io::filter::hex_encode,
+                io::sink::cout);
+            std::cout << "\n: ";
+        }
+
     } catch (exception& e) {
         std::cerr << e.what() << std::endl;
-    }
-
-    misc::ringbuffer<int, 5> ring;
-
-    for(int i = 0; i < 16; i +=4){
-    	int array[] = {i, i + 1, i + 2};
-	    ring.put(array, NX_ARRAY_SIZE(array), nullptr);
-    }
-
-	{
-		int c;
-		misc::rw_status status;
-		while((status = ring.get_elem(&c)) != misc::rw_status::eof){
-			if(status == misc::rw_status::ok){
-				std::cout << c << " "<< std::endl; 
-			}
-		}
-	}    
-
-
-
-	for(int i = 0; i < 16; i +=4){
-    	int array[] = {i, i + 1};
-	    ring.put(array, NX_ARRAY_SIZE(array), nullptr);
-    }
-
-	{
-		int c;
-		misc::rw_status status;
-		while((status = ring.get_elem(&c)) != misc::rw_status::eof){
-			if(status == misc::rw_status::ok){
-				std::cout << c << " "<< std::endl; 
-			}
-		}
-    }
-
-    {
-        misc::ringbuffer<char, 8> rb;
-        rb.put_elem('A');
-        rb.put_elem('A');
-        rb.put_elem('A');
-        rb.put_elem('d');
-
-        rb.put_elem('a');
-        rb.put_elem('b');
-        rb.put_elem('c');
-        rb.put_elem('d');
-        rb.put_elem('1');
-        rb.put_elem('2');
-        rb.put_elem('3');
-        rb.put_elem('4');
-
-        auto ar = rb.continuous_elems();
-        std::cout.write(ar.base, ar.size);
-        rb.pop(4);
-        ar = rb.continuous_elems();
-        std::cout.write(ar.base, ar.size);
     }
 
     return 0;

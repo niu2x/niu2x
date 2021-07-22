@@ -17,10 +17,12 @@
 #include <set>
 #include <algorithm>
 #include <functional>
+#include <memory>
 
 #include <boost/noncopyable.hpp>
 
 #include <niu2x/api.h>
+#include <niu2x/global.h>
 #include <niu2x/log.h>
 #include <niu2x/misc/constexpr.h>
 
@@ -100,11 +102,6 @@ if(!(condition)){   \
     NX_THROW((message)); \
 }
 
-#define NX_DELETE(ptr)  \
-if((ptr)){              \
-    delete (ptr);       \
-    (ptr) = nullptr;    \
-}
 
 // memref
 

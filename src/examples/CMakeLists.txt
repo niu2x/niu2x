@@ -6,3 +6,4 @@ function(build_application name)
 endfunction()
 
 build_application(demo)
+build_application(zlib)
