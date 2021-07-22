@@ -100,6 +100,12 @@ if(!(condition)){   \
     NX_THROW((message)); \
 }
 
+#define NX_DELETE(ptr)  \
+if((ptr)){              \
+    delete (ptr);       \
+    (ptr) = nullptr;    \
+}
+
 // memref
 
 // struct memref {

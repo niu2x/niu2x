@@ -380,6 +380,23 @@ extern API simple_filter<uint8_t, uint8_t> upper;
 extern API simple_filter<uint8_t, uint8_t> inc;
 extern API hex_encode_t hex_encode;
 
+class zlib_compress_t: public base_filter<uint8_t, uint8_t> {
+public:
+    zlib_compress_t();
+    ~zlib_compress_t();
+
+    zlib_compress_t(const zlib_compress_t &other);
+    zlib_compress_t& operator=(const zlib_compress_t &other) = delete;
+
+    virtual status cvt(const uint8_t* input, size_t isize,
+        size_t* consumed_isize, uint8_t* output, size_t max_osize,
+        size_t* osize) override;
+private:
+    struct context;
+    context *ctx_;
+};
+
+
 } // namespace filter
 
 template <class IE, class OE, size_t CHUNK = 1_k>
