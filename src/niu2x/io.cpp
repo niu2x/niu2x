@@ -36,14 +36,14 @@ void read_file(const char* pathname, std::vector<uint8_t>& output)
 namespace nx::io::filter {
 
 simple_filter<uint8_t, uint8_t> lower { [](const uint8_t& c) {
-    return tolower(c);
+    return (uint8_t)tolower(c);
 } };
 
 simple_filter<uint8_t, uint8_t> upper { [](const uint8_t& c) {
-    return toupper(c);
+    return (uint8_t)toupper(c);
 } };
 
-simple_filter<uint8_t, uint8_t> inc { [](const uint8_t& c) { return c + 1; } };
+simple_filter<uint8_t, uint8_t> inc { [](const uint8_t& c) { return (uint8_t)(c + 1); } };
 
 static uint8_t hex(uint8_t digit)
 {
