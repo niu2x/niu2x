@@ -80,6 +80,8 @@ status hex_encode_t::cvt(const uint8_t* input, size_t isize,
 
 hex_encode_t hex_encode;
 
+one_t<uint8_t> one;
+
 } // namespace nx::io::filter
 
 namespace nx::io::sink {

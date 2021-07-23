@@ -26,6 +26,7 @@
 #include <niu2x/global.h>
 #include <niu2x/log.h>
 #include <niu2x/misc/constexpr.h>
+#include <niu2x/misc/string_utils.h>
 
 namespace nx {
 
@@ -94,6 +95,14 @@ private:
     char msg_[buffer_size];
 };
 
+using string_utils = misc::string_utils;
+
+template <class T>
+struct arrayref {
+    T* base;
+    size_t size;
+};
+
 } // namespace nx
 
 #define NX_THROW(message) throw nx::exception((message), __FILE__, __LINE__)
@@ -109,11 +118,5 @@ if(!(condition)){   \
 // struct memref {
 //     void *ptr
 // };
-
-template <class T>
-struct arrayref {
-    T* base;
-    size_t size;
-};
 
 #endif

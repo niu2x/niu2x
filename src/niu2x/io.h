@@ -462,12 +462,39 @@ private:
     std::unique_ptr<context> ctx_;
 };
 
+template <class Elem>
+class one_t : public base_filter<Elem, Elem> {
+public:
+    one_t() { }
+    ~one_t() { }
+    virtual status cvt(const Elem* input, size_t isize, size_t* consumed_isize,
+        Elem* output, size_t max_osize, size_t* osize) override
+    {
+        if (!isize)
+            return status::eof;
+
+        size_t readn = min(isize, max_osize);
+
+        if (readn) {
+            if (consumed_isize)
+                *consumed_isize = readn;
+            if (osize)
+                *osize = readn;
+            memcpy(output, input, readn * sizeof(Elem));
+            return status::ok;
+        } else {
+            return status::again;
+        }
+    }
+};
+
 extern API simple_filter<uint8_t, uint8_t> lower;
 extern API simple_filter<uint8_t, uint8_t> upper;
 extern API simple_filter<uint8_t, uint8_t> inc;
 extern API hex_encode_t hex_encode;
 extern API zlib_compress_t zlib_compress;
 extern API zlib_uncompress_t zlib_uncompress;
+extern API one_t<uint8_t> one;
 
 } // namespace filter
 
