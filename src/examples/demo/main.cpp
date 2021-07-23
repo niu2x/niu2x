@@ -19,7 +19,7 @@ int main()
         io::read_file("./main.lua", buffer);
 
         {
-            io::byte_source bs(buffer.data(), buffer.size());
+            io::source::bytes bs(buffer.data(), buffer.size());
             uint8_t c;
             io::status status;
 
@@ -30,31 +30,31 @@ int main()
         }
 
         {
-            io::byte_source bs(buffer.data(), buffer.size());
+            io::source::bytes bs(buffer.data(), buffer.size());
             bs | io::sink::cout;
         }
 
         {
 
-            io::byte_source bs(buffer.data(), buffer.size());
+            io::source::bytes bs(buffer.data(), buffer.size());
             io::pipe(bs, io::filter::hex_encode, io::sink::cout);
         }
 
         {
-            io::byte_source bs(buffer.data(), buffer.size());
+            io::source::bytes bs(buffer.data(), buffer.size());
             io::pipe(bs, io::sink::cerr);
         }
 
         {
         	io::sink::file f("./b.txt");
-        	io::byte_source bs(buffer.data(), buffer.size());
+        	io::source::bytes bs(buffer.data(), buffer.size());
             io::pipe(bs, f);
         }
 
         {
             std::cout << "\n: ";
             char message[] = "HHHHHHHH";
-            io::byte_source bs((uint8_t*)(&message), 8);
+            io::source::bytes bs((uint8_t*)(&message), 8);
 
             io::pipe(bs, io::filter::zlib_compress | io::filter::hex_encode,
                 io::sink::cout);

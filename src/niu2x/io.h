@@ -50,37 +50,6 @@ public:
         = 0;
 };
 
-template <class Elem> 
-class bufsource : public base_source<Elem> {
-public:
-    bufsource(const Elem* const base, size_t size)
-    : base_(base)
-    , size_(size)
-    , read_index_(0)
-    {
-    }
-    virtual ~bufsource() { }
-
-    virtual status get(Elem* output, size_t max,  size_t* osize) override
-    {
-        size_t rest = (size_ - read_index_);
-        if (rest == 0)
-            return status::eof;
-
-        size_t readn = min(rest, max);
-        memcpy(output, base_ + read_index_, sizeof(Elem) * readn);
-
-        read_index_ += readn;
-        if (osize)
-            *osize = readn;
-        return status::ok;
-    }
-
-private:
-    const Elem* const base_;
-    const size_t size_;
-    size_t read_index_;
-};
 
 
 namespace sink {
@@ -96,9 +65,11 @@ namespace sink {
         virtual status put(
             const uint8_t* output, size_t isize, size_t* osize) override
         {
-            delegate_.write(reinterpret_cast<const char*>(output), isize / 2 + 1);
+            delegate_.write(reinterpret_cast<const char*>(output), isize);
+            NX_ASSERT(delegate_.good(), "adapter<uint8_t, std::ostream> write failed");
+
             if (osize)
-                *osize = isize / 2 + 1;
+                *osize = isize;
             return status::ok;
         }
 
@@ -224,7 +195,82 @@ void pipe(base_source<IE>& src, FILTER flt, base_sink<OE>& dst)
 
 
 
-using byte_source = bufsource<uint8_t>;
+
+namespace source {
+
+template <class Elem> 
+class array : public base_source<Elem> {
+public:
+    array(const Elem* const base, size_t size)
+    : base_(base)
+    , size_(size)
+    , read_index_(0)
+    {
+    }
+    virtual ~array() { }
+
+    virtual status get(Elem* output, size_t max,  size_t* osize) override
+    {
+        size_t rest = (size_ - read_index_);
+        if (rest == 0)
+            return status::eof;
+
+        size_t readn = min(rest, max);
+        memcpy(output, base_ + read_index_, sizeof(Elem) * readn);
+
+        read_index_ += readn;
+        if (osize)
+            *osize = readn;
+        return status::ok;
+    }
+
+private:
+    const Elem* const base_;
+    const size_t size_;
+    size_t read_index_;
+};
+
+using bytes = array<uint8_t>;
+
+template <class Elem, class Imp>
+class adapter: public base_source<Elem> {};
+
+template <>
+class API adapter<uint8_t, std::istream>: public base_source<uint8_t> {
+public:
+    adapter(std::istream& delegate)
+    :delegate_(delegate){}
+    virtual ~adapter() {}
+    virtual status get(uint8_t* output, size_t max, size_t* osize) override {
+            delegate_.read (reinterpret_cast<char*>(output),max);
+            size_t readn;
+            if (delegate_)
+                readn = max;
+            else
+                readn = delegate_.gcount();
+            if(osize) *osize = readn;
+
+            return readn ? status::ok: status::eof;
+        }
+
+private:
+    std::istream &delegate_;
+};
+
+class API file : public base_source<uint8_t> {
+public:
+    file(const char *pathname);
+    virtual ~file();
+    virtual status get(uint8_t* output, size_t max, size_t* osize) override ;
+
+private:
+    std::ifstream f_stream_;
+    adapter<uint8_t, std::istream> delegate_;
+};
+
+extern API adapter<uint8_t, std::istream> cin;
+
+}
 
 namespace filter {
 

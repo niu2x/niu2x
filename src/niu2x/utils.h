@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <limits>
 
 #include <boost/noncopyable.hpp>
 

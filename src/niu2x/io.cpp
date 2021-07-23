@@ -101,3 +101,24 @@ adapter<uint8_t, std::ostream> cout(std::cout);
 adapter<uint8_t, std::ostream> cerr(std::cerr);
 
 } // namespace nx::io::sink
+
+
+
+namespace nx::io::source {
+
+file::~file() { }
+
+file::file(const char* pathname)
+: f_stream_(pathname)
+, delegate_(f_stream_)
+{
+}
+
+status file::get(uint8_t* output, size_t max, size_t* osize)
+{
+    return delegate_.get(output, max, osize);
+}
+
+adapter<uint8_t, std::istream> cin(std::cin);
+
+} // namespace nx::io::source

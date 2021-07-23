@@ -12,6 +12,8 @@ struct zlib_compress_t::context {
 status zlib_compress_t::cvt(const uint8_t* input, size_t isize,
     size_t* consumed_isize, uint8_t* output, size_t max_osize, size_t* osize)
 {
+    NX_ASSERT(isize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large isize");
+    NX_ASSERT(max_osize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large max_osize");
     if (!ctx_) {
         ctx_ = std::make_unique<context>();
         ctx_->strm.zalloc = Z_NULL;
@@ -24,11 +26,11 @@ status zlib_compress_t::cvt(const uint8_t* input, size_t isize,
 
     auto& strm = ctx_->strm;
 
-    strm.avail_in = isize;
+    strm.avail_in = static_cast<uInt>(isize);
     int flush = isize ? Z_NO_FLUSH : Z_FINISH;
     strm.next_in = const_cast<Bytef*>(input);
 
-    strm.avail_out = max_osize;
+    strm.avail_out = static_cast<uInt>(max_osize);
     strm.next_out = output;
 
     auto ret = deflate(&strm, flush);
@@ -73,7 +75,10 @@ struct zlib_uncompress_t::context {
 
 status zlib_uncompress_t::cvt(const uint8_t* input, size_t isize,
     size_t* consumed_isize, uint8_t* output, size_t max_osize, size_t* osize)
-{
+{   
+    NX_ASSERT(isize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large isize");
+    NX_ASSERT(max_osize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large max_osize");
+
     if (!ctx_) {
         ctx_ = std::make_unique<context>();
         ctx_->strm.zalloc = Z_NULL;
@@ -86,11 +91,11 @@ status zlib_uncompress_t::cvt(const uint8_t* input, size_t isize,
 
     auto& strm = ctx_->strm;
 
-    strm.avail_in = isize;
+    strm.avail_in = static_cast<uInt>(isize);
     int flush = isize ? Z_NO_FLUSH : Z_FINISH;
     strm.next_in = const_cast<Bytef*>(input);
 
-    strm.avail_out = max_osize;
+    strm.avail_out = static_cast<uInt>(max_osize);
     strm.next_out = output;
 
     auto ret = inflate(&strm, flush);
