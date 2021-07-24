@@ -49,6 +49,17 @@ static uint8_t hex(uint8_t digit)
     return 'a' + digit - 10;
 }
 
+static uint8_t unhex(uint8_t digit)
+{
+    if (digit <= '9')
+        return digit - '0';
+
+    if (digit <= 'F')
+        return digit - 'A' + 10;
+
+    return digit - 'a' + 10;
+}
+
 status hex_encode_t::cvt(const uint8_t* input, size_t isize,
     size_t* consumed_isize, uint8_t* output, size_t max_osize, size_t* osize)
 {
@@ -78,7 +89,38 @@ status hex_encode_t::cvt(const uint8_t* input, size_t isize,
     }
 }
 
+status hex_decode_t::cvt(const uint8_t* input, size_t isize,
+    size_t* consumed_isize, uint8_t* output, size_t max_osize, size_t* osize)
+{
+
+    if (!isize)
+        return status::eof;
+
+    size_t readn = min(isize, max_osize << 1);
+    readn &= ~1;
+
+    if (readn) {
+
+        if (consumed_isize)
+            *consumed_isize = readn;
+        if (osize)
+            *osize = readn >> 1;
+
+        for (const uint8_t* end = input + readn; input < end;) {
+            uint8_t c1 = *input++;
+            uint8_t c0 = *input++;
+
+            *output++ = (unhex(c1) << 4) | unhex(c0);
+        }
+        return status::ok;
+
+    } else {
+        return status::again;
+    }
+}
+
 hex_encode_t hex_encode;
+hex_decode_t hex_decode;
 
 one_t<uint8_t> one;
 

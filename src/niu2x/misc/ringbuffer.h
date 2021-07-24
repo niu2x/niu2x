@@ -6,23 +6,26 @@
 
 namespace nx::misc {
 
-template<class Elem, size_t Capacity>
+template <class Elem, size_t UserCapacity>
 class ringbuffer {
 public:
-	ringbuffer():
-	head_(0), tail_(0) {}
-	~ringbuffer() {}
+    static constexpr size_t Capacity = UserCapacity + 1;
+    ringbuffer()
+    : head_(0)
+    , tail_(0)
+    {
+    }
+    ~ringbuffer() { }
 
-	ringbuffer(const ringbuffer &) = default;
-	ringbuffer& operator=(const ringbuffer &) = default;
+    ringbuffer(const ringbuffer&) = default;
+    ringbuffer& operator=(const ringbuffer&) = default;
 
-	rw_status put_elem(const Elem &e) noexcept {
-		return put(&e, 1, nullptr);
-	}
+    rw_status put_elem(const Elem& e) noexcept { return put(&e, 1, nullptr); }
 
-	rw_status put(const Elem *input, size_t isize, size_t *osize) noexcept {
-		auto rooms = (Capacity-1) - size();
-		auto writen = min(isize, rooms);
+    rw_status put(const Elem* input, size_t isize, size_t* osize) noexcept
+    {
+        auto rooms = (Capacity - 1) - size();
+        auto writen = min(isize, rooms);
 		if(osize) *osize = writen;
 
 		if(!writen)
@@ -42,11 +45,12 @@ public:
 		}
 
 		return rw_status::ok;
-	}
+    }
 
-	rw_status get(Elem *output, size_t max_osize, size_t *osize) noexcept {
+    rw_status get(Elem* output, size_t max_osize, size_t* osize) noexcept
+    {
 
-		auto my_size = size();
+        auto my_size = size();
 		if(!my_size) 
 			return rw_status::eof;
 
@@ -65,11 +69,9 @@ public:
 
 		head_ = add(head_, readn); 
 		return rw_status::ok;
+    }
 
-
-	}
-
-	rw_status get_elem(Elem *out) noexcept {
+    rw_status get_elem(Elem *out) noexcept {
 		return get(out, 1, nullptr);
 	}
 
@@ -109,6 +111,20 @@ public:
 
     bool empty() const noexcept { return !size(); }
 
+    void normalize()
+    {
+        if (head_) {
+            Elem temp[Capacity];
+            memcpy(temp, data_ + head_, (Capacity - head_) * sizeof(Elem));
+            memcpy(temp + Capacity - head_, data_, (head_) * sizeof(Elem));
+            memcpy(data_, temp, Capacity * sizeof(Elem));
+
+            size_t s = size();
+            head_ = 0;
+            tail_ = s;
+        }
+    }
+
 private:
 
 	Elem data_[Capacity];
@@ -126,8 +142,6 @@ private:
 		return sum;
 	}
 };
-
-
 }
 
 #endif

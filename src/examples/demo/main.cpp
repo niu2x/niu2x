@@ -56,7 +56,7 @@ int main()
             char message[] = "HHHHHHHH";
             io::source::bytes bs((uint8_t*)(&message), 8);
 
-            io::pipe(bs, io::filter::zlib_compress | io::filter::hex_encode,
+            io::pipe(bs, (io::filter::zlib_compress | io::filter::hex_encode),
                 io::sink::cout);
             std::cout << "\n: ";
         }

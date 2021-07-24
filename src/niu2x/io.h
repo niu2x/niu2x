@@ -18,7 +18,8 @@ void API read_file(const char *pathname, std::vector<uint8_t> &output);
 
 using status = misc::rw_status;
 
-template <class Elem> class base_source : private noncopyable {
+template <class Elem>
+class base_source {
 public:
     base_source() { }
     virtual ~base_source() { }
@@ -26,7 +27,8 @@ public:
     virtual status get(Elem* output, size_t max, size_t* osize) = 0;
 };
 
-template <class Elem> class base_sink : private noncopyable {
+template <class Elem>
+class base_sink {
 public:
     base_sink() { }
     virtual ~base_sink() { }
@@ -73,11 +75,14 @@ namespace sink {
             return status::ok;
         }
 
+        adapter(const adapter&) = default;
+        adapter& operator=(const adapter&) = default;
+
     private:
         std::ostream &delegate_;
     };
 
-    class API file : public base_sink<uint8_t> {
+    class API file : public base_sink<uint8_t>, private noncopyable {
     public:
         file(const char *pathname);
         virtual ~file();
@@ -87,6 +92,30 @@ namespace sink {
     private:
         std::ofstream f_stream_;
         adapter<uint8_t, std::ostream> delegate_;
+    };
+
+    template <class Elem>
+    class adapter<Elem, std::vector<Elem>> : public base_sink<Elem> {
+    public:
+        adapter(std::vector<Elem>& delegate)
+        : delegate_(delegate)
+        {
+        }
+        virtual ~adapter() { }
+        virtual status put(
+            const uint8_t* output, size_t isize, size_t* osize) override
+        {
+            delegate_.insert(delegate_.end(), output, output + isize);
+            if (osize)
+                *osize = isize;
+            return status::ok;
+        }
+
+        adapter(const adapter&) = default;
+        adapter& operator=(const adapter&) = default;
+
+    private:
+        std::vector<Elem>& delegate_;
     };
 
     extern API adapter<uint8_t, std::ostream> cout;
@@ -120,8 +149,16 @@ void pipe(base_source<Elem>& src, base_sink<Elem>& dst)
     }
 }
 
-template <class IE, class OE, class FILTER, size_t CHUNK = 1_k>
-void pipe(base_source<IE>& src, FILTER flt, base_sink<OE>& dst)
+namespace details {
+
+// template <class E, size_t CHUNK>
+// bool ringbuffer_near_full(const misc::ringbuffer<E, CHUNK>& rb)
+// {
+//     return rb.size() >= CHUNK - 1 - 1;
+// }
+
+template <class IE, class OE, size_t CHUNK = 1_k>
+void pipe(base_source<IE>& src, base_filter<IE, OE>& flt, base_sink<OE>& dst)
 {
     misc::ringbuffer<IE, CHUNK> ibuf;
     misc::ringbuffer<OE, CHUNK> obuf;
@@ -155,8 +192,14 @@ void pipe(base_source<IE>& src, FILTER flt, base_sink<OE>& dst)
 
             while ((s = flt.cvt(
                         im.base, im.size, &readn, om.base, om.size, &writen))
-                == status::again)
-                ;
+                == status::again) {
+                ibuf.normalize();
+                obuf.normalize();
+
+                im = ibuf.continuous_elems();
+                om = obuf.continuous_slots();
+            }
+
             filter_eof = s == status::eof;
             if (!filter_eof) {
                 ibuf.pop(readn);
@@ -171,8 +214,10 @@ void pipe(base_source<IE>& src, FILTER flt, base_sink<OE>& dst)
             status s;
 
             while ((s = flt.cvt(nullptr, 0, nullptr, om.base, om.size, &writen))
-                == status::again)
-                ;
+                == status::again) {
+                obuf.normalize();
+                om = obuf.continuous_slots();
+            }
             filter_eof = s == status::eof;
             if (!filter_eof) {
                 obuf.push(writen);
@@ -192,9 +237,14 @@ void pipe(base_source<IE>& src, FILTER flt, base_sink<OE>& dst)
         }
     }
 }
+} // namespace details
 
-
-
+template <class IE, class OE, class FILTER, size_t CHUNK = 1_k>
+void pipe(base_source<IE>& src, FILTER p_flt, base_sink<OE>& dst)
+{
+    base_filter<IE, OE>& flt = p_flt;
+    details::pipe(src, flt, dst);
+}
 
 namespace source {
 
@@ -223,6 +273,9 @@ public:
             *osize = readn;
         return status::ok;
     }
+
+    array(const array&) = default;
+    array& operator=(const array&) = default;
 
 private:
     const Elem* const base_;
@@ -253,11 +306,14 @@ public:
             return readn ? status::ok: status::eof;
         }
 
-private:
-    std::istream &delegate_;
+        adapter(const adapter&) = default;
+        adapter& operator=(const adapter&) = default;
+
+    private:
+        std::istream& delegate_;
 };
 
-class API file : public base_source<uint8_t> {
+class API file : public base_source<uint8_t>, private noncopyable {
 public:
     file(const char *pathname);
     virtual ~file();
@@ -305,16 +361,10 @@ private:
     converter converter_;
 };
 
-template <class FIRST_FILTER, class SECOND_FILTER, size_t CHUNK = 1_k>
-class concat_filter : public base_filter<typename FIRST_FILTER::from_t,
-                          typename SECOND_FILTER::to_t> {
+template <class IE, class ME, class OE, size_t CHUNK = 1_k>
+class concat_filter : public base_filter<IE, OE> {
 public:
-    using from_t = typename FIRST_FILTER::from_t;
-    using to_t = typename SECOND_FILTER::to_t;
-
-    using middle_t = typename FIRST_FILTER::to_t;
-
-    concat_filter(const FIRST_FILTER& first, const SECOND_FILTER& second)
+    concat_filter(base_filter<IE, ME>& first, base_filter<ME, OE>& second)
     : first_(first)
     , second_(second)
     , tmp_size_(0)
@@ -323,9 +373,8 @@ public:
     }
     ~concat_filter() { }
 
-    virtual status cvt(const from_t* input, size_t isize,
-        size_t* consumed_isize, to_t* output, size_t max_osize,
-        size_t* osize) override
+    virtual status cvt(const IE* input, size_t isize, size_t* consumed_isize,
+        OE* output, size_t max_osize, size_t* osize) override
     {
 
         size_t first_readn;
@@ -362,7 +411,7 @@ public:
                             *osize = second_writen;
                         tmp_size_ = first_writen - second_readn;
                         memcpy(tmp_, tmp_ + second_readn,
-                            sizeof(tmp_size_) * sizeof(middle_t));
+                            sizeof(tmp_size_) * sizeof(ME));
                         return status::ok;
                     }
 
@@ -412,10 +461,10 @@ public:
     }
 
 private:
-    FIRST_FILTER first_;
-    SECOND_FILTER second_;
+    base_filter<IE, ME>& first_;
+    base_filter<ME, OE>& second_;
     bool first_eof_;
-    middle_t tmp_[CHUNK];
+    ME tmp_[CHUNK];
     size_t tmp_size_;
 };
 
@@ -423,6 +472,15 @@ class API hex_encode_t : public base_filter<uint8_t, uint8_t> {
 public:
     hex_encode_t() { }
     ~hex_encode_t() { }
+    virtual status cvt(const uint8_t* input, size_t isize,
+        size_t* consumed_isize, uint8_t* output, size_t max_osize,
+        size_t* osize) override;
+};
+
+class API hex_decode_t : public base_filter<uint8_t, uint8_t> {
+public:
+    hex_decode_t() { }
+    ~hex_decode_t() { }
     virtual status cvt(const uint8_t* input, size_t isize,
         size_t* consumed_isize, uint8_t* output, size_t max_osize,
         size_t* osize) override;
@@ -492,9 +550,16 @@ extern API simple_filter<uint8_t, uint8_t> lower;
 extern API simple_filter<uint8_t, uint8_t> upper;
 extern API simple_filter<uint8_t, uint8_t> inc;
 extern API hex_encode_t hex_encode;
+extern API hex_decode_t hex_decode;
+extern API one_t<uint8_t> one;
 extern API zlib_compress_t zlib_compress;
 extern API zlib_uncompress_t zlib_uncompress;
-extern API one_t<uint8_t> one;
+
+// template <class FILTER>
+// FILTER get(const char* name)
+// {
+//     if (strcmp(name, "lower"))
+// }
 
 } // namespace filter
 
@@ -504,12 +569,9 @@ void operator|(base_source<IE>& src, base_sink<OE>& dst)
     pipe(src, dst);
 }
 
-template <class FIRST_FILTER, class SECOND_FILTER>
-
-std::enable_if_t<
-    std::is_same_v<typename FIRST_FILTER::to_t, typename SECOND_FILTER::from_t>,
-    filter::concat_filter<FIRST_FILTER, SECOND_FILTER>>
-operator|(const FIRST_FILTER& a, const SECOND_FILTER& b)
+template <class IE, class ME, class OE>
+filter::concat_filter<IE, ME, OE> operator|(
+    base_filter<IE, ME>& a, base_filter<ME, OE>& b)
 {
     return filter::concat_filter(a, b);
 }

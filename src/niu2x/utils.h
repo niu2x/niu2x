@@ -87,6 +87,12 @@ public:
         const char* fmt = "%s\nat: %s line: %d";
         snprintf(msg_, buffer_size, fmt, msg, file, line);
     }
+
+    exception(const std::string& sz, const char* file, uint32_t line)
+    : exception(sz.c_str(), file, line)
+    {
+    }
+
     virtual ~exception() { }
     virtual const char* what() const noexcept override { return msg_; }
 
@@ -102,6 +108,14 @@ struct arrayref {
     T* base;
     size_t size;
 };
+
+template <class T>
+void swap(T& a, T& b)
+{
+    T tmp = a;
+    a = b;
+    b = tmp;
+}
 
 } // namespace nx
 

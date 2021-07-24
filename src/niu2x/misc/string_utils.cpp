@@ -14,17 +14,15 @@ std::vector<std::string> string_utils::split(
     std::string token;
     while ((pos = sz.find(delimiter, prev_pos)) != std::string_view::npos) {
         results.emplace_back(sz.substr(prev_pos, pos - prev_pos));
-        prev_pos = pos;
-        // std::cout << token << std::endl;
-        // s.erase(0, pos + delimiter.length());
+        prev_pos = pos + 1;
     }
 
-    if (prev_pos < sz.length())
+    if (prev_pos < sz.length()) {
         results.emplace_back(sz.substr(prev_pos, sz.length() - prev_pos));
-
-    if (!results.size()) {
+    } else {
         results.emplace_back("");
     }
+
     return results;
 }
 

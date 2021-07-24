@@ -34,7 +34,6 @@ status zlib_compress_t::cvt(const uint8_t* input, size_t isize,
     strm.next_out = output;
 
     auto ret = deflate(&strm, flush);
-    printf("ret is %x\n", ret);
     NX_ASSERT(
         ret == Z_OK || ret == Z_STREAM_END, "zlib compress deflate failed");
     auto have = max_osize - strm.avail_out;
@@ -44,7 +43,15 @@ status zlib_compress_t::cvt(const uint8_t* input, size_t isize,
     if (consumed_isize)
         *consumed_isize = isize - strm.avail_in;
 
-    return have ? status::ok : status::eof;
+    if (isize) {
+        return have ? status::ok
+                    : (isize - strm.avail_in
+                            ? status::ok
+                            : ((max_osize >= 4 ? status::eof : status::again)));
+    } else {
+        return have ? status::ok
+                    : (max_osize >= 4 ? status::eof : status::again);
+    }
 }
 
 zlib_compress_t::zlib_compress_t(const zlib_compress_t& other)
@@ -66,7 +73,6 @@ zlib_compress_t::~zlib_compress_t()
         deflateEnd(&(ctx_->strm));
 }
 
-zlib_compress_t zlib_compress;
 
 struct zlib_uncompress_t::context {
     z_stream strm;
@@ -109,7 +115,15 @@ status zlib_uncompress_t::cvt(const uint8_t* input, size_t isize,
     if (consumed_isize)
         *consumed_isize = isize - strm.avail_in;
 
-    return have ? status::ok : status::eof;
+    if (isize) {
+        return have ? status::ok
+                    : (isize - strm.avail_in
+                            ? status::ok
+                            : ((max_osize >= 4 ? status::eof : status::again)));
+    } else {
+        return have ? status::ok
+                    : (max_osize >= 4 ? status::eof : status::again);
+    }
 }
 
 zlib_uncompress_t::zlib_uncompress_t(const zlib_uncompress_t& other)
@@ -129,6 +143,7 @@ zlib_uncompress_t::~zlib_uncompress_t()
         inflateEnd(&(ctx_->strm));
 }
 
+zlib_compress_t zlib_compress;
 zlib_uncompress_t zlib_uncompress;
 
 } // namespace nx::io::filter
