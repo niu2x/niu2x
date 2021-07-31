@@ -12,7 +12,7 @@ namespace nx {
 
 class API lua_engine : private boost::noncopyable {
 public:
-    lua_engine(size_t memory_limit = 16 * 1024 * 1024);
+    lua_engine(size_t memory_limit = 16_m);
     ~lua_engine();
 
     void dostring(const char*);

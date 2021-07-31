@@ -8,3 +8,4 @@ endfunction()
 
 build_application(demo)
 build_application(cvt)
+build_application(nx)
