@@ -1,6 +1,6 @@
 /*
 ** Lua binding: cvt
-** Generated automatically by tolua++-1.0.93 on Sat Jul 31 20:14:21 2021.
+** Generated automatically by tolua++-1.0.93 on Sat Jul 31 23:05:05 2021.
 */
 
 /* Exported function */
