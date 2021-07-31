@@ -3,7 +3,6 @@ function table.tostring(tbl, indent, limit, depth, jstack)
     depth   = depth  or 7
     jstack  = jstack or {name="top"}
     local i = 0
-
     local output = {}
     if type(tbl) == "table" then
     -- very important to avoid disgracing ourselves with circular referencs...
