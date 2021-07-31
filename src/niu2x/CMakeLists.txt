@@ -5,10 +5,14 @@ target_include_directories(niu2x PUBLIC
 	${CMAKE_BINARY_DIR}/src
 )
 
-file(GLOB_RECURSE sources PATTERN "*.cpp")
-
+file(GLOB_RECURSE cpp_sources PATTERN "*.cpp")
 target_sources(niu2x PRIVATE
-	${sources}
+	${cpp_sources}
+)
+
+file(GLOB_RECURSE c_source PATTERN "*.c")
+target_sources(niu2x PRIVATE
+	${c_source}
 )
 
 include(dependent_prebuilt)

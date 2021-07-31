@@ -1,0 +1,15 @@
+$#include <niu2x/utils.h>
+$#include <niu2x/lua_bindings/cvt.h>
+
+namespace nx {
+namespace lua_bindings {
+
+struct cvt_utils {
+    static std::string hex_encode(const memref& mref);
+    static std::string hex_decode(const memref& mref);
+    static std::string zlib_compress(const memref& mref);
+    static std::string zlib_uncompress(const memref& mref);
+};
+
+} 
+}

@@ -14,7 +14,7 @@ namespace nx::lua_bindings {
 
 void openlib_all(lua_State* L);
 void openlib_log(lua_State* L);
-void openlib_io(lua_State* L);
+void openlib_cvt(lua_State* L);
 
 } // namespace nx::lua_bindings
 

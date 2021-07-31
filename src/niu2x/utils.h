@@ -128,9 +128,9 @@ if(!(condition)){   \
 
 
 // memref
-
-// struct memref {
-//     void *ptr
-// };
+struct memref {
+    void* base;
+    size_t size;
+};
 
 #endif
