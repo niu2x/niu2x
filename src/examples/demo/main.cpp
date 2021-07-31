@@ -6,6 +6,7 @@
 #include <niu2x/memory.h>
 #include <niu2x/io.h>
 #include <niu2x/misc/ringbuffer.h>
+#include <niu2x/lua_bindings/cvt.h>
 
 using namespace nx;
 
@@ -59,6 +60,11 @@ int main()
             io::pipe(bs, (io::filter::zlib_compress | io::filter::hex_encode),
                 io::sink::cout);
             std::cout << "\n: ";
+        }
+
+        {
+            std::cout << nx::lua_bindings::cvt_utils::hex_encode("hello ")
+                      << std::endl;
         }
 
     } catch (exception& e) {

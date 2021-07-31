@@ -1,6 +1,6 @@
 /*
 ** Lua binding: cvt
-** Generated automatically by tolua++-1.0.93 on Sat Jul 31 17:55:21 2021.
+** Generated automatically by tolua++-1.0.93 on Sat Jul 31 20:14:21 2021.
 */
 
 #ifndef __cplusplus
@@ -19,7 +19,6 @@ TOLUA_API int tolua_cvt_open(lua_State* tolua_S);
 /* function to register type */
 static void tolua_reg_types(lua_State* tolua_S)
 {
-    tolua_usertype(tolua_S, "memref");
     tolua_usertype(tolua_S, "nx::lua_bindings::cvt_utils");
 }
 
@@ -31,21 +30,22 @@ static int tolua_cvt_nx_lua_bindings_cvt_utils_hex_encode00(lua_State* tolua_S)
     tolua_Error tolua_err;
     if (!tolua_isusertable(
             tolua_S, 1, "nx::lua_bindings::cvt_utils", 0, &tolua_err)
-        || (tolua_isvaluenil(tolua_S, 2, &tolua_err)
-            || !tolua_isusertype(tolua_S, 2, "const memref", 0, &tolua_err))
+        || !tolua_iscppstring(tolua_S, 2, 0, &tolua_err)
         || !tolua_isnoobj(tolua_S, 3, &tolua_err))
         goto tolua_lerror;
     else
     #endif
     {
-        const memref* mref = ((const memref*)tolua_tousertype(tolua_S, 2, 0));
+        const std::string sz
+            = ((const std::string)tolua_tocppstring(tolua_S, 2, 0));
         {
             std::string tolua_ret
-                = (std::string)nx::lua_bindings::cvt_utils::hex_encode(*mref);
+                = (std::string)nx::lua_bindings::cvt_utils::hex_encode(sz);
             tolua_pushcppstring(tolua_S, (const char*)tolua_ret);
+            tolua_pushcppstring(tolua_S, (const char*)sz);
         }
     }
-    return 1;
+    return 2;
     #ifndef TOLUA_RELEASE
 tolua_lerror:
     tolua_error(tolua_S, "#ferror in function 'hex_encode'.", &tolua_err);
@@ -62,21 +62,22 @@ static int tolua_cvt_nx_lua_bindings_cvt_utils_hex_decode00(lua_State* tolua_S)
     tolua_Error tolua_err;
     if (!tolua_isusertable(
             tolua_S, 1, "nx::lua_bindings::cvt_utils", 0, &tolua_err)
-        || (tolua_isvaluenil(tolua_S, 2, &tolua_err)
-            || !tolua_isusertype(tolua_S, 2, "const memref", 0, &tolua_err))
+        || !tolua_iscppstring(tolua_S, 2, 0, &tolua_err)
         || !tolua_isnoobj(tolua_S, 3, &tolua_err))
         goto tolua_lerror;
     else
     #endif
     {
-        const memref* mref = ((const memref*)tolua_tousertype(tolua_S, 2, 0));
+        const std::string sz
+            = ((const std::string)tolua_tocppstring(tolua_S, 2, 0));
         {
             std::string tolua_ret
-                = (std::string)nx::lua_bindings::cvt_utils::hex_decode(*mref);
+                = (std::string)nx::lua_bindings::cvt_utils::hex_decode(sz);
             tolua_pushcppstring(tolua_S, (const char*)tolua_ret);
+            tolua_pushcppstring(tolua_S, (const char*)sz);
         }
     }
-    return 1;
+    return 2;
     #ifndef TOLUA_RELEASE
 tolua_lerror:
     tolua_error(tolua_S, "#ferror in function 'hex_decode'.", &tolua_err);
@@ -94,22 +95,22 @@ static int tolua_cvt_nx_lua_bindings_cvt_utils_zlib_compress00(
     tolua_Error tolua_err;
     if (!tolua_isusertable(
             tolua_S, 1, "nx::lua_bindings::cvt_utils", 0, &tolua_err)
-        || (tolua_isvaluenil(tolua_S, 2, &tolua_err)
-            || !tolua_isusertype(tolua_S, 2, "const memref", 0, &tolua_err))
+        || !tolua_iscppstring(tolua_S, 2, 0, &tolua_err)
         || !tolua_isnoobj(tolua_S, 3, &tolua_err))
         goto tolua_lerror;
     else
     #endif
     {
-        const memref* mref = ((const memref*)tolua_tousertype(tolua_S, 2, 0));
+        const std::string sz
+            = ((const std::string)tolua_tocppstring(tolua_S, 2, 0));
         {
             std::string tolua_ret
-                = (std::string)nx::lua_bindings::cvt_utils::zlib_compress(
-                    *mref);
+                = (std::string)nx::lua_bindings::cvt_utils::zlib_compress(sz);
             tolua_pushcppstring(tolua_S, (const char*)tolua_ret);
+            tolua_pushcppstring(tolua_S, (const char*)sz);
         }
     }
-    return 1;
+    return 2;
     #ifndef TOLUA_RELEASE
 tolua_lerror:
     tolua_error(tolua_S, "#ferror in function 'zlib_compress'.", &tolua_err);
@@ -127,22 +128,22 @@ static int tolua_cvt_nx_lua_bindings_cvt_utils_zlib_uncompress00(
     tolua_Error tolua_err;
     if (!tolua_isusertable(
             tolua_S, 1, "nx::lua_bindings::cvt_utils", 0, &tolua_err)
-        || (tolua_isvaluenil(tolua_S, 2, &tolua_err)
-            || !tolua_isusertype(tolua_S, 2, "const memref", 0, &tolua_err))
+        || !tolua_iscppstring(tolua_S, 2, 0, &tolua_err)
         || !tolua_isnoobj(tolua_S, 3, &tolua_err))
         goto tolua_lerror;
     else
     #endif
     {
-        const memref* mref = ((const memref*)tolua_tousertype(tolua_S, 2, 0));
+        const std::string sz
+            = ((const std::string)tolua_tocppstring(tolua_S, 2, 0));
         {
             std::string tolua_ret
-                = (std::string)nx::lua_bindings::cvt_utils::zlib_uncompress(
-                    *mref);
+                = (std::string)nx::lua_bindings::cvt_utils::zlib_uncompress(sz);
             tolua_pushcppstring(tolua_S, (const char*)tolua_ret);
+            tolua_pushcppstring(tolua_S, (const char*)sz);
         }
     }
-    return 1;
+    return 2;
     #ifndef TOLUA_RELEASE
 tolua_lerror:
     tolua_error(tolua_S, "#ferror in function 'zlib_uncompress'.", &tolua_err);
