@@ -117,6 +117,22 @@ void swap(T& a, T& b)
     b = tmp;
 }
 
+// memref
+struct memref {
+    void* base;
+    size_t size;
+};
+
+// template<class T>
+// struct nil {
+//     static constexpr T v;
+// };
+//
+template <class T>
+struct destructor {
+    static void destory(T* obj) { obj->~T(); }
+};
+
 } // namespace nx
 
 #define NX_THROW(message) throw nx::exception((message), __FILE__, __LINE__)
@@ -127,10 +143,5 @@ if(!(condition)){   \
 }
 
 
-// memref
-struct memref {
-    void* base;
-    size_t size;
-};
 
 #endif

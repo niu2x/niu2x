@@ -78,9 +78,15 @@ int main()
 
             // uv_loop_close(loop);
             // nx::global::allocator.free(loop);
-            // 
+            //
+            int counter = 0;
             auto my_loop = nx::aio::event_loop::create();
-            my_loop->run();
+            my_loop->create_idle([&my_loop, &counter](auto idle) {
+                printf("hello world\n");
+                if (counter++ >= 1024)
+                    my_loop->destroy_idle(idle);
+            });
+            my_loop->run(nx::aio::event_loop::type::wait);
         }
 
     } catch (exception& e) {
