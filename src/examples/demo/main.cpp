@@ -70,15 +70,6 @@ int main()
         }
 
         {
-            // uv_loop_t *loop = (uv_loop_t*)nx::global::allocator.allocate(sizeof(uv_loop_t));
-            // uv_loop_init(loop);
-
-            // printf("Now quitting.\n");
-            // uv_run(loop, UV_RUN_DEFAULT);
-
-            // uv_loop_close(loop);
-            // nx::global::allocator.free(loop);
-            //
             int counter = 0;
             auto my_loop = nx::aio::event_loop::create();
             my_loop->create_idle([&my_loop, &counter](auto idle) {
