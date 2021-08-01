@@ -4,6 +4,7 @@
 
 #include "tolua_cvt.h"
 #include <niu2x/hardcode/lua_utils.h>
+#include <niu2x/hardcode/lua_export_luabindings.h>
 #include <niu2x/lua_engine.h>
 
 namespace nx::lua_bindings {
@@ -17,9 +18,13 @@ void openlib_all(lua_State* L)
 
 void openlib_cvt(lua_State* L) { tolua_cvt_open(L); }
 
+#define EXEC_EMBED_LUA(name)                                                   \
+    lua_utils::dobuffer(L, hardcode::lua_##name##_mref);
+
 void openlib_hardcodelua(lua_State* L)
 {
-    lua_utils::dobuffer(L, hardcode::lua_utils_mref);
+    EXEC_EMBED_LUA(export_luabindings);
+    EXEC_EMBED_LUA(utils);
 }
 
 } // namespace nx::lua_bindings

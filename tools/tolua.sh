@@ -1,5 +1,10 @@
 #!/bin/bash
-# set -x
+set -e
+
+if [ "$#" -ne 1 ]; then
+    echo "too few arguments"
+fi
+
 workdir=$1
 find $workdir -name '*.pkg'|while read item; do
 	filename=$(basename $item);

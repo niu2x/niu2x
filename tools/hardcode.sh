@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 resource=$1
 output=$2
 echo "hardcode ${resource} to ${output}"
