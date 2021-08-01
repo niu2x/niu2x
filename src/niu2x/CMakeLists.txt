@@ -1,4 +1,4 @@
-add_library(niu2x SHARED "")
+add_library(niu2x "")
 
 target_include_directories(niu2x PUBLIC 
 	${CMAKE_SOURCE_DIR}/src

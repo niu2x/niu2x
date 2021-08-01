@@ -16,3 +16,7 @@ sed -i "12iconst memref ${file}_mref={${file}, ${file}_length};" ${output}.h
 
 sed -i '5inamespace nx::hardcode {' ${output}.cpp
 sed -i '$i}' ${output}.cpp
+sed -i '1d' ${output}.cpp
+
+header_filename=$(basename ${output}.h)
+sed -i "1i#include \"${header_filename}\"" ${output}.cpp

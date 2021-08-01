@@ -1,4 +1,4 @@
-#include"../src/niu2x/hardcode/lua_utils.h"
+#include "lua_utils.h"
 
 
     #define BYTES(a,b,c,d,e,f,g,h) 0x##a,0x##b,0x##c,0x##d,0x##e,0x##f,0x##g,0x##h,
