@@ -5,6 +5,8 @@
 #include <niu2x/lua_engine.h>
 #include <niu2x/memory.h>
 #include <niu2x/io.h>
+#include <niu2x/async_io.h>
+#include <niu2x/global.h>
 #include <niu2x/misc/ringbuffer.h>
 #include <niu2x/lua_bindings/cvt.h>
 
@@ -65,6 +67,20 @@ int main()
         {
             std::cout << nx::lua_bindings::cvt_utils::hex_encode("hello ")
                       << std::endl;
+        }
+
+        {
+            // uv_loop_t *loop = (uv_loop_t*)nx::global::allocator.allocate(sizeof(uv_loop_t));
+            // uv_loop_init(loop);
+
+            // printf("Now quitting.\n");
+            // uv_run(loop, UV_RUN_DEFAULT);
+
+            // uv_loop_close(loop);
+            // nx::global::allocator.free(loop);
+            // 
+            auto my_loop = nx::aio::event_loop::create();
+            my_loop->run();
         }
 
     } catch (exception& e) {

@@ -1,6 +1,7 @@
 #include "SinglyLinkedList.h"
 
-template <class T> SinglyLinkedList<T>::SinglyLinkedList() { }
+template <class T> SinglyLinkedList<T>::SinglyLinkedList() 
+{ }
 
 template <class T>
 void SinglyLinkedList<T>::insert(Node* previousNode, Node* newNode)

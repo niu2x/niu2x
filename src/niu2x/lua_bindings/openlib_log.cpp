@@ -1,5 +1,12 @@
 #include "openlib.h"
 
+
+extern "C" {
+#include "lauxlib.h"
+#include "lua.h"
+#include "lualib.h"
+}
+
 #if !defined(_WIN32) || !defined(_WIN64)
     #define strncpy_s strncpy
 #endif
@@ -17,7 +24,7 @@ static void fetch_backtrace(lua_State* L)
     lua_pushnumber(L, 2); // debug getinfo 0
     lua_call(L, 1, 1); // debug result
     lua_getfield(L, -1, "source"); // debug result source
-    strncpy_s(source, lua_tostring(L, -1), NX_ARRAY_SIZE(source));
+    strncpy_s(source, lua_tostring(L, -1), NX_ARRAY_SIZE(source)-1);
     lua_pop(L, 1); // debug result
 
     lua_getfield(L, -1, "currentline"); // debug result currentline

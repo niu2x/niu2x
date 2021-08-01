@@ -44,8 +44,8 @@ void* FreeListAllocator::Allocate(
 
     // Search through the free list for a free block that has enough space to
     // allocate our data
-    std::size_t padding;
-    Node *affectedNode, *previousNode;
+    std::size_t padding{0};
+    Node *affectedNode{nullptr}, *previousNode{nullptr};
     this->Find(size, alignment, padding, previousNode, affectedNode);
     // assert(affectedNode != nullptr && "Not enough memory");
     if (!affectedNode) {

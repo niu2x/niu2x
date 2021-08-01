@@ -1,14 +1,9 @@
 #ifndef NX_LB_OPEN_LIB_H
 #define NX_LB_OPEN_LIB_H
 
-extern "C" {
-
-#include "lauxlib.h"
-#include "lua.h"
-#include "lualib.h"
-}
-
 #include <niu2x/utils.h>
+
+struct lua_State;
 
 namespace nx::lua_bindings {
 

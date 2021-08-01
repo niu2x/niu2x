@@ -22,10 +22,12 @@ dependent_prebuilt(
 	LIBS 
 		luajit 
 		zlib
+		libuv
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-list(APPEND runtime dl)
+	list(APPEND runtime dl)
+	list(APPEND runtime Threads::Threads)
 endif()
 
 target_link_libraries(niu2x PUBLIC
