@@ -17,6 +17,9 @@ public:
 
     virtual void run(type p_type) override { delegate_->run(p_type); }
 
+    void run(int p_type) { run((type)p_type); }
+    void run() { run(0); }
+
     virtual rid create_idle(idle_handle handle) override
     {
         return delegate_->create_idle(handle);

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: aio
-** Generated automatically by tolua++-1.0.93 on Wed Aug  4 01:35:36 2021.
+** Generated automatically by tolua++-1.0.93 on Wed Aug  4 02:02:51 2021.
 */
 
 #ifndef __cplusplus
@@ -77,6 +77,68 @@ tolua_lerror:
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: run of class  nx::lua_bindings::aio::event_loop */
+#ifndef TOLUA_DISABLE_tolua_aio_nx_lua_bindings_aio_event_loop_run00
+static int tolua_aio_nx_lua_bindings_aio_event_loop_run00(lua_State* tolua_S)
+{
+    #ifndef TOLUA_RELEASE
+    tolua_Error tolua_err;
+    if (!tolua_isusertype(
+            tolua_S, 1, "nx::lua_bindings::aio::event_loop", 0, &tolua_err)
+        || !tolua_isnumber(tolua_S, 2, 0, &tolua_err)
+        || !tolua_isnoobj(tolua_S, 3, &tolua_err))
+        goto tolua_lerror;
+    else
+    #endif
+    {
+        nx::lua_bindings::aio::event_loop* self
+            = (nx::lua_bindings::aio::event_loop*)tolua_tousertype(
+                tolua_S, 1, 0);
+        int p_type = ((int)tolua_tonumber(tolua_S, 2, 0));
+    #ifndef TOLUA_RELEASE
+        if (!self)
+            tolua_error(tolua_S, "invalid 'self' in function 'run'", NULL);
+    #endif
+        {
+            self->run(p_type);
+        }
+    }
+    return 0;
+    #ifndef TOLUA_RELEASE
+tolua_lerror:
+    tolua_error(tolua_S, "#ferror in function 'run'.", &tolua_err);
+    return 0;
+    #endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: run of class  nx::lua_bindings::aio::event_loop */
+#ifndef TOLUA_DISABLE_tolua_aio_nx_lua_bindings_aio_event_loop_run01
+static int tolua_aio_nx_lua_bindings_aio_event_loop_run01(lua_State* tolua_S)
+{
+    tolua_Error tolua_err;
+    if (!tolua_isusertype(
+            tolua_S, 1, "nx::lua_bindings::aio::event_loop", 0, &tolua_err)
+        || !tolua_isnoobj(tolua_S, 2, &tolua_err))
+        goto tolua_lerror;
+    else {
+        nx::lua_bindings::aio::event_loop* self
+            = (nx::lua_bindings::aio::event_loop*)tolua_tousertype(
+                tolua_S, 1, 0);
+    #ifndef TOLUA_RELEASE
+        if (!self)
+            tolua_error(tolua_S, "invalid 'self' in function 'run'", NULL);
+    #endif
+        {
+            self->run();
+        }
+    }
+    return 0;
+tolua_lerror:
+    return tolua_aio_nx_lua_bindings_aio_event_loop_run00(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_aio_open(lua_State* tolua_S)
 {
@@ -100,6 +162,10 @@ TOLUA_API int tolua_aio_open(lua_State* tolua_S)
     tolua_beginmodule(tolua_S, "event_loop");
     tolua_function(
         tolua_S, "create", tolua_aio_nx_lua_bindings_aio_event_loop_create00);
+    tolua_function(
+        tolua_S, "run", tolua_aio_nx_lua_bindings_aio_event_loop_run00);
+    tolua_function(
+        tolua_S, "run", tolua_aio_nx_lua_bindings_aio_event_loop_run01);
     tolua_endmodule(tolua_S);
     tolua_endmodule(tolua_S);
     tolua_endmodule(tolua_S);

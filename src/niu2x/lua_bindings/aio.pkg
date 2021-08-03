@@ -7,6 +7,8 @@ namespace aio {
 class event_loop {
    
    static event_loop create();
+   void run(int p_type);
+   void run();
 
 };
 

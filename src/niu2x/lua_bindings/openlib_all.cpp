@@ -4,8 +4,9 @@
 
 #include "tolua_cvt.h"
 #include "tolua_aio.h"
-#include <niu2x/hardcode/lua_utils.h>
 #include <niu2x/hardcode/lua_export_luabindings.h>
+#include <niu2x/hardcode/lua_utils.h>
+#include <niu2x/hardcode/lua_init.h>
 #include <niu2x/lua_engine.h>
 
 namespace nx::lua_bindings {
@@ -29,6 +30,7 @@ void openlib_hardcodelua(lua_State* L)
 {
     EXEC_EMBED_LUA(export_luabindings);
     EXEC_EMBED_LUA(utils);
+    EXEC_EMBED_LUA(init);
 }
 
 } // namespace nx::lua_bindings

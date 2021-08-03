@@ -19,7 +19,7 @@ public:
     using freelist = misc::freelist<T, N>;
 
     enum type {
-        wait,
+        wait = 0,
         wait_once,
         no_wait,
     };
