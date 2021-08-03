@@ -35,6 +35,7 @@ struct limits {
 #define LIMIT(type, name, value) static constexpr type name = value;
 
     LIMIT(size_t, max_path, 1024)
+    LIMIT(size_t, max_varname, 256)
 
 #undef LIMIT
 };
@@ -77,7 +78,10 @@ template <class T> inline T max(const T& a, const T& b)
     return a > b ? a : b;
 }
 
-#define NX_ARRAY_SIZE(array) sizeof(array)/sizeof(array[0])
+#define MIN(a, b) (a) < (b) ? (a) : (b)
+#define MAX(a, b) (a) > (b) ? (a) : (b)
+
+#define NX_ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 // exception
 class exception : public std::exception {
@@ -142,6 +146,15 @@ if(!(condition)){   \
     NX_THROW((message)); \
 }
 
-
+#define NX_INIT_FUNC(f)                                                        \
+    static void nx_init_func();                                                \
+    namespace {                                                                \
+    struct nx_init_wrapper {                                                   \
+        nx_init_wrapper() { nx_init_func(); }                                  \
+        static nx_init_wrapper instance_;                                      \
+    };                                                                         \
+    nx_init_wrapper nx_init_wrapper::instance_;                                \
+    }                                                                          \
+    static void nx_init_func()
 
 #endif

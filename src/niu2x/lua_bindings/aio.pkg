@@ -1,0 +1,15 @@
+$#include <niu2x/lua_bindings/aio.h>
+
+namespace nx {
+namespace lua_bindings {
+namespace aio {
+
+class event_loop {
+   
+   static event_loop create();
+
+};
+
+}
+}
+}

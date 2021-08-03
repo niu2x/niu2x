@@ -112,4 +112,39 @@ void lua_engine::compile(const char* code, std::vector<uint8_t>& output)
     lua_pop(L, 1);
 }
 
+void lua_engine::set_global_variable(
+    const char* name, const char* const sz_list[])
+{
+    auto tbl = LUA_GLOBALSINDEX;
+    const char* field = name;
+    const char* dot;
+
+    char tmpname[limits::max_varname];
+
+    while ((dot = strchr(field, '.')) != nullptr) {
+        strncpy(tmpname, field,
+            min((size_t)(dot - field), limits::max_varname - 1));
+        tmpname[min((size_t)(dot - field), limits::max_varname - 1)] = 0;
+        lua_getfield(L, tbl, tmpname);
+        tbl = lua_gettop(L);
+        field = dot + 1;
+    }
+
+    strncpy(tmpname, field, limits::max_varname - 1);
+    tmpname[limits::max_varname - 1] = 0;
+    lua_getfield(L, tbl, tmpname);
+    tbl = lua_gettop(L);
+
+    int idx = 0;
+    while (sz_list[idx]) {
+        lua_pushnumber(L, idx + 1);
+        lua_pushstring(L, sz_list[idx++]);
+        lua_settable(L, tbl);
+    }
+
+    if (lua_gettop(L)) {
+        lua_pop(L, lua_gettop(L));
+    }
+}
+
 } // namespace nx

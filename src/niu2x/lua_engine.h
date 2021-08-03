@@ -24,6 +24,8 @@ public:
     void dofile(const char*);
     void compile(const char*, std::vector<uint8_t>& output);
 
+    void set_global_variable(const char* name, const char* const sz_list[]);
+
 private:
     lua_State* L;
     size_t memory_limit_;
