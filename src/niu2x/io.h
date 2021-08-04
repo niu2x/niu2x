@@ -207,9 +207,10 @@ void pipe(base_source<IE>& src, base_filter<IE, OE>& flt, base_sink<OE>& dst)
             }
         }
 
-        while (src_eof && ibuf.empty() && !obuf.full() && !filter_eof) {
+        int filter_try = 2;
+        while (filter_try && src_eof && ibuf.empty() && !obuf.full()
+            && !filter_eof) {
             auto om = obuf.continuous_slots();
-
             size_t writen = 0;
             status s;
 
@@ -217,6 +218,8 @@ void pipe(base_source<IE>& src, base_filter<IE, OE>& flt, base_sink<OE>& dst)
                 == status::again) {
                 obuf.normalize();
                 om = obuf.continuous_slots();
+                if (!(--filter_try))
+                    break;
             }
             filter_eof = s == status::eof;
             if (!filter_eof) {

@@ -5,7 +5,7 @@
 
 namespace nx::lua_bindings {
 
-struct API cvt_utils {
+struct API cvt {
     static std::string hex_encode(const memref& mref);
     static std::string hex_decode(const memref& mref);
     static std::string zlib_compress(const memref& mref);

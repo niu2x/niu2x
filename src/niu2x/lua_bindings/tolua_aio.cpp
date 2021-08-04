@@ -1,6 +1,6 @@
 /*
 ** Lua binding: aio
-** Generated automatically by tolua++-1.0.93 on Wed Aug  4 02:02:51 2021.
+** Generated automatically by tolua++-1.0.93 on Thu Aug  5 01:34:04 2021.
 */
 
 #ifndef __cplusplus
@@ -10,7 +10,6 @@
 
 #include "tolua++.h"
 
-#define my_pushcppstring(L, sz) lua_pushlstring(L, sz.c_str(), sz.length())
 /* Exported function */
 TOLUA_API int tolua_aio_open(lua_State* tolua_S);
 

@@ -1,4 +1,4 @@
-$ #include<niu2x/utils.h> 
+$ #include<niu2x/lua_bindings/tolua_fix.h> 
 $ #include<niu2x/lua_bindings/cvt.h>
 
 namespace nx
@@ -6,7 +6,7 @@ namespace nx
 namespace lua_bindings
 {
 
-struct cvt_utils {
+struct cvt {
  
     static std::string hex_encode(const std::string &sz);
     static std::string hex_decode(const std::string &sz);

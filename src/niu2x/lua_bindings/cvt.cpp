@@ -3,7 +3,7 @@
 #include <niu2x/io.h>
 
 #define IMP(filter_name)                                                       \
-    std::string cvt_utils::filter_name(const memref& mref)                     \
+    std::string cvt::filter_name(const memref& mref)                           \
     {                                                                          \
         std::stringstream device;                                              \
         io::sink::adapter<uint8_t, std::ostream> sink(device);                 \

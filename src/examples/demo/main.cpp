@@ -66,7 +66,7 @@ int main()
         }
 
         {
-            std::cout << nx::lua_bindings::cvt_utils::hex_encode("hello ")
+            std::cout << nx::lua_bindings::cvt::hex_encode("hello ")
                       << std::endl;
         }
 
