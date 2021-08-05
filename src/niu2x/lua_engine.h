@@ -12,6 +12,7 @@ namespace nx {
 
 struct lua_utils {
     static void dobuffer(lua_State* L, const memref& mref);
+    static void call(lua_State* L, int nargs, int nrets);
 };
 
 class API lua_engine : private boost::noncopyable {

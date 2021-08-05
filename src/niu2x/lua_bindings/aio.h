@@ -5,6 +5,12 @@
 
 namespace nx::lua_bindings::aio {
 
+using status = nx::aio::status;
+
+// operator int(const status &s){
+//     return 0;
+// }
+
 class API event_loop : public nx::aio::event_loop {
 public:
     static event_loop create()
@@ -36,6 +42,15 @@ public:
         connect_handle cb) override
     {
         delegate_->connect(tcp_id, address, port, cb);
+    }
+
+    virtual void start_read(rid stream_id, read_handle callback) override
+    {
+        delegate_->start_read(stream_id, callback);
+    }
+    virtual void stop_read(rid stream_id) override
+    {
+        delegate_->stop_read(stream_id);
     }
 
 private:

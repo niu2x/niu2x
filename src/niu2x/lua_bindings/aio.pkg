@@ -1,15 +1,38 @@
-$#include <niu2x/lua_bindings/aio.h>
+$ #include <niu2x/lua_bindings/aio.h>
+$ #include <niu2x/lua_bindings/tolua_fix.h>
 
 namespace nx {
 namespace lua_bindings {
 namespace aio {
 
+struct status {
+   enum {
+      ok,
+      fail,
+   };
+};
+
 class event_loop {
-   
+   struct rid {
+       uint16_t id;
+
+       rid();
+       ~rid();
+   };
+
    static event_loop create();
+
    void run(int p_type);
    void run();
 
+   rid create_tcp();
+   void destory_tcp(rid tcp_id);
+
+   void connect(rid tcp_id, const char* address, uint16_t port, nx_luafunction callback);
+
+   void start_read(rid stream_id, nx_luafunction callback);
+   void stop_read(rid stream_id);
+   
 };
 
 }

@@ -26,6 +26,8 @@ public:
 
     using idle_handle = std::function<void(rid self)>;
     using connect_handle = std::function<void(status, rid self)>;
+    using read_handle = std::function<void(
+        status, rid self, const uint8_t* buffer, size_t size)>;
 
     static std::unique_ptr<event_loop> create();
 
@@ -47,7 +49,8 @@ public:
         rid tcp_id, const char* address, uint16_t port, connect_handle)
         = 0;
 
-private:
+    virtual void start_read(rid stream_id, read_handle callback) = 0;
+    virtual void stop_read(rid stream_id) = 0;
 };
 
 // class idle: private noncopyable {

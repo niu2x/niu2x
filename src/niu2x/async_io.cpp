@@ -5,6 +5,8 @@
 #include <niu2x/misc/net_utils.h>
 #include <niu2x/log.h>
 
+#include <niu2x/global.h>
+
 namespace nx::async_io {
 
 namespace {
@@ -16,8 +18,18 @@ struct idle {
     };
 };
 
-struct tcp {
-    uv_tcp_t uv_obj;
+struct stream {
+    union {
+        uv_tcp_t uv_tcp;
+    };
+    enum {
+        tcp,
+        udp,
+    } type;
+
+    union {
+        event_loop::read_handle read_cb;
+    };
 };
 
 struct connect_t {
@@ -87,22 +99,29 @@ public:
 
     virtual rid create_tcp() override
     {
-        rid tcp_id = tcps_.alloc();
+        rid tcp_id = streams_.alloc();
         if (tcp_id != rid::nil) {
-            auto* tcp = tcps_.get(tcp_id);
-            uv_tcp_init(&loop_, &(tcp->uv_obj));
+            auto* tcp = streams_.get(tcp_id);
+            tcp->type = stream::tcp;
+            new (&(tcp->read_cb)) event_loop::read_handle();
+            uv_tcp_init(&loop_, &(tcp->uv_tcp));
+            tcp->uv_tcp.data = reinterpret_cast<void*>(tcp_id.id);
         }
+
+        NX_LOG_D("create_tcp %u", tcp_id.id);
         return tcp_id;
     }
 
     virtual void destory_tcp(rid tcp_id) override
     {
+        NX_LOG_D("destory_tcp %u", tcp_id.id);
         if (tcp_id == rid::nil)
             return;
-        auto* tcp = tcps_.get(tcp_id);
+        auto* tcp = streams_.get(tcp_id);
         NX_ASSERT(tcp, "invalid tcp ptr");
-        uv_close(reinterpret_cast<uv_handle_t*>(&(tcp->uv_obj)), nullptr);
-        tcps_.free(tcp_id);
+        uv_close(reinterpret_cast<uv_handle_t*>(&(tcp->uv_tcp)), nullptr);
+        destructor<event_loop::read_handle>::destory(&(tcp->read_cb));
+        streams_.free(tcp_id);
     }
 
     virtual void connect(rid tcp_id, const char* address, uint16_t port,
@@ -112,6 +131,48 @@ public:
             // todo delay callback
             NX_LOG_E("tcp failed to connect: %s %d", address, port);
             callback(status::fail, tcp_id);
+        }
+    }
+
+    virtual void start_read(rid stream_id, read_handle callback) override
+    {
+        if (stream_id != rid::nil) {
+            auto* my_stream = streams_.get(stream_id);
+            if (my_stream->read_cb != nullptr) {
+                NX_LOG_W("steam is already start read");
+                return;
+            }
+
+            my_stream->read_cb = callback;
+            switch (my_stream->type) {
+                case stream::tcp: {
+                    auto s = uv_read_start((uv_stream_t*)&(my_stream->uv_tcp),
+                        my_alloc_cb, read_callback);
+                    if (s) {
+                        NX_LOG_E("tcp failed to start_read: %d, reason: %s", s,
+                            uv_strerror(s));
+                    }
+
+                    break;
+                }
+                default: {
+                }
+            }
+        }
+    }
+
+    virtual void stop_read(rid stream_id) override
+    {
+        if (stream_id != rid::nil) {
+            auto* my_stream = streams_.get(stream_id);
+            switch (my_stream->type) {
+                case stream::tcp: {
+                    uv_read_stop((uv_stream_t*)&(my_stream->uv_tcp));
+                    break;
+                }
+                default: {
+                }
+            }
         }
     }
 
@@ -129,13 +190,12 @@ private:
         idle->callback(idle_id);
     }
 
-    freelist<tcp, 1024> tcps_;
+    freelist<stream, 1024> streams_;
     misc::freelist<connect_t, 1024> connects_;
 
     rid create_connect(
         rid tcp_id, const char* address, uint16_t port, connect_handle callback)
     {
-
         rid con_id = connects_.alloc();
         if (con_id != rid::nil) {
             auto* con = connects_.get(con_id);
@@ -143,10 +203,9 @@ private:
             new (&(con->callback)) event_loop::connect_handle(callback);
             struct sockaddr_in* p_dest = &(con->dest);
             uv_ip4_addr(address, port, p_dest);
-            uv_tcp_connect(&(con->uv_obj), &(tcps_.get(tcp_id)->uv_obj),
+            uv_tcp_connect(&(con->uv_obj), &(streams_.get(tcp_id)->uv_tcp),
                 (const struct sockaddr*)p_dest, connect_callback);
         }
-
         return con_id;
     }
 
@@ -157,7 +216,7 @@ private:
         auto* con = connects_.get(con_id);
         NX_ASSERT(con, "invalid idle ptr");
         destructor<event_loop::connect_handle>::destory(&(con->callback));
-        tcps_.free(con_id);
+        connects_.free(con_id);
     }
 
     static void connect_callback(uv_connect_t* uv_con, int status)
@@ -183,6 +242,45 @@ private:
         }
 
         my_loop->destroy_connect(con_id);
+    }
+
+    static void my_alloc_cb(
+        uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
+    {
+        unused(handle);
+        buf->base = (char*)global::allocator.allocate(suggested_size);
+        buf->len = suggested_size;
+    }
+
+    static void free_buf(const uv_buf_t* buf)
+    {
+        if (buf->base && buf->len) {
+            global::allocator.free(buf->base);
+        }
+    }
+
+    static void read_callback(
+        uv_stream_t* uv_stream, ssize_t nread, const uv_buf_t* buf)
+    {
+
+        uv_loop_t* uv_loop = uv_stream->loop;
+        auto* my_loop = reinterpret_cast<uv_event_loop*>(uv_loop->data);
+        rid stream_id { rid::id_t(uint64_t(uv_stream->data)) };
+        auto* stream = my_loop->streams_.get(stream_id);
+
+        unused(stream, stream_id);
+
+        if (nread < 0) {
+            stream->read_cb(status::fail, stream_id, nullptr, 0);
+        }
+
+        else if (nread > 0) {
+            if (stream->read_cb)
+                stream->read_cb(
+                    status::ok, stream_id, (const uint8_t*)buf->base, nread);
+        }
+
+        free_buf(buf);
     }
 };
 

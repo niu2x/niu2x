@@ -55,6 +55,8 @@ lua_engine::~lua_engine()
 
 void* lua_engine::mem_alloc(void* ud, void* ptr, size_t osize, size_t nsize)
 {
+    if (nsize)
+        nsize = max(32ul, nsize);
     auto* allocator = reinterpret_cast<mm::allocator*>(ud);
     if (nsize == 0) {
         if (ptr) {
@@ -81,6 +83,11 @@ void* lua_engine::mem_alloc(void* ud, void* ptr, size_t osize, size_t nsize)
 void lua_utils::dobuffer(lua_State* L, const memref& mref)
 {
     CHECK(lua_dobuffer(L, mref.base, mref.size));
+}
+
+void lua_utils::call(lua_State* L, int nargs, int nrets)
+{
+    CHECK(lua_pcall(L, nargs, nrets, 0));
 }
 
 void lua_engine::dostring(const char* code) { CHECK(luaL_dostring(L, code)); }
