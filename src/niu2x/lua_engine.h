@@ -1,8 +1,6 @@
 #ifndef NX_LUA_ENGINE_H
 #define NX_LUA_ENGINE_H
 
-#include <boost/noncopyable.hpp>
-
 #include <niu2x/memory.h>
 #include <niu2x/utils.h>
 
@@ -15,7 +13,7 @@ struct lua_utils {
     static void call(lua_State* L, int nargs, int nrets);
 };
 
-class API lua_engine : private boost::noncopyable {
+class API lua_engine : private noncopyable {
 public:
     lua_engine(size_t memory_limit = 16_m);
     ~lua_engine();

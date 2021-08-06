@@ -20,13 +20,12 @@
 #include <memory>
 #include <limits>
 
-#include <boost/noncopyable.hpp>
-
 #include <niu2x/api.h>
 #include <niu2x/global.h>
 #include <niu2x/log.h>
 #include <niu2x/misc/constexpr.h>
 #include <niu2x/misc/string_utils.h>
+#include <niu2x/misc/noncopyable.h>
 
 namespace nx {
 
@@ -51,7 +50,7 @@ inline void unused(FirstParam&& first_param, Params&&... params)
 }
 
 // noncopyable
-using noncopyable = boost::noncopyable;
+using noncopyable = misc::noncopyable;
 
 // literals
 inline constexpr size_t operator"" _k(const char* n)

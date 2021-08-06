@@ -6,7 +6,7 @@
 #include <niu2x/memory.h>
 #include <niu2x/io.h>
 #include <niu2x/os.h>
-#include <niu2x/async_io.h>
+#include <niu2x/aio.h>
 #include <niu2x/global.h>
 #include <niu2x/misc/ringbuffer.h>
 #include <niu2x/lua_bindings/cvt.h>

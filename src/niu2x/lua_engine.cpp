@@ -56,7 +56,8 @@ lua_engine::~lua_engine()
 void* lua_engine::mem_alloc(void* ud, void* ptr, size_t osize, size_t nsize)
 {
     if (nsize)
-        nsize = max(32ul, nsize);
+        nsize = max(nsize, 16ul);
+
     auto* allocator = reinterpret_cast<mm::allocator*>(ud);
     if (nsize == 0) {
         if (ptr) {

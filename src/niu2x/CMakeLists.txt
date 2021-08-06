@@ -34,10 +34,6 @@ target_link_libraries(niu2x PUBLIC
 	${runtime}
 )
 
-target_link_libraries(niu2x PUBLIC
-	Boost::headers
-)
-
 include(GenerateExportHeader)
 generate_export_header(niu2x
 	EXPORT_FILE_NAME api.h

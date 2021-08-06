@@ -1,6 +1,8 @@
 #ifndef NX_OS_LINUX_H
 #define NX_OS_LINUX_H
 
+#include <unistd.h>
+
 #include <niu2x/utils.h>
 
 namespace nx::os {

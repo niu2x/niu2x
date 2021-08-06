@@ -11,6 +11,7 @@ int main(int argc, char* argv[])
     {
         nx::io::sink::adapter<uint8_t, std::vector<uint8_t>> sink(buffer);
         nx::io::pipe(nx::io::source::cin, sink);
+        buffer.push_back(0);
     }
 
     {

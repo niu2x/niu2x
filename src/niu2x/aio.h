@@ -4,7 +4,7 @@
 #include <niu2x/utils.h>
 #include <niu2x/misc/freelist.h>
 
-namespace nx::async_io {
+namespace nx::aio {
 
 enum class API status {
     ok = 0,
@@ -63,12 +63,12 @@ public:
 // 	event_loop
 // };
 
-} // namespace nx::async_io
-
-namespace nx::aio {
-
-using namespace nx::async_io;
-
 } // namespace nx::aio
+
+namespace nx::async_io {
+
+using namespace nx::aio;
+
+} // namespace nx::async_io
 
 #endif

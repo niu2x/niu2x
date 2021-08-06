@@ -1,7 +1,7 @@
 #ifndef NX_LUA_LB_AIO_H
 #define NX_LUA_LB_AIO_H
 
-#include <niu2x/async_io.h>
+#include <niu2x/aio.h>
 
 namespace nx::lua_bindings::aio {
 

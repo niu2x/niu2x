@@ -1,4 +1,4 @@
-#include "async_io.h"
+#include "aio.h"
 
 #include <uv.h>
 #include <niu2x/misc/freelist.h>
@@ -7,7 +7,7 @@
 
 #include <niu2x/global.h>
 
-namespace nx::async_io {
+namespace nx::aio {
 
 namespace {
 
@@ -177,7 +177,7 @@ public:
     }
 
 private:
-	uv_loop_t loop_;
+    uv_loop_t loop_;
 
     freelist<idle, 4> idles_;
     static void idle_callback(uv_idle_t* handle)
@@ -288,19 +288,17 @@ NX_INIT_FUNC(init_uv_allocator) { }
 
 } // namespace
 
-} // namespace nx::async_io
+} // namespace nx::aio
 
-namespace nx::async_io {
+namespace nx::aio {
 
+event_loop::event_loop() { }
+event_loop::~event_loop() { }
 
-event_loop::event_loop() {
-}
-event_loop::~event_loop() {
-}
-
-std::unique_ptr<event_loop> event_loop::create() {
-    std::cout << "uv_event_loop size: " << sizeof(uv_event_loop) << std::endl;
+std::unique_ptr<event_loop> event_loop::create()
+{
+    NX_LOG_D("uv_event_loop size: %lu", sizeof(uv_event_loop));
     return std::make_unique<uv_event_loop>();
 }
 
-} // namespace nx::async_io
+} // namespace nx::aio

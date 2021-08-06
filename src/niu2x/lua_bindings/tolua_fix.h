@@ -2,7 +2,7 @@
 #define NX_LB_TOLUA_FIX_H
 
 #include <niu2x/utils.h>
-#include <niu2x/async_io.h>
+#include <niu2x/aio.h>
 
 struct lua_State;
 struct tolua_Error;
