@@ -49,8 +49,6 @@ namespace details {
 
 using allocator = details::allocator_adapter<Allocator>;
 
-extern API memory_t memory;
-
 } // namespace nx::mm
 
 #endif

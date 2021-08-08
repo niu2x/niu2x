@@ -22,6 +22,7 @@
 
 #include <niu2x/api.h>
 #include <niu2x/log.h>
+#include <niu2x/memory.h>
 #include <niu2x/misc/constexpr.h>
 #include <niu2x/misc/string_utils.h>
 #include <niu2x/misc/noncopyable.h>
@@ -78,11 +79,6 @@ inline API T max(const T& a, const T& b)
     return a > b ? a : b;
 }
 
-#define MIN(a, b) (a) < (b) ? (a) : (b)
-#define MAX(a, b) (a) > (b) ? (a) : (b)
-
-#define NX_ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
-
 // exception
 class API exception : public std::exception {
 public:
@@ -134,7 +130,7 @@ struct API memref {
 //
 template <class T>
 struct API destructor {
-    static void destory(T* obj) { obj->~T(); }
+    static void destroy(T* obj) { obj->~T(); }
 };
 
 enum API status {
@@ -147,7 +143,14 @@ enum API status {
 using rid = uint64_t;
 constexpr rid nil = 0;
 
+extern API mm::allocator default_allocator;
+
 } // namespace nx
+
+#define NX_MIN(a, b) (a) < (b) ? (a) : (b)
+#define NX_MAX(a, b) (a) > (b) ? (a) : (b)
+
+#define NX_ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 #define NX_THROW(message) throw nx::exception((message), __FILE__, __LINE__)
 

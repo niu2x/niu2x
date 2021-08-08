@@ -1,4 +1,4 @@
-#include <niu2x/io.h>
+#include <niu2x/cvt.h>
 
 #include <common/cxxopts.h>
 
@@ -17,12 +17,12 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    // std::unique_ptr<nx::io::base_source<uint8_t>> source;
-    // std::unique_ptr<nx::io::base_sink<uint8_t>> sink;
+    // std::unique_ptr<nx::cvt::base_source<uint8_t>> source;
+    // std::unique_ptr<nx::cvt::base_sink<uint8_t>> sink;
     // source =
     //
-    auto& source = nx::io::source::cin;
-    auto& sink = nx::io::sink::cout;
+    auto& source = nx::cvt::source::cin;
+    auto& sink = nx::cvt::sink::cout;
 
     auto codec = result["codec"].as<std::string>();
 
@@ -32,14 +32,14 @@ int main(int argc, char* argv[])
     {
         std::string input = result["input"].as<std::string>();
         if (input == "") {
-            nx::io::sink::adapter<uint8_t, std::vector<uint8_t>> sink(
+            nx::cvt::sink::adapter<uint8_t, std::vector<uint8_t>> sink(
                 buffer[0]);
-            nx::io::pipe(nx::io::source::cin, sink);
+            nx::cvt::pipe(nx::cvt::source::cin, sink);
         } else {
-            nx::io::sink::adapter<uint8_t, std::vector<uint8_t>> sink(
+            nx::cvt::sink::adapter<uint8_t, std::vector<uint8_t>> sink(
                 buffer[0]);
-            nx::io::source::file f(input.c_str());
-            nx::io::pipe(f, sink);
+            nx::cvt::source::file f(input.c_str());
+            nx::cvt::pipe(f, sink);
         }
     }
 
@@ -47,16 +47,16 @@ int main(int argc, char* argv[])
     std::vector<uint8_t>* sink_v = &buffer[1];
 
     for (auto& filter_name : filters) {
-        nx::io::source::bytes src { src_v->data(), src_v->size() };
-        nx::io::sink::adapter<uint8_t, std::vector<uint8_t>> sink(*sink_v);
+        nx::cvt::source::bytes src { src_v->data(), src_v->size() };
+        nx::cvt::sink::adapter<uint8_t, std::vector<uint8_t>> sink(*sink_v);
         if (filter_name == "hex_encode") {
-            nx::io::pipe(src, nx::io::filter::hex_encode, sink);
+            nx::cvt::pipe(src, nx::cvt::filter::hex_encode, sink);
         } else if (filter_name == "hex_decode") {
-            nx::io::pipe(src, nx::io::filter::hex_decode, sink);
+            nx::cvt::pipe(src, nx::cvt::filter::hex_decode, sink);
         } else if (filter_name == "zlib_compress") {
-            nx::io::pipe(src, nx::io::filter::zlib_compress, sink);
+            nx::cvt::pipe(src, nx::cvt::filter::zlib_compress, sink);
         } else if (filter_name == "zlib_uncompress") {
-            nx::io::pipe(src, nx::io::filter::zlib_uncompress, sink);
+            nx::cvt::pipe(src, nx::cvt::filter::zlib_uncompress, sink);
         } else if (filter_name == "") {
             continue;
         } else {
@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
     }
 
     {
-        nx::io::source::bytes src { src_v->data(), src_v->size() };
-        nx::io::pipe(src, nx::io::sink::cout);
+        nx::cvt::source::bytes src { src_v->data(), src_v->size() };
+        nx::cvt::pipe(src, nx::cvt::sink::cout);
     }
 
     return 0;
