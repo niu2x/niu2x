@@ -19,6 +19,8 @@ _basic_ctype['nx_luafunction'] = 'nx_luafunction'
 _basic['uint16_t'] = 'number'
 _basic['const uint16_t'] = 'number'
 
+-- _collect['std::shared_ptr<nx::aio::event_loop>'] = true
+
 EOF
 
 workdir=$1
@@ -31,7 +33,6 @@ find $workdir -name '*.pkg'|while read item; do
 	# sed 's/tolua_pushcppstring(tolua_S,(const char\*)/my_pushcppstring(tolua_S, /g' -i ${dir}/tolua_${pkgname}.cpp
 	# sed '13i#define my_pushcppstring(L, sz) lua_pushlstring(L,sz.c_str(), sz.length())' -i ${dir}/tolua_${pkgname}.cpp
 	# sed '1i#pragma GCC diagnostic ignored "-Werror=unused-function"' -i ${dir}/tolua_${pkgname}.cpp
-	sed -E 's/(nx::lua_bindings::aio::status::)/(int)\1/g' -i ${dir}/tolua_${pkgname}.cpp
 	clang-format -i ${dir}/tolua_${pkgname}.cpp
 	clang-format -i ${dir}/tolua_${pkgname}.h
 done

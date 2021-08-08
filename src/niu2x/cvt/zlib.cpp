@@ -1,8 +1,8 @@
-#include <niu2x/io.h>
+#include <niu2x/cvt.h>
 
 #include <zlib.h>
 
-namespace nx::io::filter {
+namespace nx::cvt::filter {
 
 struct zlib_compress_t::context {
     z_stream strm;
@@ -12,8 +12,10 @@ struct zlib_compress_t::context {
 status zlib_compress_t::cvt(const uint8_t* input, size_t isize,
     size_t* consumed_isize, uint8_t* output, size_t max_osize, size_t* osize)
 {
-    NX_ASSERT(isize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large isize");
-    NX_ASSERT(max_osize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large max_osize");
+    NX_ASSERT(isize <= std::numeric_limits<uInt>::max(),
+        "zlib_compress_t cvt fail: too large isize");
+    NX_ASSERT(max_osize <= std::numeric_limits<uInt>::max(),
+        "zlib_compress_t cvt fail: too large max_osize");
     if (!ctx_) {
         ctx_ = std::make_unique<context>();
         ctx_->strm.zalloc = Z_NULL;
@@ -73,7 +75,6 @@ zlib_compress_t::~zlib_compress_t()
         deflateEnd(&(ctx_->strm));
 }
 
-
 struct zlib_uncompress_t::context {
     z_stream strm;
     std::vector<uint8_t> buffer;
@@ -81,9 +82,11 @@ struct zlib_uncompress_t::context {
 
 status zlib_uncompress_t::cvt(const uint8_t* input, size_t isize,
     size_t* consumed_isize, uint8_t* output, size_t max_osize, size_t* osize)
-{   
-    NX_ASSERT(isize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large isize");
-    NX_ASSERT(max_osize <= std::numeric_limits<uInt>::max(), "zlib_compress_t cvt fail: too large max_osize");
+{
+    NX_ASSERT(isize <= std::numeric_limits<uInt>::max(),
+        "zlib_compress_t cvt fail: too large isize");
+    NX_ASSERT(max_osize <= std::numeric_limits<uInt>::max(),
+        "zlib_compress_t cvt fail: too large max_osize");
 
     if (!ctx_) {
         ctx_ = std::make_unique<context>();
@@ -146,4 +149,4 @@ zlib_uncompress_t::~zlib_uncompress_t()
 zlib_compress_t zlib_compress;
 zlib_uncompress_t zlib_uncompress;
 
-} // namespace nx::io::filter
+} // namespace nx::cvt::filter

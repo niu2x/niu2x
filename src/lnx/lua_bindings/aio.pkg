@@ -1,15 +1,18 @@
-$ #include <niu2x/lua_bindings/aio.h>
+$ #include <niu2x/aio.h>
 $ #include <niu2x/lua_bindings/tolua_fix.h>
 
 namespace nx {
-namespace lua_bindings {
 namespace aio {
 
-struct status {
-   enum {
-      ok,
-      fail,
-   };
+enum status {
+    ok = 0,
+    fail,
+};
+
+enum wait_type {
+    wait_all = 0,
+    wait_once,
+    no_wait,
 };
 
 class event_loop {
@@ -20,7 +23,7 @@ class event_loop {
        ~rid();
    };
 
-   static event_loop create();
+   static std::shared_ptr<event_loop> create();
 
    void run(int p_type);
    void run();
@@ -32,9 +35,8 @@ class event_loop {
 
    void start_read(rid stream_id, nx_luafunction callback);
    void stop_read(rid stream_id);
-   
+
 };
 
-}
 }
 }

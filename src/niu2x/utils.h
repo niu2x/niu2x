@@ -21,7 +21,6 @@
 #include <limits>
 
 #include <niu2x/api.h>
-#include <niu2x/global.h>
 #include <niu2x/log.h>
 #include <niu2x/misc/constexpr.h>
 #include <niu2x/misc/string_utils.h>
@@ -30,7 +29,7 @@
 namespace nx {
 
 // limits
-struct limits {
+struct API limits {
 #define LIMIT(type, name, value) static constexpr type name = value;
 
     LIMIT(size_t, max_path, 1024)
@@ -40,7 +39,7 @@ struct limits {
 };
 
 // unused
-inline void unused() { }
+inline API void unused() { }
 
 template <class FirstParam, class... Params>
 inline void unused(FirstParam&& first_param, Params&&... params)
@@ -53,26 +52,28 @@ inline void unused(FirstParam&& first_param, Params&&... params)
 using noncopyable = misc::noncopyable;
 
 // literals
-inline constexpr size_t operator"" _k(const char* n)
+inline API constexpr size_t operator"" _k(const char* n)
 {
     return misc::stoi(n) << 10;
 }
-inline constexpr size_t operator"" _m(const char* n)
+inline API constexpr size_t operator"" _m(const char* n)
 {
     return misc::stoi(n) << 20;
 }
-inline constexpr size_t operator"" _g(const char* n)
+inline API constexpr size_t operator"" _g(const char* n)
 {
     return misc::stoi(n) << 30;
 }
 
 // math utils
-template <class T> inline T min(const T& a, const T& b)
+template <class T>
+inline API T min(const T& a, const T& b)
 {
     return a < b ? a : b;
 }
 
-template <class T> inline T max(const T& a, const T& b)
+template <class T>
+inline API T max(const T& a, const T& b)
 {
     return a > b ? a : b;
 }
@@ -83,7 +84,7 @@ template <class T> inline T max(const T& a, const T& b)
 #define NX_ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 // exception
-class exception : public std::exception {
+class API exception : public std::exception {
 public:
     exception(const char* msg, const char* file, uint32_t line)
     {
@@ -107,13 +108,13 @@ private:
 using string_utils = misc::string_utils;
 
 template <class T>
-struct arrayref {
+struct API arrayref {
     T* base;
     size_t size;
 };
 
 template <class T>
-void swap(T& a, T& b)
+void API swap(T& a, T& b)
 {
     T tmp = a;
     a = b;
@@ -121,7 +122,7 @@ void swap(T& a, T& b)
 }
 
 // memref
-struct memref {
+struct API memref {
     void* base;
     size_t size;
 };
@@ -132,9 +133,19 @@ struct memref {
 // };
 //
 template <class T>
-struct destructor {
+struct API destructor {
     static void destory(T* obj) { obj->~T(); }
 };
+
+enum API status {
+    ok,
+    again,
+    eof,
+    fail,
+};
+
+using rid = uint64_t;
+constexpr rid nil = 0;
 
 } // namespace nx
 

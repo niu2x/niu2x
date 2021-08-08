@@ -32,9 +32,9 @@ private:
         luafunc_ref(lua_State* L, int idx);
         ~luafunc_ref();
 
-        void operator()(nx::aio::status status, nx::misc::rid rid);
-        void operator()(nx::aio::status status, nx::misc::rid rid,
-            const uint8_t* data, size_t len);
+        void operator()(int status, nx::misc::rid rid);
+        void operator()(
+            int status, nx::misc::rid rid, const uint8_t* data, size_t len);
 
     private:
         lua_State* L_;
@@ -50,5 +50,20 @@ private:
 extern nx_luafunction tolua_tonx_luafunction(lua_State* L, int idx, int def);
 extern int tolua_isnx_luafunction(
     lua_State* L, int idx, int def, tolua_Error* err);
+
+// template<class T>
+// struct nxobj_luawrapper {
+//     std::shared_ptr<T> nxobj;
+
+//     nxobj_luawrapper(){
+//         nxobj = T::create();
+//     }
+
+//     ~nxobj_luawrapper(){
+//         nxobj = nullptr;
+//     }
+// };
+
+// using nx_aio_event_loop_wrapper = nxobj_luawrapper<nx::aio::event_loop>;
 
 #endif

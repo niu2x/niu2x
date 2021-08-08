@@ -1,6 +1,6 @@
-#include <niu2x/io.h>
+#include <niu2x/cvt.h>
 
-namespace nx::io {
+namespace nx::cvt {
 
 static size_t file_size(FILE* fp) noexcept
 {
@@ -28,9 +28,9 @@ void read_file(const char* pathname, std::vector<uint8_t>& output)
     NX_ASSERT(fread(output.data(), 1, fsize, fp) == fsize, "read file failed.");
 }
 
-} // namespace nx::io
+} // namespace nx::cvt
 
-namespace nx::io::filter {
+namespace nx::cvt::filter {
 
 simple_filter<uint8_t, uint8_t> lower { [](const uint8_t& c) {
     return (uint8_t)tolower(c);
@@ -40,7 +40,9 @@ simple_filter<uint8_t, uint8_t> upper { [](const uint8_t& c) {
     return (uint8_t)toupper(c);
 } };
 
-simple_filter<uint8_t, uint8_t> inc { [](const uint8_t& c) { return (uint8_t)(c + 1); } };
+simple_filter<uint8_t, uint8_t> inc { [](const uint8_t& c) {
+    return (uint8_t)(c + 1);
+} };
 
 static uint8_t hex(uint8_t digit)
 {
@@ -124,9 +126,9 @@ hex_decode_t hex_decode;
 
 one_t<uint8_t> one;
 
-} // namespace nx::io::filter
+} // namespace nx::cvt::filter
 
-namespace nx::io::sink {
+namespace nx::cvt::sink {
 
 file::~file() { }
 
@@ -144,11 +146,9 @@ status file::put(const uint8_t* output, size_t isize, size_t* osize)
 adapter<uint8_t, std::ostream> cout(std::cout);
 adapter<uint8_t, std::ostream> cerr(std::cerr);
 
-} // namespace nx::io::sink
+} // namespace nx::cvt::sink
 
-
-
-namespace nx::io::source {
+namespace nx::cvt::source {
 
 file::~file() { }
 
@@ -165,4 +165,4 @@ status file::get(uint8_t* output, size_t max, size_t* osize)
 
 adapter<uint8_t, std::istream> cin(std::cin);
 
-} // namespace nx::io::source
+} // namespace nx::cvt::source

@@ -3,8 +3,7 @@
 
 #include <fstream>
 
-#include <niu2x/misc/ringbuffer.h>
-#include <niu2x/misc/rw_status.h>
+#include <niu2x/ringbuffer.h>
 #include <niu2x/utils.h>
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -12,18 +11,16 @@
     #pragma warning(disable : 4251)
 #endif
 
-namespace nx::io {
+namespace nx::cvt {
 
-void API read_file(const char *pathname, std::vector<uint8_t> &output);
-
-using status = misc::rw_status;
+void API read_file(const char* pathname, std::vector<uint8_t>& output);
 
 template <class Elem>
 class base_source {
 public:
     base_source() { }
     virtual ~base_source() { }
-    status get_elem(Elem *elem) { return get(elem, 1, nullptr); }
+    status get_elem(Elem* elem) { return get(elem, 1, nullptr); }
     virtual status get(Elem* output, size_t max, size_t* osize) = 0;
 };
 
@@ -32,9 +29,7 @@ class base_sink {
 public:
     base_sink() { }
     virtual ~base_sink() { }
-    status put_elem(const Elem& elem) {
-        return put(&elem, 1, nullptr);
-    }
+    status put_elem(const Elem& elem) { return put(&elem, 1, nullptr); }
     virtual status put(const Elem* output, size_t isize, size_t* osize) = 0;
 };
 
@@ -52,77 +47,77 @@ public:
         = 0;
 };
 
-
-
 namespace sink {
-    template <class Elem, class Imp>
-    class adapter: public base_sink<Elem> {};
+template <class Elem, class Imp>
+class adapter : public base_sink<Elem> {
+};
 
-    template <>
-    class API adapter<uint8_t, std::ostream>: public base_sink<uint8_t> {
-    public:
-        adapter(std::ostream& delegate)
-        :delegate_(delegate){}
-        virtual ~adapter() {}
-        virtual status put(
-            const uint8_t* output, size_t isize, size_t* osize) override
-        {
-            delegate_.write(reinterpret_cast<const char*>(output), isize);
-            NX_ASSERT(delegate_.good(), "adapter<uint8_t, std::ostream> write failed");
+template <>
+class API adapter<uint8_t, std::ostream> : public base_sink<uint8_t> {
+public:
+    adapter(std::ostream& delegate)
+    : delegate_(delegate)
+    {
+    }
+    virtual ~adapter() { }
+    virtual status put(
+        const uint8_t* output, size_t isize, size_t* osize) override
+    {
+        delegate_.write(reinterpret_cast<const char*>(output), isize);
+        NX_ASSERT(
+            delegate_.good(), "adapter<uint8_t, std::ostream> write failed");
 
-            if (osize)
-                *osize = isize;
-            return status::ok;
-        }
+        if (osize)
+            *osize = isize;
+        return status::ok;
+    }
 
-        adapter(const adapter&) = default;
-        adapter& operator=(const adapter&) = default;
+    adapter(const adapter&) = default;
+    adapter& operator=(const adapter&) = default;
 
-    private:
-        std::ostream &delegate_;
-    };
+private:
+    std::ostream& delegate_;
+};
 
-    class API file : public base_sink<uint8_t>, private noncopyable {
-    public:
-        file(const char *pathname);
-        virtual ~file();
-        virtual status put(
-            const uint8_t* output, size_t isize, size_t* osize) override;
+class API file : public base_sink<uint8_t>, private noncopyable {
+public:
+    file(const char* pathname);
+    virtual ~file();
+    virtual status put(
+        const uint8_t* output, size_t isize, size_t* osize) override;
 
-    private:
-        std::ofstream f_stream_;
-        adapter<uint8_t, std::ostream> delegate_;
-    };
+private:
+    std::ofstream f_stream_;
+    adapter<uint8_t, std::ostream> delegate_;
+};
 
-    template <class Elem>
-    class adapter<Elem, std::vector<Elem>> : public base_sink<Elem> {
-    public:
-        adapter(std::vector<Elem>& delegate)
-        : delegate_(delegate)
-        {
-        }
-        virtual ~adapter() { }
-        virtual status put(
-            const uint8_t* output, size_t isize, size_t* osize) override
-        {
-            delegate_.insert(delegate_.end(), output, output + isize);
-            if (osize)
-                *osize = isize;
-            return status::ok;
-        }
+template <class Elem>
+class adapter<Elem, std::vector<Elem>> : public base_sink<Elem> {
+public:
+    adapter(std::vector<Elem>& delegate)
+    : delegate_(delegate)
+    {
+    }
+    virtual ~adapter() { }
+    virtual status put(
+        const uint8_t* output, size_t isize, size_t* osize) override
+    {
+        delegate_.insert(delegate_.end(), output, output + isize);
+        if (osize)
+            *osize = isize;
+        return status::ok;
+    }
 
-        adapter(const adapter&) = default;
-        adapter& operator=(const adapter&) = default;
+    adapter(const adapter&) = default;
+    adapter& operator=(const adapter&) = default;
 
-    private:
-        std::vector<Elem>& delegate_;
-    };
+private:
+    std::vector<Elem>& delegate_;
+};
 
-    extern API adapter<uint8_t, std::ostream> cout;
-    extern API adapter<uint8_t, std::ostream> cerr;
-}
-
-
+extern API adapter<uint8_t, std::ostream> cout;
+extern API adapter<uint8_t, std::ostream> cerr;
+} // namespace sink
 
 template <class Elem, size_t CHUNK = 1_k>
 void pipe(base_source<Elem>& src, base_sink<Elem>& dst)
@@ -131,18 +126,20 @@ void pipe(base_source<Elem>& src, base_sink<Elem>& dst)
     buffer.resize(CHUNK);
 
     size_t readn = 0;
-    while(!readn){
+    while (!readn) {
         status s;
         while ((s = src.get(buffer.data(), CHUNK, &readn)) == status::again)
             ;
-        if(s == status::eof) break;
+        if (s == status::eof)
+            break;
 
         auto* ptr = buffer.data();
-        while(readn){
+        while (readn) {
             size_t writen = 0;
             while ((s = dst.put(ptr, readn, &writen)) == status::again)
                 ;
-            if(s == status::eof) break;
+            if (s == status::eof)
+                break;
             readn -= writen;
             ptr += writen;
         }
@@ -151,17 +148,11 @@ void pipe(base_source<Elem>& src, base_sink<Elem>& dst)
 
 namespace details {
 
-// template <class E, size_t CHUNK>
-// bool ringbuffer_near_full(const misc::ringbuffer<E, CHUNK>& rb)
-// {
-//     return rb.size() >= CHUNK - 1 - 1;
-// }
-
 template <class IE, class OE, size_t CHUNK = 1_k>
 void pipe(base_source<IE>& src, base_filter<IE, OE>& flt, base_sink<OE>& dst)
 {
-    misc::ringbuffer<IE, CHUNK> ibuf;
-    misc::ringbuffer<OE, CHUNK> obuf;
+    ringbuffer<IE, CHUNK> ibuf;
+    ringbuffer<OE, CHUNK> obuf;
 
     bool src_eof = false;
     bool dst_eof = false;
@@ -240,6 +231,7 @@ void pipe(base_source<IE>& src, base_filter<IE, OE>& flt, base_sink<OE>& dst)
         }
     }
 }
+
 } // namespace details
 
 template <class IE, class OE, class FILTER, size_t CHUNK = 1_k>
@@ -251,7 +243,7 @@ void pipe(base_source<IE>& src, FILTER p_flt, base_sink<OE>& dst)
 
 namespace source {
 
-template <class Elem> 
+template <class Elem>
 class array : public base_source<Elem> {
 public:
     array(const Elem* const base, size_t size)
@@ -262,7 +254,7 @@ public:
     }
     virtual ~array() { }
 
-    virtual status get(Elem* output, size_t max,  size_t* osize) override
+    virtual status get(Elem* output, size_t max, size_t* osize) override
     {
         size_t rest = (size_ - read_index_);
         if (rest == 0)
@@ -289,38 +281,43 @@ private:
 using bytes = array<uint8_t>;
 
 template <class Elem, class Imp>
-class adapter: public base_source<Elem> {};
+class adapter : public base_source<Elem> {
+};
 
 template <>
-class API adapter<uint8_t, std::istream>: public base_source<uint8_t> {
+class API adapter<uint8_t, std::istream> : public base_source<uint8_t> {
 public:
     adapter(std::istream& delegate)
-    :delegate_(delegate){}
-    virtual ~adapter() {}
-    virtual status get(uint8_t* output, size_t max, size_t* osize) override {
-            delegate_.read (reinterpret_cast<char*>(output),max);
-            size_t readn;
-            if (delegate_)
-                readn = max;
-            else
-                readn = delegate_.gcount();
-            if(osize) *osize = readn;
+    : delegate_(delegate)
+    {
+    }
+    virtual ~adapter() { }
+    virtual status get(uint8_t* output, size_t max, size_t* osize) override
+    {
+        delegate_.read(reinterpret_cast<char*>(output), max);
+        size_t readn;
+        if (delegate_)
+            readn = max;
+        else
+            readn = delegate_.gcount();
+        if (osize)
+            *osize = readn;
 
-            return readn ? status::ok: status::eof;
-        }
+        return readn ? status::ok : status::eof;
+    }
 
-        adapter(const adapter&) = default;
-        adapter& operator=(const adapter&) = default;
+    adapter(const adapter&) = default;
+    adapter& operator=(const adapter&) = default;
 
-    private:
-        std::istream& delegate_;
+private:
+    std::istream& delegate_;
 };
 
 class API file : public base_source<uint8_t>, private noncopyable {
 public:
-    file(const char *pathname);
+    file(const char* pathname);
     virtual ~file();
-    virtual status get(uint8_t* output, size_t max, size_t* osize) override ;
+    virtual status get(uint8_t* output, size_t max, size_t* osize) override;
 
 private:
     std::ifstream f_stream_;
@@ -329,7 +326,7 @@ private:
 
 extern API adapter<uint8_t, std::istream> cin;
 
-}
+} // namespace source
 
 namespace filter {
 
@@ -494,12 +491,13 @@ public:
     zlib_compress_t(int level = -1);
     ~zlib_compress_t();
 
-    zlib_compress_t(const zlib_compress_t &other);
-    zlib_compress_t& operator=(const zlib_compress_t &other) = delete;
+    zlib_compress_t(const zlib_compress_t& other);
+    zlib_compress_t& operator=(const zlib_compress_t& other) = delete;
 
     virtual status cvt(const uint8_t* input, size_t isize,
         size_t* consumed_isize, uint8_t* output, size_t max_osize,
         size_t* osize) override;
+
 private:
     struct context;
     std::unique_ptr<context> ctx_;
@@ -558,12 +556,6 @@ extern API one_t<uint8_t> one;
 extern API zlib_compress_t zlib_compress;
 extern API zlib_uncompress_t zlib_uncompress;
 
-// template <class FILTER>
-// FILTER get(const char* name)
-// {
-//     if (strcmp(name, "lower"))
-// }
-
 } // namespace filter
 
 template <class IE, class OE, size_t CHUNK = 1_k>
@@ -579,6 +571,6 @@ filter::concat_filter<IE, ME, OE> operator|(
     return filter::concat_filter(a, b);
 }
 
-} // namespace nx::io
+} // namespace nx::cvt
 
 #endif

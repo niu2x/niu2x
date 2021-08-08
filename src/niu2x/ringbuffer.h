@@ -1,10 +1,9 @@
 #ifndef NX_MISC_RINGBUFFER_H
 #define NX_MISC_RINGBUFFER_H
 
-#include <niu2x/misc/rw_status.h>
 #include <niu2x/utils.h>
 
-namespace nx::misc {
+namespace nx {
 
 template <class Elem, size_t UserCapacity>
 class ringbuffer {
@@ -20,64 +19,63 @@ public:
     ringbuffer(const ringbuffer&) = default;
     ringbuffer& operator=(const ringbuffer&) = default;
 
-    rw_status put_elem(const Elem& e) noexcept { return put(&e, 1, nullptr); }
+    status put_elem(const Elem& e) noexcept { return put(&e, 1, nullptr); }
 
-    rw_status put(const Elem* input, size_t isize, size_t* osize) noexcept
+    status put(const Elem* input, size_t isize, size_t* osize) noexcept
     {
         auto rooms = (Capacity - 1) - size();
         auto writen = min(isize, rooms);
-		if(osize) *osize = writen;
+        if (osize)
+            *osize = writen;
 
-		if(!writen)
-			return rw_status::again;
+        if (!writen)
+            return again;
 
-		if(tail_ >= head_) {
-			auto n = min(Capacity - tail_, writen);
-			memcpy(data_+tail_, input, n*sizeof(Elem));
-			input += n;
-			writen -= n;
-			tail_ = add(tail_, n); 
-		}
+        if (tail_ >= head_) {
+            auto n = min(Capacity - tail_, writen);
+            memcpy(data_ + tail_, input, n * sizeof(Elem));
+            input += n;
+            writen -= n;
+            tail_ = add(tail_, n);
+        }
 
-		if(writen){
-			memcpy(data_+tail_, input, writen*sizeof(Elem));
-			tail_ = add(tail_, writen); 
-		}
+        if (writen) {
+            memcpy(data_ + tail_, input, writen * sizeof(Elem));
+            tail_ = add(tail_, writen);
+        }
 
-		return rw_status::ok;
+        return ok;
     }
 
-    rw_status get(Elem* output, size_t max_osize, size_t* osize) noexcept
+    status get(Elem* output, size_t max_osize, size_t* osize) noexcept
     {
 
         auto my_size = size();
-		if(!my_size) 
-			return rw_status::eof;
+        if (!my_size)
+            return eof;
 
-		auto readn = min(max_osize, my_size);
-		if(osize) *osize = readn;
+        auto readn = min(max_osize, my_size);
+        if (osize)
+            *osize = readn;
 
-		if(tail_ >= head_) {
-			memcpy(output, data_ + head_, readn*sizeof(Elem));
-		}
-		else{
-			memcpy(output, data_ + head_,  min(Capacity-head_,  readn)*sizeof(Elem));
-			if( readn > Capacity-head_){
-				memcpy(output+Capacity-head_, data_,   readn - (Capacity-head_)*sizeof(Elem));
-			}
-		}
+        if (tail_ >= head_) {
+            memcpy(output, data_ + head_, readn * sizeof(Elem));
+        } else {
+            memcpy(output, data_ + head_,
+                min(Capacity - head_, readn) * sizeof(Elem));
+            if (readn > Capacity - head_) {
+                memcpy(output + Capacity - head_, data_,
+                    readn - (Capacity - head_) * sizeof(Elem));
+            }
+        }
 
-		head_ = add(head_, readn); 
-		return rw_status::ok;
+        head_ = add(head_, readn);
+        return ok;
     }
 
-    rw_status get_elem(Elem *out) noexcept {
-		return get(out, 1, nullptr);
-	}
+    status get_elem(Elem* out) noexcept { return get(out, 1, nullptr); }
 
-	size_t size() const noexcept {
-		return minus(tail_ , head_);
-	}
+    size_t size() const noexcept { return minus(tail_, head_); }
 
     void pop(size_t n) noexcept { head_ = add(head_, min(n, size())); }
     void push(size_t n) noexcept
@@ -126,22 +124,25 @@ public:
     }
 
 private:
+    Elem data_[Capacity];
+    size_t head_;
+    size_t tail_;
 
-	Elem data_[Capacity];
-	size_t head_;
-	size_t tail_;
+    static size_t minus(size_t a, size_t b) noexcept
+    {
+        if (a < b)
+            return a + Capacity - b;
+        return a - b;
+    }
 
-	static size_t minus(size_t a, size_t b) noexcept {
-		if(a < b) return a + Capacity - b;
-		return a - b;
-	}
-
-	static size_t add(size_t a, size_t b) noexcept {
-		size_t sum = a + b;
-		if(sum >= Capacity) sum-=Capacity;
-		return sum;
-	}
+    static size_t add(size_t a, size_t b) noexcept
+    {
+        size_t sum = a + b;
+        if (sum >= Capacity)
+            sum -= Capacity;
+        return sum;
+    }
 };
-}
+} // namespace nx
 
 #endif
