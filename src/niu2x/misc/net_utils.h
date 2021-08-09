@@ -8,6 +8,12 @@
     #include <arpa/inet.h>
 #endif
 
+#if defined(_WIN32) || defined(_WIN64)
+    #include <Winsock2.h>
+    #include <winsock.h>
+    #include <ws2tcpip.h>
+#endif
+
 namespace nx::misc {
 
 struct net_utils {

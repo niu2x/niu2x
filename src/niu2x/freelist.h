@@ -8,10 +8,10 @@
 namespace nx {
 
 template <class T, rid N>
-class freelist {
+class API freelist {
 public:
     template <class TT>
-    union slot {
+    union API slot {
         TT data;
         rid next;
         slot() { }

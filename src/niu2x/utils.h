@@ -66,19 +66,6 @@ inline API constexpr size_t operator"" _g(const char* n)
     return misc::stoi(n) << 30;
 }
 
-// math utils
-template <class T>
-inline API T min(const T& a, const T& b)
-{
-    return a < b ? a : b;
-}
-
-template <class T>
-inline API T max(const T& a, const T& b)
-{
-    return a > b ? a : b;
-}
-
 // exception
 class API exception : public std::exception {
 public:

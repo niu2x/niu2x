@@ -1,5 +1,16 @@
 #include "net_utils.h"
 
+#if defined(_WIN32) || defined(_WIN64)
+    #include <Winsock2.h>
+    #include <winsock.h>
+    #include <ws2tcpip.h>
+#endif
+
+#if !defined(_WIN32) || !defined(_WIN64)
+    #define strncpy_s strncpy
+#endif
+
+
 namespace nx::misc {
 
 std::string net_utils::desc(const struct sockaddr* sa)
@@ -21,7 +32,7 @@ std::string net_utils::desc(const struct sockaddr* sa)
             break;
 
         default:
-            strncpy(address, "Unknown AF", INET_ADDRSTRLEN);
+            strncpy_s(address, "Unknown AF", INET_ADDRSTRLEN);
             return NULL;
     }
     ss << address;

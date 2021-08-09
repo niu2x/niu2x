@@ -6,6 +6,10 @@
 #include <niu2x/utils.h>
 #include <niu2x/freelist.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+    #pragma warning(disable : 4251)
+#endif
+
 namespace nx::aio {
 
 enum API run_type {
@@ -20,8 +24,7 @@ public:
 
     using connect_handle = std::function<void(int, rid self)>;
 
-    using read_handle = std::function<void(
-        int, rid self, const uint8_t* buffer, size_t size)>;
+    using read_handle = std::function<void(int, rid, const uint8_t*, size_t)>;
 
     event_loop(const mm::allocator& allocator = default_allocator);
     ~event_loop();
@@ -31,25 +34,27 @@ public:
 
     rid create_idle(idle_handle handle);
     void destroy_idle(rid);
-
+ 
     rid create_tcp();
     void destroy_tcp(rid tcp_id);
 
-    void connect(
-        rid tcp_id, const char* address, uint16_t port, connect_handle);
+    void connect(rid tcp_id, const char* address, uint16_t port, connect_handle);
 
     void start_read(rid stream_id, read_handle callback);
     void stop_read(rid stream_id);
 
 private:
-    struct idle_t {
+    struct API idle_t {
         uv_idle_t uv_obj;
         union {
             event_loop::idle_handle callback;
         };
+
+        idle_t() {}
+        ~idle_t() {}
     };
 
-    struct stream_t {
+    struct API stream_t {
         union {
             uv_tcp_t uv_tcp;
         };
@@ -59,14 +64,20 @@ private:
         } type;
 
         event_loop::read_handle read_cb;
+
+        stream_t() {}
+        ~stream_t() {}
     };
 
-    struct connect_t {
+    struct API connect_t {
         uv_connect_t uv_obj;
         union {
             event_loop::connect_handle callback;
         };
         struct sockaddr_in dest;
+
+        connect_t() {}
+        ~connect_t() {}
     };
 
     uv_loop_t loop_;
