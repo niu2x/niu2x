@@ -97,7 +97,7 @@ struct API arrayref {
 };
 
 template <class T>
-void API swap(T& a, T& b)
+void swap(T& a, T& b)
 {
     T tmp = a;
     a = b;
