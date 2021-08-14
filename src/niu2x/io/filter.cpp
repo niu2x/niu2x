@@ -111,16 +111,16 @@ void filter::set_next(filter* next)
     next_type_ = nt::filter;
 }
 
-filter_simple::filter_simple(const converter& p_converter)
+simple_filter::simple_filter(const converter& p_converter)
 : converter_(p_converter)
 {
 }
 
-filter_simple::~filter_simple() { }
+simple_filter::~simple_filter() { }
 
-void filter_simple::reset() { }
+void simple_filter::reset() { }
 
-void filter_simple::cvt(const uint8_t* in, size_t isize, uint8_t* out,
+void simple_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     size_t max_osize, size_t& readn, size_t& writen)
 {
     readn = writen = NX_MIN(isize, max_osize);
@@ -145,13 +145,13 @@ static uint8_t unhex(uint8_t digit)
     return digit - 'a' + 10;
 }
 
-filter_hex_encode::filter_hex_encode() { }
+hex_encode_filter::hex_encode_filter() { }
 
-filter_hex_encode::~filter_hex_encode() { }
+hex_encode_filter::~hex_encode_filter() { }
 
-void filter_hex_encode::reset() { }
+void hex_encode_filter::reset() { }
 
-void filter_hex_encode::cvt(const uint8_t* in, size_t isize, uint8_t* out,
+void hex_encode_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     size_t max_osize, size_t& readn, size_t& writen)
 {
     readn = NX_MIN(isize, max_osize >> 1);
@@ -164,13 +164,13 @@ void filter_hex_encode::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     }
 }
 
-filter_hex_decode::filter_hex_decode() { }
+hex_decode_filter::hex_decode_filter() { }
 
-filter_hex_decode::~filter_hex_decode() { }
+hex_decode_filter::~hex_decode_filter() { }
 
-void filter_hex_decode::reset() { }
+void hex_decode_filter::reset() { }
 
-void filter_hex_decode::cvt(const uint8_t* in, size_t isize, uint8_t* out,
+void hex_decode_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     size_t max_osize, size_t& readn, size_t& writen)
 {
     writen = NX_MIN(isize >> 1, max_osize);
@@ -182,16 +182,16 @@ void filter_hex_decode::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     }
 }
 
-static filter_simple filter_one([](uint8_t c) { return c; });
-static filter_simple filter_lower([](uint8_t c) { return tolower(c); });
-static filter_simple filter_upper([](uint8_t c) { return toupper(c); });
-static filter_hex_encode my_filter_hex_encode;
-static filter_hex_decode my_filter_hex_decode;
+static simple_filter filter_one([](uint8_t c) { return c; });
+static simple_filter filter_lower([](uint8_t c) { return tolower(c); });
+static simple_filter filter_upper([](uint8_t c) { return toupper(c); });
+static hex_encode_filter my_hex_encode_filter;
+static hex_decode_filter my_hex_decode_filter;
 
 filter_proxy one(&filter_one);
 filter_proxy lower(&filter_lower);
 filter_proxy upper(&filter_upper);
-filter_proxy hex_encode(&my_filter_hex_encode);
-filter_proxy hex_decode(&my_filter_hex_decode);
+filter_proxy hex_encode(&my_hex_encode_filter);
+filter_proxy hex_decode(&my_hex_decode_filter);
 
 } // namespace nx::io

@@ -8,7 +8,7 @@ source::~source() { }
 sink::sink() { }
 sink::~sink() { }
 
-static sink_null my_sink_null;
-sink_proxy null(&my_sink_null);
+static null_sink my_null_sink;
+sink_proxy null(&my_null_sink);
 
 } // namespace nx::io

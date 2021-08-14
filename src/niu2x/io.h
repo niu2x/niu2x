@@ -22,6 +22,7 @@ public:
     }
     virtual status get(uint8_t* output, size_t max, size_t& osize) = 0;
 };
+
 class API sink : private noncopyable {
 public:
     sink();
@@ -95,10 +96,10 @@ private:
     std::ostream& delegate_;
 };
 
-class API sink_null : public sink {
+class API null_sink : public sink {
 public:
-    sink_null() { }
-    virtual ~sink_null() { }
+    null_sink() { }
+    virtual ~null_sink() { }
     virtual status put(
         const uint8_t* output, size_t max, size_t& osize) override
     {
@@ -144,11 +145,11 @@ private:
     ringbuffer buf_;
 };
 
-class API filter_simple : public filter {
+class API simple_filter : public filter {
 public:
     using converter = std::function<uint8_t(uint8_t)>;
-    filter_simple(const converter& p_converter);
-    virtual ~filter_simple();
+    simple_filter(const converter& p_converter);
+    virtual ~simple_filter();
     virtual void reset() override;
     virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
         size_t max_osize, size_t& readn, size_t& writen);
@@ -157,19 +158,19 @@ private:
     converter converter_;
 };
 
-class API filter_hex_encode : public filter {
+class API hex_encode_filter : public filter {
 public:
-    filter_hex_encode();
-    virtual ~filter_hex_encode();
+    hex_encode_filter();
+    virtual ~hex_encode_filter();
     virtual void reset() override;
     virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
         size_t max_osize, size_t& readn, size_t& writen);
 };
 
-class API filter_hex_decode : public filter {
+class API hex_decode_filter : public filter {
 public:
-    filter_hex_decode();
-    virtual ~filter_hex_decode();
+    hex_decode_filter();
+    virtual ~hex_decode_filter();
     virtual void reset() override;
     virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
         size_t max_osize, size_t& readn, size_t& writen);
