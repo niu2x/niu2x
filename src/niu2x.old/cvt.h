@@ -260,7 +260,7 @@ public:
         if (rest == 0)
             return status::eof;
 
-        size_t readn = min(rest, max);
+        size_t readn = NX_MIN(rest, max);
         memcpy(output, base_ + read_index_, sizeof(Elem) * readn);
 
         read_index_ += readn;
@@ -532,7 +532,7 @@ public:
         if (!isize)
             return status::eof;
 
-        size_t readn = min(isize, max_osize);
+        size_t readn = NX_MIN(isize, max_osize);
 
         if (readn) {
             if (consumed_isize)

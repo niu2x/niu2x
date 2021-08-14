@@ -69,7 +69,7 @@ status hex_encode_t::cvt(const uint8_t* input, size_t isize,
     if (!isize)
         return status::eof;
 
-    size_t readn = min(isize, max_osize >> 1);
+    size_t readn = NX_MIN(isize, max_osize >> 1);
 
     if (readn) {
 
@@ -98,7 +98,7 @@ status hex_decode_t::cvt(const uint8_t* input, size_t isize,
     if (!isize)
         return status::eof;
 
-    size_t readn = min(isize, max_osize << 1);
+    size_t readn = NX_MIN(isize, max_osize << 1);
     readn &= ~1;
 
     if (readn) {

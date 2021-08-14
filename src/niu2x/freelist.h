@@ -16,7 +16,7 @@ public:
     static constexpr rid nil = 0;
 
     template <class TT>
-    union slot {
+    union API slot {
         TT data;
         rid next;
         slot() { }

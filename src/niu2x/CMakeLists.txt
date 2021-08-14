@@ -29,6 +29,11 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	list(APPEND runtime Threads::Threads)
 endif()
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	list(APPEND runtime wsock32 advapi32 iphlpapi psapi shell32 user32 userenv ws2_32)
+endif()
+
+
 target_link_libraries(niu2x PUBLIC
 	${runtime}
 )

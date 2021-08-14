@@ -11,7 +11,7 @@ function(dependent_prebuilt)
 
     set(depdir ${CMAKE_SOURCE_DIR}/dependencies)
     foreach(libname IN LISTS P_LIBS)
-        target_include_directories(${P_TARGET} PRIVATE 
+        target_include_directories(${P_TARGET} PUBLIC 
             ${depdir}/${libname}/include
         )   
 
@@ -24,7 +24,7 @@ function(dependent_prebuilt)
         )
 
         set(platform_include ${depdir}/${libname}/platform_include/${system_name}/${arch_name})
-        target_include_directories(${P_TARGET} PRIVATE 
+        target_include_directories(${P_TARGET} PUBLIC 
             ${platform_include}
         )  
 

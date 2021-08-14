@@ -24,7 +24,7 @@ public:
     status put(const Elem* input, size_t isize, size_t* osize) noexcept
     {
         auto rooms = (Capacity - 1) - size();
-        auto writen = min(isize, rooms);
+        auto writen = NX_MIN(isize, rooms);
         if (osize)
             *osize = writen;
 
@@ -32,7 +32,7 @@ public:
             return again;
 
         if (tail_ >= head_) {
-            auto n = min(Capacity - tail_, writen);
+            auto n = NX_MIN(Capacity - tail_, writen);
             memcpy(data_ + tail_, input, n * sizeof(Elem));
             input += n;
             writen -= n;
@@ -54,7 +54,7 @@ public:
         if (!my_size)
             return eof;
 
-        auto readn = min(max_osize, my_size);
+        auto readn = NX_MIN(max_osize, my_size);
         if (osize)
             *osize = readn;
 
@@ -62,7 +62,7 @@ public:
             memcpy(output, data_ + head_, readn * sizeof(Elem));
         } else {
             memcpy(output, data_ + head_,
-                min(Capacity - head_, readn) * sizeof(Elem));
+                NX_MIN(Capacity - head_, readn) * sizeof(Elem));
             if (readn > Capacity - head_) {
                 memcpy(output + Capacity - head_, data_,
                     readn - (Capacity - head_) * sizeof(Elem));
@@ -77,10 +77,10 @@ public:
 
     size_t size() const noexcept { return minus(tail_, head_); }
 
-    void pop(size_t n) noexcept { head_ = add(head_, min(n, size())); }
+    void pop(size_t n) noexcept { head_ = add(head_, NX_MIN(n, size())); }
     void push(size_t n) noexcept
     {
-        tail_ = add(tail_, min(n, Capacity - 1 - size()));
+        tail_ = add(tail_, NX_MIN(n, Capacity - 1 - size()));
     }
 
     arrayref<Elem> continuous_elems() noexcept

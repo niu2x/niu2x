@@ -92,7 +92,7 @@ void event_loop::my_alloc_cb(
     auto* my_loop = reinterpret_cast<event_loop*>(uv_loop->data);
 
     buf->base = (char*)my_loop->allocator_.allocate(suggested_size);
-    buf->len = buf->base ? suggested_size : 0;
+    buf->len = (ULONG)(buf->base ? suggested_size : 0);
 }
 
 void event_loop::free_buf(const uv_buf_t* buf)
