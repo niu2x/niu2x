@@ -26,6 +26,7 @@ include(find_dependencies)
 
 # niu2x runtime library
 add_subdirectory(src/niu2x)
+add_subdirectory(src/niu2x_lua)
 
 add_subdirectory(src/examples)
 

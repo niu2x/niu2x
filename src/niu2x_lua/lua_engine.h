@@ -1,39 +1,34 @@
-// #ifndef NX_LUA_ENGINE_H
-// #define NX_LUA_ENGINE_H
+#ifndef NXLUA_LUA_ENGINE_H
+#define NXLUA_LUA_ENGINE_H
 
-// #include <niu2x/memory.h>
-// #include <niu2x/utils.h>
+#include <vector>
 
-// struct lua_State;
+#include <niu2x/utils.h>
+#include <niu2x_lua/lua_utils.h>
 
-// namespace nx {
+struct lua_State;
 
-// struct lua_utils {
-//     static void dobuffer(lua_State* L, const memref& mref);
-//     static void call(lua_State* L, int nargs, int nrets);
-// };
+namespace nxlua {
 
-// class API lua_engine : private noncopyable {
-// public:
-//     lua_engine(size_t memory_limit = 16_m);
-//     ~lua_engine();
+class API lua_engine : private nx::noncopyable {
+public:
+    lua_engine(nx::memory_proxy);
+    ~lua_engine();
 
-//     void dostring(const char*);
-//     void dobuffer(const memref& mref) { lua_utils::dobuffer(L, mref); }
-//     void dofile(const char*);
-//     void compile(const char*, std::vector<uint8_t>& output);
+    void dostring(const char*);
+    void dobuffer(const nx::memref& mref) { lua_utils::dobuffer(L, mref); }
+    void dofile(const char*);
+    void compile(const char*, std::vector<uint8_t>& output);
 
-//     void set_global_variable(const char* name, const char* const sz_list[]);
+    void set_global_variable(const char* name, const char* const sz_list[]);
 
-// private:
-//     lua_State* L;
-//     size_t memory_limit_;
-//     mm::freelist_memory_t memory_;
-//     mm::allocator allocator_;
+private:
+    lua_State* L;
+    size_t memory_limit_;
+    nx::memory_proxy allocator_;
+    static void* mem_alloc(void* ud, void* ptr, size_t osize, size_t nsize);
+};
 
-//     static void* mem_alloc(void* ud, void* ptr, size_t osize, size_t nsize);
-// };
+} // namespace nxlua
 
-// } // namespace nx
-
-// #endif
+#endif
