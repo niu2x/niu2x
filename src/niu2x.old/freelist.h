@@ -1,5 +1,5 @@
-#ifndef NX_FREELIST_H
-#define NX_FREELIST_H
+#ifndef GXM_FREELIST_H
+#define GXM_FREELIST_H
 
 #include <limits>
 
@@ -7,14 +7,9 @@
 
 namespace nx {
 
-using freelist_rid = uint64_t;
-
-template <class T, freelist_rid N>
+template <class T, rid N>
 class freelist {
 public:
-    using rid = freelist_rid;
-    static constexpr rid nil = 0;
-
     template <class TT>
     union slot {
         TT data;

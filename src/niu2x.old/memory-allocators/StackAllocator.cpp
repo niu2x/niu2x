@@ -5,7 +5,7 @@
 
 #undef _DEBUG
 #ifdef _DEBUG
-#include <iostream>
+    #include <iostream>
 #endif
 
 StackAllocator::StackAllocator(const std::size_t totalSize)

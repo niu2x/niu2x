@@ -1,7 +1,8 @@
 #ifndef STACKLINKEDLIST_H
 #define STACKLINKEDLIST_H
 
-template <class T> class StackLinkedList {
+template <class T>
+class StackLinkedList {
 public:
     struct Node {
         T data;

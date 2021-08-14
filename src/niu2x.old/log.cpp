@@ -23,15 +23,15 @@ static const char* level_names[] = {
     "trace",
 };
 
-int log::current_level_ = log::trace;
+log::level log::current_level_ = log::level::trace;
 
 void log::write(
-    int p_level, const char* filename, int line, const char* msg, ...)
+    level p_level, const char* filename, int line, const char* msg, ...)
 {
     if (current_level_ < p_level)
         return;
 
-    int lvl = p_level;
+    int lvl = int(p_level);
 
     auto* fmt = "\x1b[0m\x1b[90m%s[%s] %s %d ";
     fprintf(stderr, fmt, level_colors[lvl], level_names[lvl], filename, line);

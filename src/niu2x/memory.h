@@ -1,54 +1,69 @@
 #ifndef NX_MEMORY_H
 #define NX_MEMORY_H
 
-#if defined(_WIN32) || defined(_WIN64)
-    #pragma warning(disable : 4275)
-#endif
+// #if defined(_WIN32) || defined(_WIN64)
+//     #pragma warning(disable : 4275)
+// #endif
 
-#include <niu2x/memory-allocators/CAllocator.h>
-#include <niu2x/memory-allocators/FreeListAllocator.h>
-#include <niu2x/memory-allocators/LinearAllocator.h>
-#include <niu2x/memory-allocators/PoolAllocator.h>
-#include <niu2x/memory-allocators/StackAllocator.h>
+// #include <niu2x/memory-allocators/CAllocator.h>
+// #include <niu2x/memory-allocators/StackAllocator.h>
+#include <memory>
+#include <cstddef>
+
 #include <niu2x/api.h>
-#include <niu2x/misc/noncopyable.h>
+#include <niu2x/utils/noncopyable.h>
 
-namespace nx::mm {
+class FreeListAllocator;
 
-class API memory_t : private misc::noncopyable, public CAllocator {
-};
+namespace nx {
 
-class API freelist_memory_t : private misc::noncopyable,
-                              public FreeListAllocator {
+class API memory : private noncopyable {
 public:
-    freelist_memory_t(size_t total_size);
-    ~freelist_memory_t();
+    memory();
+    virtual ~memory() = 0;
+
+    virtual void* allocate(size_t size) = 0;
+    virtual void free(void* ptr) = 0;
 };
 
-namespace details {
+class API freelist_memory : public memory {
+public:
+    freelist_memory(size_t capacity);
+    virtual ~freelist_memory();
 
-    template <class T> class API allocator_adapter {
-    public:
-        allocator_adapter(T& delegate)
-        : delegate_(delegate)
-        {
-        }
-        ~allocator_adapter() { }
+    virtual void* allocate(size_t size);
+    virtual void free(void* ptr);
 
-        void* allocate(const std::size_t size, const std::size_t alignment = 0)
-        {
-            return delegate_.Allocate(size, alignment);
-        }
-        void free(void* ptr) { delegate_.Free(ptr); }
+private:
+    std::unique_ptr<FreeListAllocator> delegate_;
+};
 
-    private:
-        T& delegate_;
-    };
+class API mallocfree_memory : public memory {
+public:
+    mallocfree_memory();
+    virtual ~mallocfree_memory();
 
-} // namespace details
+    virtual void* allocate(size_t size);
+    virtual void free(void* ptr);
+};
 
-using allocator = details::allocator_adapter<Allocator>;
+class API memory_proxy {
+public:
+    memory_proxy(memory& delegate)
+    : delegate_(delegate)
+    {
+    }
+    ~memory_proxy() { }
 
-} // namespace nx::mm
+    memory_proxy(const memory_proxy&) = default;
+    memory_proxy& operator=(const memory_proxy&) = default;
 
+    void* allocate(size_t size) { return delegate_.allocate(size); }
+    void free(void* ptr) { delegate_.free(ptr); }
+
+private:
+    memory& delegate_;
+};
+
+} // namespace nx
 #endif

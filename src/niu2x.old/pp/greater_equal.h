@@ -1,5 +1,5 @@
-#ifndef NX_PP_GREATER_EQUAL_H
-#define NX_PP_GREATER_EQUAL_H
+#ifndef NX_PP_SUB_H
+#define NX_PP_SUB_H
 
 #if !defined(NX_PP_BEGIN)
     #error "you should'n include this, just include pp.h instead."

@@ -44,7 +44,7 @@
 namespace nx {
 
 struct API log {
-    enum level {
+    enum class level {
         none,
         fatal,
         error,
@@ -53,11 +53,11 @@ struct API log {
         trace,
     };
 
-    static void write(
-        int p_level, const char* filename, int line, const char* message, ...);
+    static void write(level p_level, const char* filename, int line,
+        const char* message, ...);
 
 private:
-    static int current_level_;
+    static level current_level_;
 };
 
 } // namespace nx

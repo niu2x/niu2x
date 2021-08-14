@@ -20,6 +20,7 @@ include(dependent_prebuilt)
 dependent_prebuilt(
 	TARGET niu2x 
 	LIBS 
+		# luajit 
 		zlib
 		libuv
 )

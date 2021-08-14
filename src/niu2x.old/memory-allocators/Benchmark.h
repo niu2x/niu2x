@@ -11,9 +11,9 @@
 #include "IO.h"
 
 #if 0
-#define OPERATIONS (m_nOperations)
+    #define OPERATIONS (m_nOperations)
 #else
-#define OPERATIONS (10)
+    #define OPERATIONS (10)
 #endif
 
 struct BenchmarkResults {
