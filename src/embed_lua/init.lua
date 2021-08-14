@@ -1,1 +1,1 @@
-_G.event_loop = aio.event_loop:create()
+-- _G.event_loop = aio.event_loop:create()

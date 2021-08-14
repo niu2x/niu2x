@@ -73,7 +73,7 @@ public:
         return ok;
     }
 
-    status get_elem(Elem* out) noexcept { return get(out, 1, nullptr); }
+    status get_elem(Elem& out) noexcept { return get(&out, 1, nullptr); }
 
     size_t size() const noexcept { return minus(tail_, head_); }
 

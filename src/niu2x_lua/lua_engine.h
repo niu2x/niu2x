@@ -16,7 +16,10 @@ public:
     ~lua_engine();
 
     void dostring(const char*);
-    void dobuffer(const nx::memref& mref) { lua_utils::dobuffer(L, mref); }
+    void dobuffer(const nx::const_memref& mref)
+    {
+        lua_utils::dobuffer(L, mref);
+    }
     void dofile(const char*);
     void compile(const char*, std::vector<uint8_t>& output);
 

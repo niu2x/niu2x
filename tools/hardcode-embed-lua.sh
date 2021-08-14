@@ -9,7 +9,7 @@ find ${dir}/../src/embed_lua -name "*.lua"|while read pathname; do
 	echo "process ${pathname}"
 	$luac < $pathname > $tmp
 	filename=$(basename $pathname)
-	$hardcode $tmp ${dir}/../src/niu2x/hardcode/lua_${filename/.*}
+	$hardcode $tmp ${dir}/../src/niu2x_lua/hardcode/lua_${filename/.*} "nxlua::hardcode"
 	rm ${tmp}
 done
 

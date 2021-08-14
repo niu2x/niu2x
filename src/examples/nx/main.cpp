@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    nx::freelist_memory my_memory(16 * 1024 * 1024);
+    nx::freelist_memory my_memory(32 * 1024 * 1024);
     nx::memory_proxy allocator(my_memory);
 
     nxlua::lua_engine lua(allocator);

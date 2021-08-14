@@ -5,7 +5,6 @@ function table.tostring(tbl, indent, limit, depth, jstack)
     local i = 0
     local output = {}
     if type(tbl) == "table" then
-    -- very important to avoid disgracing ourselves with circular referencs...
         for i,t in pairs(jstack) do
             if tbl == t then
                 return "<" .. i .. ">,\n"

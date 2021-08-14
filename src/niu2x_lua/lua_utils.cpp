@@ -13,7 +13,7 @@ extern "C" {
 
 namespace nxlua {
 
-void lua_utils::dobuffer(lua_State* L, const nx::memref& mref)
+void lua_utils::dobuffer(lua_State* L, const nx::const_memref& mref)
 {
     NXLUA_CHECK_LUA(lua_dobuffer(L, mref.base, mref.size));
 }

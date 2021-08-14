@@ -17,6 +17,11 @@ struct API memref {
     size_t size;
 };
 
+struct API const_memref {
+    const void* base;
+    size_t size;
+};
+
 template <class T>
 struct destructor {
     static void destroy(T* obj) { obj->~T(); }

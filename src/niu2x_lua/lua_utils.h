@@ -10,7 +10,7 @@ struct lua_State;
 namespace nxlua {
 
 struct lua_utils {
-    static void dobuffer(lua_State* L, const nx::memref& mref);
+    static void dobuffer(lua_State* L, const nx::const_memref& mref);
     static void call(lua_State* L, int nargs, int nrets);
 };
 

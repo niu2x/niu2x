@@ -6,7 +6,7 @@ function(build_application name)
 	target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endfunction()
 
-# build_application(demo)
+build_application(demo)
 # build_application(cvt)
 # build_application(tcp-client)
 build_application(nx)
