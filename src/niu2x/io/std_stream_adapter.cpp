@@ -41,8 +41,8 @@ static std_ostream_adapter sink_cout(std::cout);
 static std_ostream_adapter sink_cerr(std::cerr);
 static std_istream_adapter source_cin(std::cin);
 
-sink_proxy cout(sink_cout);
-sink_proxy cerr(sink_cerr);
-source_proxy cin(source_cin);
+sink_proxy cout(&sink_cout);
+sink_proxy cerr(&sink_cerr);
+source_proxy cin(&source_cin);
 
 } // namespace nx::io
