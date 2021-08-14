@@ -11,5 +11,5 @@
 
 ### products
 - niu2x: c++ library for myself
-- lnx: lua wrapper for niu2x
-- nxlua: lua standalone with niu2x support, used to implement some tools
+- niu2x_lua: lua wrapper for niu2x
+- nx: lua standalone with niu2x support, used to implement some tools
