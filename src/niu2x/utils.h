@@ -13,5 +13,6 @@
 #include <niu2x/utils/status.h>
 
 #include <niu2x/log.h>
+#include <niu2x/memory.h>
 
 #endif
