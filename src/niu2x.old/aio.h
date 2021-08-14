@@ -34,11 +34,12 @@ public:
 
     rid create_idle(idle_handle handle);
     void destroy_idle(rid);
- 
+
     rid create_tcp();
     void destroy_tcp(rid tcp_id);
 
-    void connect(rid tcp_id, const char* address, uint16_t port, connect_handle);
+    void connect(
+        rid tcp_id, const char* address, uint16_t port, connect_handle);
 
     void start_read(rid stream_id, read_handle callback);
     void stop_read(rid stream_id);
@@ -50,8 +51,8 @@ private:
             event_loop::idle_handle callback;
         };
 
-        idle_t() {}
-        ~idle_t() {}
+        idle_t() { }
+        ~idle_t() { }
     };
 
     struct API stream_t {
@@ -65,8 +66,8 @@ private:
 
         event_loop::read_handle read_cb;
 
-        stream_t() {}
-        ~stream_t() {}
+        stream_t() { }
+        ~stream_t() { }
     };
 
     struct API connect_t {
@@ -76,8 +77,8 @@ private:
         };
         struct sockaddr_in dest;
 
-        connect_t() {}
-        ~connect_t() {}
+        connect_t() { }
+        ~connect_t() { }
     };
 
     uv_loop_t loop_;

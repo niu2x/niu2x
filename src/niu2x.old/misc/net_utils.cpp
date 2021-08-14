@@ -10,7 +10,6 @@
     #define strncpy_s strncpy
 #endif
 
-
 namespace nx::misc {
 
 std::string net_utils::desc(const struct sockaddr* sa)

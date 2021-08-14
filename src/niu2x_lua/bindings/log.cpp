@@ -1,5 +1,8 @@
-#include "openlib.h"
+#include <niu2x_lua/bindings.h>
 
+#include <string.h>
+
+#include <niu2x/utils.h>
 
 extern "C" {
 #include "lauxlib.h"
@@ -11,9 +14,9 @@ extern "C" {
     #define strncpy_s strncpy
 #endif
 
-namespace nx::lua_bindings {
+namespace nxlua::bindings {
 
-static char source[limits::max_path] = { 0 };
+static char source[nx::limits::max_path] = { 0 };
 static int lineno = 0;
 
 static void fetch_backtrace(lua_State* L)
@@ -24,7 +27,7 @@ static void fetch_backtrace(lua_State* L)
     lua_pushnumber(L, 2); // debug getinfo 0
     lua_call(L, 1, 1); // debug result
     lua_getfield(L, -1, "source"); // debug result source
-    strncpy_s(source, lua_tostring(L, -1), NX_ARRAY_SIZE(source)-1);
+    strncpy_s(source, lua_tostring(L, -1), NX_ARRAY_SIZE(source) - 1);
     lua_pop(L, 1); // debug result
 
     lua_getfield(L, -1, "currentline"); // debug result currentline
@@ -37,8 +40,8 @@ static void fetch_backtrace(lua_State* L)
     {                                                                          \
         if (lua_gettop(L)) {                                                   \
             fetch_backtrace(L);                                                \
-            log::write(                                                        \
-                log::level::p_level, source, lineno, lua_tostring(L, -1));     \
+            nx::log::write(                                                    \
+                nx::log::p_level, source, lineno, lua_tostring(L, -1));        \
         }                                                                      \
         return 0;                                                              \
     }
@@ -60,4 +63,4 @@ static const struct luaL_Reg lib[] = {
 
 void openlib_log(lua_State* L) { luaL_register(L, "log", lib); }
 
-} // namespace nx::lua_bindings
+} // namespace nxlua::bindings

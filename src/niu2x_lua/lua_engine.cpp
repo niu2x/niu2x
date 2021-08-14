@@ -9,6 +9,8 @@ extern "C" {
 #include "lualib.h"
 }
 
+#include "bindings.h"
+
 namespace nxlua {
 
 static int panic(lua_State* L)
@@ -30,7 +32,7 @@ lua_engine::lua_engine(nx::memory_proxy allocator)
     if (L) {
         lua_atpanic(L, panic);
         luaL_openlibs(L);
-        // lua_bindings::openlib_all(L);
+        bindings::openlib_log(L);
     }
 }
 
