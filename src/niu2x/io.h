@@ -233,8 +233,8 @@ extern API filter_proxy hex_decode;
 
 API void pipe(source_proxy src, sink_proxy dst);
 API void pipe(source_proxy src, filter_proxy dst);
-
 API void pipe(source_proxy src, filter_proxy filter, sink_proxy dst);
+
 API void pipe(
     source_proxy src, filter_proxy f0, filter_proxy f1, sink_proxy dst);
 

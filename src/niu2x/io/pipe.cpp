@@ -51,10 +51,8 @@ void pipe(source_proxy src, filter_proxy f0, filter_proxy f1, sink_proxy dst)
     pipe(src, f0);
     size_t osize;
 
-    while (f0.put(nullptr, 0, osize) == again)
-        ;
-    while (f1.put(nullptr, 0, osize) == again)
-        ;
+    while (f0.put(nullptr, 0, osize) == again) { }
+    while (f1.put(nullptr, 0, osize) == again) { }
 }
 
 } // namespace nx::io

@@ -7,7 +7,7 @@ function(build_application name)
 endfunction()
 
 build_application(demo)
-# build_application(cvt)
+build_application(cvt)
 # build_application(tcp-client)
 build_application(nx)
 # build_application(luajit-compile)
