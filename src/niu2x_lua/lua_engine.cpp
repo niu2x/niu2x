@@ -10,6 +10,7 @@ extern "C" {
 }
 
 #include "bindings.h"
+#include "hardcode/lua_utils.h"
 
 namespace nxlua {
 
@@ -33,6 +34,8 @@ lua_engine::lua_engine(nx::memory_proxy allocator)
         lua_atpanic(L, panic);
         luaL_openlibs(L);
         bindings::openlib_log(L);
+
+        lua_utils::dobuffer(L, hardcode::lua_utils_mref);
     }
 }
 

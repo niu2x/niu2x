@@ -49,7 +49,7 @@ public:
 
 class API memory_proxy {
 public:
-    memory_proxy(memory& delegate)
+    memory_proxy(memory* delegate)
     : delegate_(delegate)
     {
     }
@@ -58,11 +58,11 @@ public:
     memory_proxy(const memory_proxy&) = default;
     memory_proxy& operator=(const memory_proxy&) = default;
 
-    void* allocate(size_t size) { return delegate_.allocate(size); }
-    void free(void* ptr) { delegate_.free(ptr); }
+    void* allocate(size_t size) { return delegate_->allocate(size); }
+    void free(void* ptr) { delegate_->free(ptr); }
 
 private:
-    memory& delegate_;
+    memory* delegate_;
 };
 
 } // namespace nx

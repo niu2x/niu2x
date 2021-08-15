@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     }
 
     nx::freelist_memory my_memory(32 * 1024 * 1024);
-    nx::memory_proxy allocator(my_memory);
+    nx::memory_proxy allocator(&my_memory);
 
     nxlua::lua_engine lua(allocator);
     lua.dostring("_G.sys={argv={}}");
