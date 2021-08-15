@@ -96,6 +96,17 @@ private:
     std::ostream& delegate_;
 };
 
+class API inbuf : public source {
+public:
+    inbuf(const void* base, size_t size);
+    virtual ~inbuf();
+    virtual status get(uint8_t* output, size_t max, size_t& osize) override;
+
+private:
+    const_memref buffer_;
+    size_t read_pos_;
+};
+
 class API null_sink : public sink {
 public:
     null_sink() { }
@@ -107,6 +118,17 @@ public:
         osize = max;
         return ok;
     }
+};
+
+class API vector : public sink {
+public:
+    vector(std::vector<uint8_t>&);
+    virtual ~vector();
+    virtual status put(
+        const uint8_t* output, size_t max, size_t& osize) override;
+
+private:
+    std::vector<uint8_t>& backend_;
 };
 
 extern API sink_proxy null;
