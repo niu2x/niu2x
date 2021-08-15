@@ -4,6 +4,8 @@
 #include <iostream>
 #include <functional>
 
+#include <zlib.h>
+
 #include <niu2x/utils.h>
 #include <niu2x/ringbuffer.h>
 
@@ -196,6 +198,35 @@ public:
     virtual void reset() override;
     virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
         size_t max_osize, size_t& readn, size_t& writen);
+};
+
+class API zlib_compress_filter : public filter {
+public:
+    zlib_compress_filter(int level = -1);
+    virtual ~zlib_compress_filter();
+
+    virtual void reset() override;
+
+    virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
+        size_t max_osize, size_t& readn, size_t& writen) override;
+
+private:
+    z_stream strm_;
+    int level_;
+};
+
+class API zlib_uncompress_filter : public filter {
+public:
+    zlib_uncompress_filter();
+    virtual ~zlib_uncompress_filter();
+
+    virtual void reset() override;
+
+    virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
+        size_t max_osize, size_t& readn, size_t& writen) override;
+
+private:
+    z_stream strm_;
 };
 
 class API filter_proxy {

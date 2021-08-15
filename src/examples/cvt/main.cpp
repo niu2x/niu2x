@@ -57,10 +57,15 @@ int main(int argc, char* argv[])
             nx::io::pipe(source_proxy, nx::io::hex_encode, sink_proxy);
         } else if (filter_name == "hex_decode") {
             nx::io::pipe(source_proxy, nx::io::hex_decode, sink_proxy);
-            // } else if (filter_name == "zlib_compress") {
-            //     nx::io::pipe(src, nx::io::zlib_compress, sink);
-            // } else if (filter_name == "zlib_uncompress") {
-            //     nx::io::pipe(src, nx::io::zlib_uncompress, sink);
+        } else if (filter_name == "zlib_compress") {
+            nx::io::zlib_compress_filter zlib_compress;
+            auto filter = nx::io::filter_proxy(&zlib_compress);
+            nx::io::pipe(source_proxy, filter, sink_proxy);
+        } else if (filter_name == "zlib_uncompress") {
+            nx::io::zlib_uncompress_filter zlib_uncompress;
+            auto filter = nx::io::filter_proxy(&zlib_uncompress);
+            nx::io::pipe(source_proxy, filter, sink_proxy);
+
         } else if (filter_name == "") {
             continue;
         } else {
