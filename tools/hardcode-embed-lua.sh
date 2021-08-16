@@ -4,7 +4,7 @@ dir=$(dirname $0)
 luac=${dir}/luajit-compile
 hardcode=${dir}/hardcode.sh
 
-find ${dir}/../src/embed_lua -name "*.lua"|while read pathname; do
+find ${dir}/../src/niu2x_lua/embed_lua -name "*.lua"|while read pathname; do
 	tmp=$(mktemp)
 	echo "process ${pathname}"
 	$luac < $pathname > $tmp
