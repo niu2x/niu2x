@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <functional>
+#include <string>
 
 #include <zlib.h>
 
@@ -133,6 +134,17 @@ private:
     std::vector<uint8_t>& backend_;
 };
 
+class API string : public sink {
+public:
+    string(std::string&);
+    virtual ~string();
+    virtual status put(
+        const uint8_t* output, size_t max, size_t& osize) override;
+
+private:
+    std::string& backend_;
+};
+
 extern API sink_proxy null;
 extern API sink_proxy cout;
 extern API sink_proxy cerr;
@@ -182,28 +194,28 @@ private:
     converter converter_;
 };
 
-class API hex_encode_filter : public filter {
+class API hex_filter : public filter {
 public:
-    hex_encode_filter();
-    virtual ~hex_encode_filter();
+    hex_filter();
+    virtual ~hex_filter();
     virtual void reset() override;
     virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
         size_t max_osize, size_t& readn, size_t& writen);
 };
 
-class API hex_decode_filter : public filter {
+class API unhex_filter : public filter {
 public:
-    hex_decode_filter();
-    virtual ~hex_decode_filter();
+    unhex_filter();
+    virtual ~unhex_filter();
     virtual void reset() override;
     virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
         size_t max_osize, size_t& readn, size_t& writen);
 };
 
-class API zlib_compress_filter : public filter {
+class API zlib_filter : public filter {
 public:
-    zlib_compress_filter(int level = -1);
-    virtual ~zlib_compress_filter();
+    zlib_filter(int level = -1);
+    virtual ~zlib_filter();
 
     virtual void reset() override;
 
@@ -215,10 +227,10 @@ private:
     int level_;
 };
 
-class API zlib_uncompress_filter : public filter {
+class API unzlib_filter : public filter {
 public:
-    zlib_uncompress_filter();
-    virtual ~zlib_uncompress_filter();
+    unzlib_filter();
+    virtual ~unzlib_filter();
 
     virtual void reset() override;
 
@@ -259,8 +271,8 @@ private:
 extern API filter_proxy one;
 extern API filter_proxy lower;
 extern API filter_proxy upper;
-extern API filter_proxy hex_encode;
-extern API filter_proxy hex_decode;
+extern API filter_proxy hex;
+extern API filter_proxy unhex;
 
 API void pipe(source_proxy src, sink_proxy dst);
 API void pipe(source_proxy src, filter_proxy dst);

@@ -53,17 +53,17 @@ int main(int argc, char* argv[])
         nx::io::source_proxy source_proxy(&src);
         nx::io::sink_proxy sink_proxy(&sink);
 
-        if (filter_name == "hex_encode") {
-            nx::io::pipe(source_proxy, nx::io::hex_encode, sink_proxy);
-        } else if (filter_name == "hex_decode") {
-            nx::io::pipe(source_proxy, nx::io::hex_decode, sink_proxy);
-        } else if (filter_name == "zlib_compress") {
-            nx::io::zlib_compress_filter zlib_compress;
-            auto filter = nx::io::filter_proxy(&zlib_compress);
+        if (filter_name == "hex") {
+            nx::io::pipe(source_proxy, nx::io::hex, sink_proxy);
+        } else if (filter_name == "unhex") {
+            nx::io::pipe(source_proxy, nx::io::unhex, sink_proxy);
+        } else if (filter_name == "zlib") {
+            nx::io::zlib_filter zlib;
+            auto filter = nx::io::filter_proxy(&zlib);
             nx::io::pipe(source_proxy, filter, sink_proxy);
-        } else if (filter_name == "zlib_uncompress") {
-            nx::io::zlib_uncompress_filter zlib_uncompress;
-            auto filter = nx::io::filter_proxy(&zlib_uncompress);
+        } else if (filter_name == "unzlib") {
+            nx::io::unzlib_filter unzlib;
+            auto filter = nx::io::filter_proxy(&unzlib);
             nx::io::pipe(source_proxy, filter, sink_proxy);
 
         } else if (filter_name == "") {

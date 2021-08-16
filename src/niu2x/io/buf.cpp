@@ -39,4 +39,18 @@ status vector::put(const uint8_t* output, size_t max, size_t& osize)
     return status::ok;
 }
 
+string::string(std::string& backend)
+: backend_(backend)
+{
+}
+
+string::~string() { }
+
+status string::put(const uint8_t* output, size_t max, size_t& osize)
+{
+    backend_.insert(backend_.end(), output, output + max);
+    osize = max;
+    return status::ok;
+}
+
 } // namespace nx::io

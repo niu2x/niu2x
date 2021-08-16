@@ -6,7 +6,7 @@ struct lua_State;
 namespace nxlua::bindings {
 
 void openlib_log(lua_State* L);
-
+void openlib_pipe(lua_State* L);
 }
 
 #endif

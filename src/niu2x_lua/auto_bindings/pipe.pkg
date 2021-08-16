@@ -1,0 +1,19 @@
+$#include <string>
+
+$#include <niu2x_lua/tolua_fix.h>
+$#include <niu2x_lua/bindings/pipe.h>
+
+$using namespace nxlua;
+
+struct filter {
+
+enum {
+	hex,
+	unhex,
+	zlib,
+	unzlib,
+};
+
+};
+
+std::string pipe(const std::string &src, int);

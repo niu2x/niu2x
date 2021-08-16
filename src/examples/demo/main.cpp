@@ -9,7 +9,6 @@ using namespace nx;
 
 int main()
 {
-    nx::io::pipe(
-        nx::io::cin, nx::io::hex_encode, nx::io::hex_decode, nx::io::cout);
+    nx::io::pipe(nx::io::cin, nx::io::hex, nx::io::unhex, nx::io::cout);
     return 0;
 }

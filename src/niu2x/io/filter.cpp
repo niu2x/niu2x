@@ -127,14 +127,14 @@ void simple_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     std::transform(in, in + readn, out, converter_);
 }
 
-static uint8_t hex(uint8_t digit)
+static uint8_t hex_digit(uint8_t digit)
 {
     if (digit < 10)
         return '0' + digit;
     return 'a' + digit - 10;
 }
 
-static uint8_t unhex(uint8_t digit)
+static uint8_t unhex_digit(uint8_t digit)
 {
     if (digit <= '9')
         return digit - '0';
@@ -145,13 +145,13 @@ static uint8_t unhex(uint8_t digit)
     return digit - 'a' + 10;
 }
 
-hex_encode_filter::hex_encode_filter() { }
+hex_filter::hex_filter() { }
 
-hex_encode_filter::~hex_encode_filter() { }
+hex_filter::~hex_filter() { }
 
-void hex_encode_filter::reset() { }
+void hex_filter::reset() { }
 
-void hex_encode_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
+void hex_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     size_t max_osize, size_t& readn, size_t& writen)
 {
     readn = NX_MIN(isize, max_osize >> 1);
@@ -159,25 +159,25 @@ void hex_encode_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
 
     for (size_t i = 0; i < readn; i++) {
         uint8_t c = *in++;
-        *out++ = hex(c >> 4);
-        *out++ = hex(c & 0xF);
+        *out++ = hex_digit(c >> 4);
+        *out++ = hex_digit(c & 0xF);
     }
 }
 
-hex_decode_filter::hex_decode_filter() { }
+unhex_filter::unhex_filter() { }
 
-hex_decode_filter::~hex_decode_filter() { }
+unhex_filter::~unhex_filter() { }
 
-void hex_decode_filter::reset() { }
+void unhex_filter::reset() { }
 
-void hex_decode_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
+void unhex_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     size_t max_osize, size_t& readn, size_t& writen)
 {
     writen = NX_MIN(isize >> 1, max_osize);
     readn = writen << 1;
 
     for (size_t i = 0; i < writen; i++) {
-        *out++ = (unhex(*in) << 4) | unhex(*(in + 1));
+        *out++ = (unhex_digit(*in) << 4) | unhex_digit(*(in + 1));
         in += 2;
     }
 }
@@ -185,13 +185,13 @@ void hex_decode_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
 static simple_filter filter_one([](uint8_t c) { return c; });
 static simple_filter filter_lower([](uint8_t c) { return tolower(c); });
 static simple_filter filter_upper([](uint8_t c) { return toupper(c); });
-static hex_encode_filter my_hex_encode_filter;
-static hex_decode_filter my_hex_decode_filter;
+static hex_filter my_hex_filter;
+static unhex_filter my_unhex_filter;
 
 filter_proxy one(&filter_one);
 filter_proxy lower(&filter_lower);
 filter_proxy upper(&filter_upper);
-filter_proxy hex_encode(&my_hex_encode_filter);
-filter_proxy hex_decode(&my_hex_decode_filter);
+filter_proxy hex(&my_hex_filter);
+filter_proxy unhex(&my_unhex_filter);
 
 } // namespace nx::io
