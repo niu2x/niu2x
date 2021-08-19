@@ -1,6 +1,10 @@
 #ifndef NX_UTILS_H
 #define NX_UTILS_H
 
+#if defined(_WIN32) || defined(_WIN64)
+    #pragma warning(disable : 4275)
+#endif
+
 #include <niu2x/api.h>
 
 #include <niu2x/utils/limits.h>

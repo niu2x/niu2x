@@ -183,8 +183,8 @@ void unhex_filter::cvt(const uint8_t* in, size_t isize, uint8_t* out,
 }
 
 static simple_filter filter_one([](uint8_t c) { return c; });
-static simple_filter filter_lower([](uint8_t c) { return tolower(c); });
-static simple_filter filter_upper([](uint8_t c) { return toupper(c); });
+static simple_filter filter_lower([](uint8_t c) { return (uint8_t)tolower(c); });
+static simple_filter filter_upper([](uint8_t c) { return (uint8_t)toupper(c); });
 static hex_filter my_hex_filter;
 static unhex_filter my_unhex_filter;
 

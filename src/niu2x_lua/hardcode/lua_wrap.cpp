@@ -2,8 +2,8 @@
 
 #define BYTES(a, b, c, d, e, f, g, h)                                          \
     0x##a, 0x##b, 0x##c, 0x##d, 0x##e, 0x##f, 0x##g, 0x##h,
-unsigned long lua_wrap_length = 0x97;
 namespace nxlua::hardcode {
+unsigned long lua_wrap_length = 0x97;
 
 unsigned char lua_wrap[] = { BYTES(1b, 4c, 4a, 2, a, 6e, 0, 2) BYTES(c, 1, 5, 0,
     12, 36, 2, 0) BYTES(0, 39, 2, 1, 2, 12, 4, 1) BYTES(0, 27, 5, 2, 0, 42, 2,

@@ -2,8 +2,8 @@
 
 #define BYTES(a, b, c, d, e, f, g, h)                                          \
     0x##a, 0x##b, 0x##c, 0x##d, 0x##e, 0x##f, 0x##g, 0x##h,
-unsigned long lua_utils_length = 0x3c8;
 namespace nxlua::hardcode {
+unsigned long lua_utils_length = 0x3c8;
 
 unsigned char lua_utils[] = { BYTES(1b, 4c, 4a, 2, a, 99, 5, 0) BYTES(5, 18, 0,
     17, 1, 87, 1, e) BYTES(0, 2, 0, 58, 5, 1, 80, 29) BYTES(2, e8, 3, e, 0, 3,

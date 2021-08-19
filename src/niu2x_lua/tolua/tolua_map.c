@@ -21,6 +21,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+
+#if defined(_WIN32) || defined(_WIN64)
+    #pragma warning(disable : 4996)
+#endif
+
 /* Create metatable
  * Create and register new metatable
  */

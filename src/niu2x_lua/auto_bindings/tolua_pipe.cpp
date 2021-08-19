@@ -8,7 +8,7 @@
 #endif
 #include "string.h"
 
-#include "tolua++.h"
+#include <niu2x_lua/tolua/tolua++.h>
 
 /* Exported function */
 TOLUA_API int tolua_pipe_open(lua_State* tolua_S);

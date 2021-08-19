@@ -2,8 +2,14 @@
 #define NX_UTILS_EXCEPTION_H
 
 #include <exception>
+#include <string>
+
 #include <niu2x/api.h>
 #include <niu2x/utils/limits.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+    #pragma warning(disable : 4275)
+#endif
 
 namespace nx {
 

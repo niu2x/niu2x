@@ -1,12 +1,10 @@
 #ifndef NX_MEMORY_H
 #define NX_MEMORY_H
 
-// #if defined(_WIN32) || defined(_WIN64)
-//     #pragma warning(disable : 4275)
-// #endif
+#if defined(_WIN32) || defined(_WIN64)
+    #pragma warning(disable : 4251)
+#endif
 
-// #include <niu2x/memory-allocators/CAllocator.h>
-// #include <niu2x/memory-allocators/StackAllocator.h>
 #include <memory>
 #include <cstddef>
 

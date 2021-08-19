@@ -9,6 +9,10 @@ extern "C" {
 #include "lualib.h"
 }
 
+#if !defined(_WIN32) || !defined(_WIN64)
+    #define strncpy_s strncpy
+#endif
+
 #include "tolua/tolua++.h"
 
 #include "bindings.h"
@@ -119,14 +123,14 @@ void lua_engine::set_global_variable(
     char tmpname[max_varname];
 
     while ((dot = strchr(field, '.')) != nullptr) {
-        strncpy(tmpname, field, NX_MIN((size_t)(dot - field), max_varname - 1));
+        strncpy_s(tmpname, field, NX_MIN((size_t)(dot - field), max_varname - 1));
         tmpname[NX_MIN((size_t)(dot - field), max_varname - 1)] = 0;
         lua_getfield(L, tbl, tmpname);
         tbl = lua_gettop(L);
         field = dot + 1;
     }
 
-    strncpy(tmpname, field, max_varname - 1);
+    strncpy_s(tmpname, field, max_varname - 1);
     tmpname[max_varname - 1] = 0;
     lua_getfield(L, tbl, tmpname);
     tbl = lua_gettop(L);

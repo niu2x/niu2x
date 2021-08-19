@@ -1,6 +1,10 @@
 #ifndef NX_PP_H
 #define NX_PP_H
 
+#if defined(_WIN32) || defined(_WIN64)
+    #pragma warning(disable : 4067)
+#endif
+
 #define NX_PP_BEGIN
 
 #define NX_PP_VA_ARGS_COUNT(...)                                               \
@@ -11,9 +15,9 @@
     NX_PP_CONCAT_X0(NX_PP_VA_ARGS_COUNT(__VA_ARGS__), __VA_ARGS__)
 #define NX_PP_CONCAT_X0(n, ...) NX_PP_CONCAT_X1(n, __VA_ARGS__)
 #define NX_PP_CONCAT_X1(n, ...) NX_PP_CONCAT_##n(__VA_ARGS__)
-#define NX_PP_CONCAT_2(a, b) a##b
-#define NX_PP_CONCAT_3(a, b, ...) NX_PP_CONCAT_2(a##b, __VA_ARGS__)
-#define NX_PP_CONCAT_4(a, b, ...) NX_PP_CONCAT_3(a##b, __VA_ARGS__)
+#define NX_PP_CONCAT_X2(a, b) a##b
+#define NX_PP_CONCAT_X3(a, b, ...) NX_PP_CONCAT_X2(a##b, __VA_ARGS__)
+#define NX_PP_CONCAT_X4(a, b, ...) NX_PP_CONCAT_X3(a##b, __VA_ARGS__)
 
 #define NX_PP_ADD(x, y) NX_PP_ADD_##x##_##y
 #include <niu2x/pp/add.h>

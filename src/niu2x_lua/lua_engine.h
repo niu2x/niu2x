@@ -10,7 +10,7 @@ struct lua_State;
 
 namespace nxlua {
 
-class API lua_engine : private nx::noncopyable {
+class lua_engine : private nx::noncopyable {
 public:
     lua_engine(nx::memory_proxy);
     ~lua_engine();
