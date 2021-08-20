@@ -6,6 +6,7 @@
 #include <string>
 
 #include <zlib.h>
+#include <openssl/evp.h>
 
 #include <niu2x/utils.h>
 #include <niu2x/ringbuffer.h>
@@ -239,6 +240,26 @@ public:
 
 private:
     z_stream strm_;
+};
+
+class API digest : public filter {
+public:
+    digest(const char* algorithm);
+    virtual ~digest();
+
+    virtual void reset() override;
+    virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
+        size_t max_osize, size_t& readn, size_t& writen) override;
+
+private:
+    EVP_MD_CTX* ctx_;
+    const EVP_MD* algorithm_;
+    enum {
+        uninit,
+        inited,
+        finishing,
+        finished,
+    } state_;
 };
 
 class API filter_proxy {
