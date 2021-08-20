@@ -15,7 +15,7 @@ sed -i "9inamespace ${namespace} {" ${output}.h
 sed -i '12i}' ${output}.h
 sed -i "12iconst nx::const_memref ${file}_mref={${file}, ${file}_length};" ${output}.h
 
-sed -i "5inamespace ${namespace} {" ${output}.cpp
+sed -i "4inamespace ${namespace} {" ${output}.cpp
 sed -i '$i}' ${output}.cpp
 sed -i '1d' ${output}.cpp
 

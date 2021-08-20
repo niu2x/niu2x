@@ -1,6 +1,6 @@
 /*
 ** Lua binding: pipe
-** Generated automatically by tolua++-1.0.93 on Tue Aug 17 00:28:26 2021.
+** Generated automatically by tolua++-1.0.93 on Sat Aug 21 02:22:30 2021.
 */
 
 #ifndef __cplusplus
@@ -8,7 +8,7 @@
 #endif
 #include "string.h"
 
-#include <niu2x_lua/tolua/tolua++.h>
+#include "tolua++.h"
 
 /* Exported function */
 TOLUA_API int tolua_pipe_open(lua_State* tolua_S);
@@ -55,6 +55,37 @@ tolua_lerror:
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* function: pipe_digest */
+#ifndef TOLUA_DISABLE_tolua_pipe_pipe_digest00
+static int tolua_pipe_pipe_digest00(lua_State* tolua_S)
+{
+    #ifndef TOLUA_RELEASE
+    tolua_Error tolua_err;
+    if (!tolua_isnxcppstring(tolua_S, 1, 0, &tolua_err)
+        || !tolua_isstring(tolua_S, 2, 0, &tolua_err)
+        || !tolua_isnoobj(tolua_S, 3, &tolua_err))
+        goto tolua_lerror;
+    else
+    #endif
+    {
+        const std::string src
+            = ((const std::string)tolua_tonxcppstring(tolua_S, 1, 0));
+        const char* algorithm = ((const char*)tolua_tostring(tolua_S, 2, 0));
+        {
+            std::string tolua_ret = (std::string)pipe_digest(src, algorithm);
+            tolua_pushnxcppstring(tolua_S, (std::string)tolua_ret);
+            tolua_pushnxcppstring(tolua_S, (std::string)src);
+        }
+    }
+    return 2;
+    #ifndef TOLUA_RELEASE
+tolua_lerror:
+    tolua_error(tolua_S, "#ferror in function 'pipe_digest'.", &tolua_err);
+    return 0;
+    #endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_pipe_open(lua_State* tolua_S)
 {
@@ -70,6 +101,7 @@ TOLUA_API int tolua_pipe_open(lua_State* tolua_S)
     tolua_constant(tolua_S, "unzlib", filter::unzlib);
     tolua_endmodule(tolua_S);
     tolua_function(tolua_S, "pipe", tolua_pipe_pipe00);
+    tolua_function(tolua_S, "pipe_digest", tolua_pipe_pipe_digest00);
     tolua_endmodule(tolua_S);
     return 1;
 }

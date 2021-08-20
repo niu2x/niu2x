@@ -9,8 +9,8 @@ using namespace nx;
 
 int main()
 {
-    nx::io::digest md5("md5");
+    nx::io::digest sha256("sha256");
     nx::io::pipe(
-        nx::io::cin, nx::io::filter_proxy(&md5), nx::io::hex, nx::io::cout);
+        nx::io::cin, nx::io::filter_proxy(&sha256), nx::io::hex, nx::io::cout);
     return 0;
 }

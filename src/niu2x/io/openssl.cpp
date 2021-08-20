@@ -44,7 +44,6 @@ void digest::cvt(const uint8_t* in, size_t isize, uint8_t* out,
             unsigned int digest_len;
             EVP_DigestFinal_ex(ctx_, out, &digest_len);
             writen = digest_len;
-            NX_LOG_T("digest_len %lu", digest_len);
             state_ = finished;
         } else {
             NX_LOG_E("no enough space for digest");

@@ -39,6 +39,15 @@ function table.tostring(tbl, indent, limit, depth, jstack)
     return table.concat(output)
 end
 
+function table.include(tbl, vv)
+    for k, v in pairs(tbl) do
+        if v == vv then
+            return true
+        end
+    end
+    return false
+end
+
 function string.split(str, delim, maxNb)
     if string.find(str, delim) == nil then return {str} end
     if maxNb == nil or maxNb < 1 then
