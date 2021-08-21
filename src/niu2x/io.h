@@ -262,6 +262,52 @@ private:
     } state_;
 };
 
+class API encrypt : public filter {
+public:
+    encrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[]);
+    virtual ~encrypt();
+
+    virtual void reset() override;
+    virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
+        size_t max_osize, size_t& readn, size_t& writen) override;
+
+private:
+    EVP_CIPHER_CTX* ctx_;
+    const EVP_CIPHER* algorithm_;
+    enum {
+        uninit,
+        inited,
+        finishing,
+        finished,
+    } state_;
+
+    uint8_t key_[EVP_MAX_KEY_LENGTH];
+    uint8_t iv_[EVP_MAX_IV_LENGTH];
+};
+
+class API decrypt : public filter {
+public:
+    decrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[]);
+    virtual ~decrypt();
+
+    virtual void reset() override;
+    virtual void cvt(const uint8_t* in, size_t isize, uint8_t* out,
+        size_t max_osize, size_t& readn, size_t& writen) override;
+
+private:
+    EVP_CIPHER_CTX* ctx_;
+    const EVP_CIPHER* algorithm_;
+    enum {
+        uninit,
+        inited,
+        finishing,
+        finished,
+    } state_;
+
+    uint8_t key_[EVP_MAX_KEY_LENGTH];
+    uint8_t iv_[EVP_MAX_IV_LENGTH];
+};
+
 class API filter_proxy {
 public:
     filter_proxy(filter* delegate)

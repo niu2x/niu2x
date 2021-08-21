@@ -9,8 +9,15 @@ using namespace nx;
 
 int main()
 {
+
+    const uint8_t key[64] = { 0 };
+    const uint8_t iv[64] = { 0 };
+
     nx::io::digest sha256("sha256");
-    nx::io::pipe(
-        nx::io::cin, nx::io::filter_proxy(&sha256), nx::io::hex, nx::io::cout);
+    nx::io::encrypt encrypt("aes-128-cbc", key, iv);
+    nx::io::decrypt decrypt("aes-128-cbc", key, iv);
+
+    nx::io::pipe(nx::io::cin, nx::io::filter_proxy(&encrypt),
+        nx::io::filter_proxy(&decrypt), nx::io::cout);
     return 0;
 }
