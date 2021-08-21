@@ -5,7 +5,7 @@
 
 namespace nx {
 
-static freelist_memory memory0(16_k);
-static mallocfree_memory memory1;
+// static freelist_memory memory0(16_k);
+// static mallocfree_memory memory1;
 
 } // namespace nx

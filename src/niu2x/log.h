@@ -5,7 +5,7 @@
 #include <niu2x/pp.h>
 
 #ifndef NX_LOG_LEVEL
-    #define NX_LOG_LEVEL 5
+    #define NX_LOG_LEVEL 4
 #endif
 
 #if NX_PP_GREATER_EQUAL(NX_LOG_LEVEL, 5)

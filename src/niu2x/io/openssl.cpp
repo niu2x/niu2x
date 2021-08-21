@@ -104,7 +104,8 @@ void cipher::cvt(const uint8_t* in, size_t isize, uint8_t* out,
             NX_LOG_T("cipher::cvt EVP_CipherUpdate %p %lu", in, isize);
             int status = EVP_CipherUpdate(ctx_, out, &iwriten, in, isize);
             NX_ASSERT(status != 0,
-                std::string("EVP_CipherUpdate fail ") + std::to_string(status));
+                (std::string("EVP_CipherUpdate fail ") + std::to_string(status))
+                    .c_str());
             writen = iwriten;
             readn = isize;
         }

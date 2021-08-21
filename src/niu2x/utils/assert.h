@@ -5,6 +5,7 @@
 
 #define NX_ASSERT(condition, message)                                          \
     if (!(condition)) {                                                        \
+        NX_LOG_F(message);                                                     \
         NX_THROW((message));                                                   \
     }
 
