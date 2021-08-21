@@ -8,10 +8,10 @@ digest::digest(const char* algorithm)
 , state_(uninit)
 {
     ctx_ = EVP_MD_CTX_new();
-    NX_ASSERT(ctx_ != nullptr, "invalid ctx_");
+    NX_ASSERT(ctx_ != nullptr, "invalid digest ctx_");
 
     algorithm_ = EVP_get_digestbyname(algorithm);
-    NX_ASSERT(algorithm_ != nullptr, "invalid algorithm_");
+    NX_ASSERT(algorithm_ != nullptr, "invalid digest algorithm_");
 }
 digest::~digest() { EVP_MD_CTX_free(ctx_); }
 void digest::reset()
