@@ -3,7 +3,7 @@
 #define BYTES(a, b, c, d, e, f, g, h)                                          \
     0x##a, 0x##b, 0x##c, 0x##d, 0x##e, 0x##f, 0x##g, 0x##h,
 namespace nxlua::hardcode {
-unsigned long lua_utils_length = 0x41b;
+unsigned long lua_utils_length = 0x489;
 
 unsigned char lua_utils[] = { BYTES(1b, 4c, 4a, 2, a, 99, 5, 0) BYTES(5, 18, 0,
     17, 1, 87, 1, e) BYTES(0, 2, 0, 58, 5, 1, 80, 29) BYTES(2, e8, 3, e, 0, 3,
@@ -81,16 +81,30 @@ unsigned char lua_utils[] = { BYTES(1b, 4c, 4a, 2, a, 99, 5, 0) BYTES(5, 18, 0,
                                         b) BYTES(67, 6d, 61, 74, 63, 68, 7,
                                         28) BYTES(29, 9, 28, 2e, 2d, 29, 9,
                                         66) BYTES(69, 6e, 64, b, 73, 74, 72, 69)
-                                        BYTES(6e, 67, 2, 56, 3, 0, 2, 0) BYTES(
-                                            8, 0, a, 36, 0, 0, 0, 33) BYTES(1,
-                                            2, 0, 3d, 1, 1, 0, 36) BYTES(0, 0,
-                                            0, 33, 1, 4, 0, 3d) BYTES(1, 3, 0,
-                                            36, 0, 5, 0, 33) BYTES(1, 7, 0, 3d,
-                                            1, 6, 0, 4b) BYTES(0, 1, 0, 0,
-                                            a, 73, 70, 6c) BYTES(69, 74,
-                                            b, 73, 74, 72, 69, 6e) BYTES(67, 0,
-                                            c, 69, 6e, 63, 6c, 75) BYTES(64, 65,
-                                            0, d, 74, 6f, 73, 74) BYTES(72, 69,
-                                            6e, 67, a, 74, 61, 62) BYTES(6c, 65,
-                                            0, 0, 0, 0, 0, 0) 0x0 };
+                                        BYTES(6e, 67, 2, 5a, 0, 1, 6, 0) BYTES(
+                                            5, 0, d, 36, 1, 0, 0, 39) BYTES(1,
+                                            1, 1, 12, 3, 0, 0, 27) BYTES(4, 2,
+                                            0, 27, 5, 3, 0, 42) BYTES(1, 4, 2,
+                                            12, 0, 1, 0, 36) BYTES(1, 0, 0, 39,
+                                            1, 1, 1, 12) BYTES(3, 0, 0, 27, 4,
+                                            4, 0, 27) BYTES(5, 3, 0, 44, 1, 4,
+                                            0, d) BYTES(5b, 20, 9, a, d, 5d, 2b,
+                                            24) BYTES(5, d, 5e, 5b, 20, 9, a,
+                                            d) BYTES(5d, 2b, 9, 67, 73, 75, 62,
+                                            b) BYTES(73, 74, 72, 69, 6e, 67, 69,
+                                            3) BYTES(0, 2, 0, a, 0, d, 36,
+                                            0) BYTES(0, 0, 33, 1, 2, 0, 3d,
+                                            1) BYTES(1, 0, 36, 0, 0, 0, 33,
+                                            1) BYTES(4, 0, 3d, 1, 3, 0, 36,
+                                            0) BYTES(5, 0, 33, 1, 7, 0, 3d,
+                                            1) BYTES(6, 0, 36, 0, 5, 0, 33,
+                                            1) BYTES(9, 0, 3d, 1, 8, 0, 4b,
+                                            0) BYTES(1, 0, 0, a, 73, 74, 72,
+                                            69) BYTES(70, 0, a, 73, 70, 6c, 69,
+                                            74) BYTES(b, 73, 74, 72, 69, 6e, 67,
+                                            0) BYTES(c, 69, 6e, 63, 6c, 75, 64,
+                                            65) BYTES(0, d, 74, 6f, 73, 74, 72,
+                                            69) BYTES(6e, 67, a, 74, 61, 62, 6c,
+                                            65)
+                                            BYTES(0, 0, 0, 0, 0, 0, 0, 0) 0x0 };
 }

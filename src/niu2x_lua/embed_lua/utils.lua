@@ -67,3 +67,8 @@ function string.split(str, delim, maxNb)
     if nb ~= maxNb then result[nb + 1] = string.sub(str, lastPos) end
     return result
 end
+
+function string.strip(input)
+    input = string.gsub(input, "^[ \t\n\r]+", "")
+    return string.gsub(input, "[ \t\n\r]+$", "")
+end

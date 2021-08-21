@@ -31,6 +31,7 @@ void digest::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     writen = readn = 0;
 
     if (state_ == uninit) {
+        NX_LOG_T("digest::cvt EVP_DigestInit_ex2");
         EVP_DigestInit_ex2(ctx_, algorithm_, nullptr);
         state_ = inited;
     }
@@ -39,6 +40,7 @@ void digest::cvt(const uint8_t* in, size_t isize, uint8_t* out,
         if (isize == 0) {
             state_ = finishing;
         } else {
+            NX_LOG_T("digest::cvt EVP_DigestUpdate %p %p %lu", ctx_, in, isize);
             EVP_DigestUpdate(ctx_, in, isize);
             readn = isize;
         }
@@ -47,6 +49,7 @@ void digest::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     if (state_ == finishing) {
         if (max_osize >= EVP_MAX_MD_SIZE) {
             unsigned int digest_len;
+            NX_LOG_T("digest::cvt EVP_DigestFinal_ex");
             EVP_DigestFinal_ex(ctx_, out, &digest_len);
             writen = digest_len;
             state_ = finished;
@@ -56,7 +59,9 @@ void digest::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     }
 }
 
-encrypt::encrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
+cipher::cipher(
+    int mode, const char* algorithm, const uint8_t key[], const uint8_t iv[])
+: mode_(mode)
 {
     ctx_ = EVP_CIPHER_CTX_new();
     NX_ASSERT(ctx_ != nullptr, "invalid digest ctx_");
@@ -68,22 +73,25 @@ encrypt::encrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
     memcpy(iv_, iv, EVP_CIPHER_iv_length(algorithm_));
 }
 
-encrypt::~encrypt() { EVP_CIPHER_CTX_free(ctx_); }
+cipher::~cipher() { EVP_CIPHER_CTX_free(ctx_); }
 
-void encrypt::reset()
+void cipher::reset()
 {
     EVP_CIPHER_CTX_reset(ctx_);
     state_ = uninit;
 }
 
-void encrypt::cvt(const uint8_t* in, size_t isize, uint8_t* out,
+void cipher::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     size_t max_osize, size_t& readn, size_t& writen)
 {
 
     writen = readn = 0;
 
     if (state_ == uninit) {
-        EVP_EncryptInit_ex2(ctx_, algorithm_, key_, iv_, nullptr);
+
+        NX_LOG_T("cipher::cvt EVP_CipherInit_ex2");
+        EVP_CipherInit_ex2(ctx_, algorithm_, key_, iv_, mode_, nullptr);
+
         state_ = inited;
     }
 
@@ -93,8 +101,10 @@ void encrypt::cvt(const uint8_t* in, size_t isize, uint8_t* out,
         } else {
             isize = NX_MIN(isize, max_osize - EVP_MAX_BLOCK_LENGTH);
             int iwriten;
-            NX_ASSERT(EVP_CipherUpdate(ctx_, out, &iwriten, in, isize) != 0,
-                "EVP_CipherUpdate fail");
+            NX_LOG_T("cipher::cvt EVP_CipherUpdate %p %lu", in, isize);
+            int status = EVP_CipherUpdate(ctx_, out, &iwriten, in, isize);
+            NX_ASSERT(status != 0,
+                std::string("EVP_CipherUpdate fail ") + std::to_string(status));
             writen = iwriten;
             readn = isize;
         }
@@ -103,62 +113,7 @@ void encrypt::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     if (state_ == finishing) {
         if (max_osize >= EVP_MAX_BLOCK_LENGTH) {
             int iwriten;
-            EVP_CipherFinal_ex(ctx_, out, &iwriten);
-            writen = iwriten;
-            state_ = finished;
-        } else {
-            NX_LOG_E("no enough space for EVP_CipherFinal_ex");
-        }
-    }
-}
-
-decrypt::decrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
-{
-    ctx_ = EVP_CIPHER_CTX_new();
-    NX_ASSERT(ctx_ != nullptr, "invalid digest ctx_");
-
-    algorithm_ = EVP_get_cipherbyname(algorithm);
-    NX_ASSERT(algorithm_ != nullptr, "invalid digest algorithm_");
-
-    memcpy(key_, key, EVP_CIPHER_key_length(algorithm_));
-    memcpy(iv_, iv, EVP_CIPHER_iv_length(algorithm_));
-}
-
-decrypt::~decrypt() { EVP_CIPHER_CTX_free(ctx_); }
-
-void decrypt::reset()
-{
-    EVP_CIPHER_CTX_reset(ctx_);
-    state_ = uninit;
-}
-
-void decrypt::cvt(const uint8_t* in, size_t isize, uint8_t* out,
-    size_t max_osize, size_t& readn, size_t& writen)
-{
-
-    writen = readn = 0;
-
-    if (state_ == uninit) {
-        EVP_DecryptInit_ex2(ctx_, algorithm_, key_, iv_, nullptr);
-        state_ = inited;
-    }
-
-    if (state_ == inited) {
-        if (isize == 0) {
-            state_ = finishing;
-        } else {
-            isize = NX_MIN(isize, max_osize - EVP_MAX_BLOCK_LENGTH);
-            int iwriten;
-            NX_ASSERT(EVP_CipherUpdate(ctx_, out, &iwriten, in, isize) != 0,
-                "EVP_CipherUpdate fail");
-            writen = iwriten;
-            readn = isize;
-        }
-    }
-
-    if (state_ == finishing) {
-        if (max_osize >= EVP_MAX_BLOCK_LENGTH) {
-            int iwriten;
+            NX_LOG_T("cipher::cvt EVP_CipherFinal_ex");
             EVP_CipherFinal_ex(ctx_, out, &iwriten);
             writen = iwriten;
             state_ = finished;
