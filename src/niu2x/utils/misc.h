@@ -1,6 +1,8 @@
 #ifndef NX_UTILS_MISC_H
 #define NX_UTILS_MISC_H
 
+#include <cstddef>
+
 #include <niu2x/api.h>
 
 namespace nx {
@@ -44,5 +46,7 @@ struct destructor {
     nx_init_wrapper nx_init_wrapper::instance_;                                \
     }                                                                          \
     static void nx_init_func()
+
+#define NX_OFFSET_OF(mt, field) (ptrdiff_t)(&(((mt*)nullptr)->field))
 
 #endif

@@ -4,18 +4,17 @@
 
 #include <niu2x/memory.h>
 #include <niu2x/io.h>
+#include <niu2x/aio.h>
 
 using namespace nx;
 
 int main()
 {
 
-    const uint8_t key[64] = { 0 };
-    const uint8_t iv[64] = { 0 };
-
-    nx::io::digest sha256("sha256");
-    nx::io::cipher des(nx::io::cipher::encrypt, "des", key, iv);
-
-    nx::io::pipe(nx::io::cin, nx::io::filter_proxy(&des), nx::io::cout);
+    nx::aio::create_idle([](auto rid) {
+        printf("hello world!\n");
+        nx::aio::destroy_idle(rid);
+    });
+    nx::aio::run();
     return 0;
 }

@@ -2,6 +2,7 @@
 #define NX_LIST_HEAD_H
 
 #include <niu2x/api.h>
+#include <niu2x/utils/misc.h>
 
 namespace nx {
 
@@ -22,6 +23,10 @@ void API list_del_init(struct list_head* entry);
     {                                                                          \
         &(name), &(name)                                                       \
     }
-#define NX_LIST_HEAD(name) struct list_head name = LIST_HEAD_INIT(name)
+#define NX_LIST_HEAD(name) struct list_head name = NX_LIST_HEAD_INIT(name)
+#define NX_LIST_ENTRY(ptr, mt, field)                                          \
+    ((mt*)(((uint8_t*)(ptr)) - NX_OFFSET_OF(mt, field)))
+#define NX_LIST_FOR_EACH(ptr, head)                                            \
+    for (list_head* ptr = (head)->next; ptr != (head); ptr = ptr->next)
 
 #endif /* NX_LIST_HEAD_H */
