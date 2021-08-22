@@ -2,6 +2,15 @@
 
 #include <string.h>
 
+#include <openssl/err.h>
+
+#define OPENSSL_CHECK(condition, message)                                      \
+    if (!(condition)) {                                                        \
+        int e = ERR_peek_last_error();                                         \
+        NX_LOG_F("%s reason: %d %s", message, e, ERR_reason_error_string(e));  \
+        NX_THROW(message);                                                     \
+    }
+
 namespace nx::io {
 
 digest::digest(const char* algorithm)
@@ -10,10 +19,10 @@ digest::digest(const char* algorithm)
 , state_(uninit)
 {
     ctx_ = EVP_MD_CTX_new();
-    NX_ASSERT(ctx_ != nullptr, "invalid digest ctx_");
+    OPENSSL_CHECK(ctx_ != nullptr, "invalid digest ctx_");
 
     algorithm_ = EVP_get_digestbyname(algorithm);
-    NX_ASSERT(algorithm_ != nullptr, "invalid digest algorithm_");
+    OPENSSL_CHECK(algorithm_ != nullptr, "invalid digest algorithm_");
 }
 
 digest::~digest() { EVP_MD_CTX_free(ctx_); }
@@ -64,10 +73,10 @@ cipher::cipher(
 : mode_(mode)
 {
     ctx_ = EVP_CIPHER_CTX_new();
-    NX_ASSERT(ctx_ != nullptr, "invalid digest ctx_");
+    OPENSSL_CHECK(ctx_ != nullptr, "invalid digest ctx_");
 
     algorithm_ = EVP_get_cipherbyname(algorithm);
-    NX_ASSERT(algorithm_ != nullptr, "invalid digest algorithm_");
+    OPENSSL_CHECK(algorithm_ != nullptr, "invalid digest algorithm_");
 
     memcpy(key_, key, EVP_CIPHER_key_length(algorithm_));
     memcpy(iv_, iv, EVP_CIPHER_iv_length(algorithm_));
@@ -90,7 +99,9 @@ void cipher::cvt(const uint8_t* in, size_t isize, uint8_t* out,
     if (state_ == uninit) {
 
         NX_LOG_T("cipher::cvt EVP_CipherInit_ex2");
-        EVP_CipherInit_ex2(ctx_, algorithm_, key_, iv_, mode_, nullptr);
+        OPENSSL_CHECK(
+            EVP_CipherInit_ex2(ctx_, algorithm_, key_, iv_, mode_, nullptr),
+            "cipher init fail");
 
         state_ = inited;
     }
@@ -103,9 +114,11 @@ void cipher::cvt(const uint8_t* in, size_t isize, uint8_t* out,
             int iwriten;
             NX_LOG_T("cipher::cvt EVP_CipherUpdate %p %lu", in, isize);
             int status = EVP_CipherUpdate(ctx_, out, &iwriten, in, isize);
-            NX_ASSERT(status != 0,
+
+            OPENSSL_CHECK(status != 0,
                 (std::string("EVP_CipherUpdate fail ") + std::to_string(status))
                     .c_str());
+
             writen = iwriten;
             readn = isize;
         }

@@ -6,6 +6,8 @@
 #include <string>
 
 #include <zlib.h>
+
+#define OPENSSL_NO_DEPRECATED 1
 #include <openssl/evp.h>
 
 #include <niu2x/utils.h>

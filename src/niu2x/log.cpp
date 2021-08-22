@@ -7,7 +7,7 @@ namespace nx {
 
 static const char* level_colors[] = {
     "",
-    "\x1b[35m",
+    "\x1b[31m",
     "\x1b[31m",
     "\x1b[33m",
     "\x1b[36m",
