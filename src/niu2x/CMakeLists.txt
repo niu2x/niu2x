@@ -23,6 +23,7 @@ dependent_prebuilt(
 		zlib
 		libuv
 		openssl
+		boost
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

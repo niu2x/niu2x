@@ -2,11 +2,16 @@
 
 #include <string.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+    #pragma warning(disable : 4100)
+    // #pragma warning(disable : 4189)
+#endif
+
 #include <openssl/err.h>
 
 #define OPENSSL_CHECK(condition, message)                                      \
     if (!(condition)) {                                                        \
-        int e = ERR_peek_last_error();                                         \
+        auto e = ERR_peek_last_error();                                         \
         NX_LOG_F("%s reason: %d %s", message, e, ERR_reason_error_string(e));  \
         NX_THROW(message);                                                     \
     }
@@ -113,7 +118,7 @@ void cipher::cvt(const uint8_t* in, size_t isize, uint8_t* out,
             isize = NX_MIN(isize, max_osize - EVP_MAX_BLOCK_LENGTH);
             int iwriten;
             NX_LOG_T("cipher::cvt EVP_CipherUpdate %p %lu", in, isize);
-            int status = EVP_CipherUpdate(ctx_, out, &iwriten, in, isize);
+            int status = EVP_CipherUpdate(ctx_, out, &iwriten, in, (int)isize);
 
             OPENSSL_CHECK(status != 0,
                 (std::string("EVP_CipherUpdate fail ") + std::to_string(status))
