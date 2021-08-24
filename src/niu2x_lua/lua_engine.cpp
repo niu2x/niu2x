@@ -19,6 +19,7 @@ extern "C" {
 #include "hardcode/lua_utils.h"
 #include "hardcode/lua_wrap_pipe.h"
 #include "auto_bindings/tolua_pipe.h"
+#include "auto_bindings/tolua_aio.h"
 
 namespace nxlua {
 
@@ -43,6 +44,7 @@ lua_engine::lua_engine(nx::memory_proxy allocator)
         luaL_openlibs(L);
         bindings::openlib_log(L);
         tolua_pipe_open(L);
+        tolua_aio_open(L);
 
         lua_utils::dobuffer(L, hardcode::lua_utils_mref);
         lua_utils::dobuffer(L, hardcode::lua_wrap_pipe_mref);

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: pipe
-** Generated automatically by tolua++-1.0.93 on Sun Aug 22 00:52:59 2021.
+** Generated automatically by tolua++-1.0.93 on Wed Aug 25 01:26:03 2021.
 */
 
 #ifndef __cplusplus

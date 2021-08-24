@@ -1,0 +1,22 @@
+$#include <niu2x_lua/bindings/aio.h>
+
+$using namespace nxlua;
+
+namespace aio {
+
+enum type {
+    wait_all,
+    wait_once,
+    no_wait,
+};
+
+void run(int t = wait_all);
+
+typedef nx::aio::rid rid;
+
+rid create_idle(nx_luafunction);
+void destroy_idle(rid idle);
+
+
+}
+
