@@ -26,7 +26,9 @@ struct tcp_item {
     uv_tcp_t uv_obj;
     list_head list;
     tcp_connect_item* con;
+    tcp_read_callback read_cb;
     bool ready;
+    bool reading;
 };
 
 struct tcp_connect_item {
@@ -195,6 +197,65 @@ API void tcp_connect(
     auto* tcp = find_tcp_item(tcp_id, &tcps);
     NX_ASSERT(tcp, "tcp_id isn't exist");
     create_tcp_connect(tcp, ip, port, cb);
+}
+
+static void alloc_buf(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
+{
+    unused(handle);
+    buf->base = (char*)default_allocator.allocate(suggested_size);
+    buf->len = (size_t)(buf->base ? suggested_size : 0);
+}
+
+static void free_buf(const uv_buf_t* buf)
+{
+    if (buf->base && buf->len) {
+        default_allocator.free(buf->base);
+    }
+}
+
+static void uv_tcp_read_callback(
+    uv_stream_t* uv_stream, ssize_t nread, const uv_buf_t* buf)
+{
+
+    auto* tcp = reinterpret_cast<tcp_item*>((uv_stream->data));
+
+    if (nread < 0) {
+        tcp->read_cb(fail, tcp->id, nullptr, 0);
+    }
+
+    else if (nread > 0) {
+        if (tcp->read_cb)
+            tcp->read_cb(ok, tcp->id, (const uint8_t*)buf->base, nread);
+    }
+
+    free_buf(buf);
+}
+
+API status tcp_read_start(rid tcp_id, const tcp_read_callback& cb)
+{
+    NX_LOG_D("tcp_read_start %lu", tcp_id);
+
+    auto* tcp = find_tcp_item(tcp_id, &tcps);
+    NX_ASSERT(tcp != nullptr, "");
+    NX_ASSERT(tcp->reading == false, "");
+
+    tcp->read_cb = cb;
+    auto s = uv_read_start(
+        (uv_stream_t*)&(tcp->uv_obj), alloc_buf, uv_tcp_read_callback);
+    if (s) {
+        NX_LOG_E("tcp failed to start_read: %d, reason: %s", s, uv_strerror(s));
+        return fail;
+    } else {
+        tcp->reading = true;
+        return ok;
+    }
+}
+API void tcp_read_stop(rid tcp_id)
+{
+    NX_LOG_D("tcp_read_stop %lu", tcp_id);
+
+    auto* tcp = find_tcp_item(tcp_id, &tcps);
+    uv_read_stop((uv_stream_t*)&(tcp->uv_obj));
 }
 
 } // namespace nx::aio

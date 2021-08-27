@@ -18,8 +18,30 @@ int main()
     //
 
     auto tcp = nx::aio::create_tcp();
-    nx::aio::tcp_connect(tcp, "127.0.0.1", 1994,
-        [](auto status, auto self) { nx::aio::destroy_tcp(self); });
+    nx::aio::tcp_connect(tcp, "127.0.0.1", 1994, [](auto status, auto self) {
+        if (status != ok) {
+            nx::aio::destroy_tcp(self);
+            return;
+        }
+
+        if (ok
+            != nx::aio::tcp_read_start(
+                self, [](auto status, auto self, const uint8_t* buf, size_t s) {
+                    if (status == ok) {
+                        printf("%s", std::string(buf, buf + s).c_str());
+                        if (std::string(buf, buf + s) == "quit\n") {
+                            nx::aio::tcp_read_stop(self);
+                            nx::aio::destroy_tcp(self);
+                        }
+                    } else {
+                        nx::aio::tcp_read_stop(self);
+                        nx::aio::destroy_tcp(self);
+                    }
+                })) {
+            nx::aio::destroy_tcp(self);
+            return;
+        }
+    });
     nx::aio::run();
     return 0;
 }
