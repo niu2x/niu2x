@@ -74,9 +74,12 @@ void event_loop::connect_callback(uv_connect_t* uv_con, int status)
     auto* con = my_loop->connects_.get(con_id);
 
     if (status < 0) {
-        NX_LOG_E("tcp failed to connect: %s reason: %s",
-            misc::net_utils::desc((struct sockaddr*)&(con->dest)).c_str(),
-            uv_strerror(status));
+
+        struct sockaddr_in* addr_in = (struct sockaddr_in*)(&(con->dest));
+        char* s = inet_ntoa(addr_in->sin_addr);
+
+        NX_LOG_E(
+            "tcp failed to connect: %s reason: %s", s, uv_strerror(status));
         con->callback(fail, tcp_id);
     } else {
         con->callback(ok, tcp_id);
@@ -143,6 +146,7 @@ rid event_loop::create_connect(
         auto* con = connects_.get(con_id);
         con->uv_obj.data = reinterpret_cast<void*>(con_id);
         new (&(con->callback)) event_loop::connect_handle(callback);
+
         struct sockaddr_in* p_dest = &(con->dest);
         uv_ip4_addr(address, port, p_dest);
         uv_tcp_connect(&(con->uv_obj), &(streams_.get(tcp_id)->uv_tcp),

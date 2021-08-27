@@ -11,10 +11,15 @@ using namespace nx;
 int main()
 {
 
-    nx::aio::create_idle([](auto rid) {
-        printf("hello world!\n");
-        nx::aio::destroy_idle(rid);
-    });
+    // nx::aio::create_idle([](auto rid) {
+    //     printf("hello world!\n");
+    //     nx::aio::destroy_idle(rid);
+    // });
+    //
+
+    auto tcp = nx::aio::create_tcp();
+    nx::aio::tcp_connect(tcp, "127.0.0.1", 1994,
+        [](auto status, auto self) { nx::aio::destroy_tcp(self); });
     nx::aio::run();
     return 0;
 }
