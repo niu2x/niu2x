@@ -1,5 +1,7 @@
 #include <niu2x/aio.h>
 
+#include <string.h>
+
 #include <uv.h>
 
 #define LOOP uv_default_loop()
@@ -38,6 +40,12 @@ struct tcp_connect_item {
     uv_connect_t uv_obj;
     struct sockaddr_in dest;
     tcp_connect_callback callback;
+};
+
+struct stream_write_req {
+    uv_write_t req;
+    uv_buf_t buf;
+    tcp_write_callback callback;
 };
 
 NX_LIST_HEAD(idles);
@@ -168,8 +176,8 @@ static void uv_tcp_connect_callback(uv_connect_t* uv_con, int status)
     destroy_tcp_connect(con->id);
 }
 
-static rid create_tcp_connect(tcp_item* tcp, const char* ip, uint16_t port,
-    const tcp_connect_callback& cb)
+static bool create_tcp_connect(rid& con_id, tcp_item* tcp, const char* ip,
+    uint16_t port, const tcp_connect_callback& cb)
 {
     NX_LOG_D("aio create_tcp_connect %s %u", ip, port);
     NX_ASSERT(tcp->con == nullptr && tcp->ready == false, "");
@@ -185,10 +193,11 @@ static rid create_tcp_connect(tcp_item* tcp, const char* ip, uint16_t port,
     auto* addr = &(con->dest);
 
     uv_ip4_addr(ip, port, addr);
-    uv_tcp_connect(&(con->uv_obj), &(tcp->uv_obj),
-        (const struct sockaddr*)(addr), uv_tcp_connect_callback);
+    con_id = con->id;
 
-    return con->id;
+    bool success = !uv_tcp_connect(&(con->uv_obj), &(tcp->uv_obj),
+        (const struct sockaddr*)(addr), uv_tcp_connect_callback);
+    return success;
 }
 
 API void tcp_connect(
@@ -196,7 +205,15 @@ API void tcp_connect(
 {
     auto* tcp = find_tcp_item(tcp_id, &tcps);
     NX_ASSERT(tcp, "tcp_id isn't exist");
-    create_tcp_connect(tcp, ip, port, cb);
+
+    rid con_id;
+    if (!create_tcp_connect(con_id, tcp, ip, port, cb)) {
+        destroy_tcp_connect(con_id);
+        create_idle([tcp_id, cb](auto self) {
+            destroy_idle(self);
+            cb(fail, tcp_id);
+        });
+    }
 }
 
 static void alloc_buf(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -231,7 +248,7 @@ static void uv_tcp_read_callback(
     free_buf(buf);
 }
 
-API status tcp_read_start(rid tcp_id, const tcp_read_callback& cb)
+void tcp_read_start(rid tcp_id, const tcp_read_callback& cb)
 {
     NX_LOG_D("tcp_read_start %lu", tcp_id);
 
@@ -243,19 +260,69 @@ API status tcp_read_start(rid tcp_id, const tcp_read_callback& cb)
     auto s = uv_read_start(
         (uv_stream_t*)&(tcp->uv_obj), alloc_buf, uv_tcp_read_callback);
     if (s) {
-        NX_LOG_E("tcp failed to start_read: %d, reason: %s", s, uv_strerror(s));
-        return fail;
+
+        create_idle([tcp_id, cb](auto self) {
+            destroy_idle(self);
+            cb(fail, tcp_id, nullptr, 0);
+        });
+        create_idle([tcp_id, cb](auto self) {
+            destroy_idle(self);
+            cb(fail, tcp_id, nullptr, 0);
+        });
     } else {
         tcp->reading = true;
-        return ok;
     }
 }
-API void tcp_read_stop(rid tcp_id)
+void tcp_read_stop(rid tcp_id)
 {
     NX_LOG_D("tcp_read_stop %lu", tcp_id);
+    auto* tcp = find_tcp_item(tcp_id, &tcps);
+    if (tcp->reading) {
+        uv_read_stop((uv_stream_t*)&(tcp->uv_obj));
+        tcp->reading = false;
+    }
+}
+
+static void free_write_req(stream_write_req* wr)
+{
+    free(wr->buf.base);
+    free(wr);
+}
+
+static void stream_write_callback(uv_write_t* req, int status)
+{
+    auto* wr = (stream_write_req*)req;
+    auto* tcp = (tcp_item*)(req->handle->data);
+    if (status < 0) {
+        wr->callback(fail, tcp->id);
+    } else {
+        wr->callback(ok, tcp->id);
+    }
+    free_write_req(wr);
+}
+
+void tcp_write(rid tcp_id, const uint8_t* buffer, size_t size,
+    const tcp_write_callback& cb)
+{
 
     auto* tcp = find_tcp_item(tcp_id, &tcps);
-    uv_read_stop((uv_stream_t*)&(tcp->uv_obj));
+
+    auto* req = (stream_write_req*)default_allocator.allocate(
+        sizeof(stream_write_req));
+    req->callback = cb;
+    req->buf = uv_buf_init((char*)default_allocator.allocate(size), size);
+    memcpy(req->buf.base, buffer, size);
+
+    if (uv_write((uv_write_t*)req, (uv_stream_t*)&(tcp->uv_obj), &req->buf, 1,
+            stream_write_callback)
+        < 0) {
+        free_write_req(req);
+
+        create_idle([tcp_id, cb](auto self) {
+            destroy_idle(self);
+            cb(fail, tcp_id);
+        });
+    }
 }
 
 } // namespace nx::aio

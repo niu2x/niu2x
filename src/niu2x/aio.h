@@ -29,12 +29,15 @@ API void destroy_tcp(rid tcp);
 API void tcp_connect(
     rid tcp, const char* ip, uint16_t port, const tcp_connect_callback& cb);
 API void tcp_bind(rid tcp, const char* ip, uint16_t port);
-API void tcp_write(rid tcp);
 
 using tcp_read_callback
     = std::function<void(status, rid self, const uint8_t*, size_t size)>;
-API status tcp_read_start(rid tcp, const tcp_read_callback& cb);
+API void tcp_read_start(rid tcp, const tcp_read_callback& cb);
 API void tcp_read_stop(rid tcp);
+
+using tcp_write_callback = std::function<void(status, rid self)>;
+API void tcp_write(
+    rid tcp, const uint8_t* buffer, size_t size, const tcp_write_callback&);
 
 // API void destroy(rid id);
 

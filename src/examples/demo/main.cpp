@@ -10,38 +10,26 @@ using namespace nx;
 
 int main()
 {
-
-    // nx::aio::create_idle([](auto rid) {
-    //     printf("hello world!\n");
-    //     nx::aio::destroy_idle(rid);
-    // });
-    //
-
-    auto tcp = nx::aio::create_tcp();
-    nx::aio::tcp_connect(tcp, "127.0.0.1", 1994, [](auto status, auto self) {
+    auto tcp = aio::create_tcp();
+    aio::tcp_connect(tcp, "127.0.0.1", 1994, [](auto status, auto self) {
         if (status != ok) {
-            nx::aio::destroy_tcp(self);
+            aio::destroy_tcp(self);
+            printf("connect fail\n");
             return;
         }
 
-        if (ok
-            != nx::aio::tcp_read_start(
-                self, [](auto status, auto self, const uint8_t* buf, size_t s) {
-                    if (status == ok) {
-                        printf("%s", std::string(buf, buf + s).c_str());
-                        if (std::string(buf, buf + s) == "quit\n") {
-                            nx::aio::tcp_read_stop(self);
-                            nx::aio::destroy_tcp(self);
-                        }
-                    } else {
-                        nx::aio::tcp_read_stop(self);
-                        nx::aio::destroy_tcp(self);
-                    }
-                })) {
-            nx::aio::destroy_tcp(self);
-            return;
-        }
+        aio::tcp_write(self, (const uint8_t*)"hello world\n", 12,
+            [](auto status, auto self) {
+                if (status != ok) {
+                    printf("write fail\n");
+                    aio::tcp_read_stop(self);
+                    aio::destroy_tcp(self);
+                } else {
+                    aio::tcp_read_stop(self);
+                    aio::destroy_tcp(self);
+                }
+            });
     });
-    nx::aio::run();
+    aio::run();
     return 0;
 }
