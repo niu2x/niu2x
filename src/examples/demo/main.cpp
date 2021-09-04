@@ -5,6 +5,7 @@
 #include <niu2x/memory.h>
 #include <niu2x/io.h>
 #include <niu2x/aio.h>
+#include <niu2x/lexical_cast.h>
 
 using namespace nx;
 
@@ -31,28 +32,31 @@ int main()
     //         });
     // });
 
-    aio::tcp_listen(tcp, "0.0.0.0", 8888, [](auto status, auto id) {
-        if (status != ok) {
-            NX_LOG_E("callback is not ok");
-            aio::destroy_tcp(id);
-        } else {
+    // aio::tcp_listen(tcp, "0.0.0.0", 8888, [](auto status, auto id) {
+    //     if (status != ok) {
+    //         NX_LOG_E("callback is not ok");
+    //         aio::destroy_tcp(id);
+    //     } else {
 
-            aio::create_idle([id](auto idle) {
-                if (!aio::tcp_alive(id)) {
-                    aio::destroy_idle(idle);
-                    return;
-                }
+    //         aio::create_idle([id](auto idle) {
+    //             if (!aio::tcp_alive(id)) {
+    //                 aio::destroy_idle(idle);
+    //                 return;
+    //             }
 
-                aio::tcp_write(
-                    id, "hello world", 11, [](auto status, auto self) {
-                        if (status != ok) {
-                            aio::destroy_tcp(self);
-                        }
-                    });
-            });
-        }
-    });
+    //             aio::tcp_write(
+    //                 id, "hello world", 11, [](auto status, auto self) {
+    //                     if (status != ok) {
+    //                         aio::destroy_tcp(self);
+    //                     }
+    //                 });
+    //         });
+    //     }
+    // });
 
-    aio::run();
+    // aio::run();
+
+    std::cout << lexical_cast<int>("2313f", 4) << std::endl;
+
     return 0;
 }

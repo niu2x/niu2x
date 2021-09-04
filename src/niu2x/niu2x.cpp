@@ -2,6 +2,7 @@
 #include <niu2x/freelist.h>
 #include <niu2x/list_head.h>
 #include <niu2x/pp.h>
+#include <niu2x/lexical_cast.h>
 #include <niu2x/memory.h>
 
 namespace nx {
