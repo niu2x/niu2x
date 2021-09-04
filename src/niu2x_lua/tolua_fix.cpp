@@ -70,6 +70,7 @@ nx_luafunction::luafunc_ref::luafunc_ref(lua_State* L, int idx)
     lua_pushvalue(L_, idx);
     lua_settable(L_, -3);
     lua_pop(L_, 1);
+    // NX_LOG_D("ref func_id_ %d", func_id_);
 }
 
 nx_luafunction::luafunc_ref::~luafunc_ref()
@@ -82,6 +83,7 @@ nx_luafunction::luafunc_ref::~luafunc_ref()
         lua_settable(L_, -3);
         lua_pop(L_, 1);
     }
+    // NX_LOG_D("unref func_id_ %d", func_id_);
 }
 
 uint32_t nx_luafunction::luafunc_ref::next_func_id_ = 0;
@@ -106,6 +108,8 @@ void nx_luafunction::luafunc_ref::call(
     lua_getfield(L_, LUA_REGISTRYINDEX, "nx_luafunction");
     lua_pushnumber(L_, func_id_);
     lua_gettable(L_, -2);
+
+    // NX_LOG_D("call func_id_ %d", func_id_);
 
     NX_ASSERT(lua_isfunction(L_, -1), "");
 

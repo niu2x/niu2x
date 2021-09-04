@@ -293,7 +293,7 @@ static void uv_tcp_read_callback(
 
 void tcp_read_start(rid tcp_id, const tcp_read_callback& cb)
 {
-    NX_LOG_D("tcp_read_start %lu", tcp_id);
+    NX_LOG_D("tcp_read_start id: %lu", tcp_id);
 
     auto* tcp = find_tcp_item(tcp_id, &tcps);
     NX_ASSERT(tcp != nullptr, "");
@@ -318,7 +318,7 @@ void tcp_read_start(rid tcp_id, const tcp_read_callback& cb)
 }
 void tcp_read_stop(rid tcp_id)
 {
-    NX_LOG_D("tcp_read_stop %lu", tcp_id);
+    NX_LOG_D("tcp_read_stop id: %lu", tcp_id);
     auto* tcp = find_tcp_item(tcp_id, &tcps);
     if (tcp->reading) {
         uv_read_stop((uv_stream_t*)&(tcp->uv_obj));

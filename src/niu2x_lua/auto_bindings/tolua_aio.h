@@ -1,6 +1,6 @@
 /*
 ** Lua binding: aio
-** Generated automatically by tolua++-1.0.93 on Wed Aug 25 01:26:03 2021.
+** Generated automatically by tolua++-1.0.93 on Sat Sep  4 15:23:15 2021.
 */
 
 /* Exported function */

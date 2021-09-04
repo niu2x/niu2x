@@ -18,8 +18,8 @@ _basic_ctype['nx_luafunction'] = 'nx_luafunction'
 
 _basic['uint16_t'] = 'number'
 _basic['const uint16_t'] = 'number'
-
--- _collect['std::shared_ptr<nx::aio::event_loop>'] = true
+_basic['size_t'] = 'number'
+_basic['const size_t'] = 'number'
 
 EOF
 
