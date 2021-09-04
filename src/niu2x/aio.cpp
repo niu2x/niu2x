@@ -29,6 +29,7 @@ struct tcp_item {
     list_head list;
     tcp_connect_item* con;
     tcp_read_callback read_cb;
+    tcp_connect_callback client_connect_cb;
     bool ready;
     bool reading;
 };
@@ -200,7 +201,7 @@ static bool create_tcp_connect(rid& con_id, tcp_item* tcp, const char* ip,
     return success;
 }
 
-API void tcp_connect(
+void tcp_connect(
     rid tcp_id, const char* ip, uint16_t port, const tcp_connect_callback& cb)
 {
     auto* tcp = find_tcp_item(tcp_id, &tcps);
@@ -213,6 +214,48 @@ API void tcp_connect(
             destroy_idle(self);
             cb(fail, tcp_id);
         });
+    }
+}
+
+static void uv_tcp_new_connection_callback(uv_stream_t* server, int status)
+{
+    auto* tcp = reinterpret_cast<tcp_item*>((server->data));
+    if (status < 0) {
+        NX_LOG_E("New connection error %s\n", uv_strerror(status));
+        tcp->client_connect_cb(fail, tcp->id);
+        return;
+    }
+
+    rid client_id = create_tcp();
+    auto* client = find_tcp_item(client_id, &tcps);
+    if (uv_accept(server, (uv_stream_t*)&(client->uv_obj)) == 0) {
+        tcp->client_connect_cb(ok, client_id);
+    } else {
+        destroy_tcp(client_id);
+        tcp->client_connect_cb(fail, tcp->id);
+    }
+}
+
+void tcp_listen(
+    rid tcp_id, const char* ip, uint16_t port, const tcp_connect_callback& cb)
+{
+    auto* tcp = find_tcp_item(tcp_id, &tcps);
+    NX_ASSERT(tcp, "tcp_id isn't exist");
+
+    struct sockaddr_in addr;
+    uv_ip4_addr(ip, port, &addr);
+    uv_tcp_bind(&(tcp->uv_obj), (const struct sockaddr*)&addr, 0);
+    tcp->client_connect_cb = cb;
+
+    int r = uv_listen(
+        (uv_stream_t*)&(tcp->uv_obj), 4, uv_tcp_new_connection_callback);
+    if (r) {
+        NX_LOG_E("Listen error %s\n", uv_strerror(r));
+        create_idle([tcp_id, cb](auto self) {
+            destroy_idle(self);
+            cb(fail, tcp_id);
+        });
+        return;
     }
 }
 
@@ -301,8 +344,8 @@ static void stream_write_callback(uv_write_t* req, int status)
     free_write_req(wr);
 }
 
-void tcp_write(rid tcp_id, const uint8_t* buffer, size_t size,
-    const tcp_write_callback& cb)
+void tcp_write(
+    rid tcp_id, const void* buffer, size_t size, const tcp_write_callback& cb)
 {
 
     auto* tcp = find_tcp_item(tcp_id, &tcps);
@@ -324,5 +367,11 @@ void tcp_write(rid tcp_id, const uint8_t* buffer, size_t size,
         });
     }
 }
+
+tcp_write_callback default_tcp_write_callback { [](auto status, auto id) {
+    unused(status, id);
+} };
+
+bool tcp_alive(rid tcp_id) { return find_tcp_item(tcp_id, &tcps); }
 
 } // namespace nx::aio
