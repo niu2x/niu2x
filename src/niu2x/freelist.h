@@ -31,7 +31,11 @@ public:
             ptr->next = i + 1;
         }
         ptr->next = nil;
+        size_ = 0;
     }
+
+    freelist(const freelist&) = default;
+    freelist& operator=(const freelist&) = default;
 
     rid alloc()
     {
@@ -39,6 +43,7 @@ public:
             return nil;
         auto result = next_;
         next_ = slots_[result - 1].next;
+        ++size_;
         return result;
     }
 
@@ -47,6 +52,7 @@ public:
         if (p_rid == nil)
             return;
 
+        --size_;
         slots_[p_rid - 1].next = next_;
         next_ = p_rid;
     }
@@ -60,6 +66,7 @@ public:
 private:
     slot<T> slots_[N];
     rid next_;
+    rid size_;
 };
 
 } // namespace nx

@@ -6,3 +6,7 @@
 # )
 
 find_package(Threads REQUIRED)
+
+find_package(glfw3)
+find_package(OpenGL)
+find_package(GLEW)

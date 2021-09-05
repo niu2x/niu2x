@@ -26,6 +26,12 @@ dependent_prebuilt(
 		boost
 )
 
+list(APPEND runtime
+	glfw
+	GLEW::GLEW
+    OpenGL::OpenGL
+)
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	list(APPEND runtime dl)
 	list(APPEND runtime Threads::Threads)

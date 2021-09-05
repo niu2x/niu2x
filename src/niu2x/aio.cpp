@@ -11,7 +11,7 @@ namespace nx::aio {
 namespace {
 
 mallocfree_memory default_memory;
-memory_proxy default_allocator(&default_memory);
+memory_proxy default_allocator { &default_memory };
 
 rid next_rid = 0;
 
@@ -103,6 +103,8 @@ rid create_idle(const idle_handle& handler)
     NX_LOG_D("aio create_idle");
 
     auto* idle = (idle_item*)default_allocator.allocate(sizeof(idle_item));
+    new (idle) idle_item;
+
     idle->id = next_rid++;
     idle->callback = handler;
     list_add_tail(&(idle->list), &idles);
@@ -120,6 +122,8 @@ void destroy_idle(rid idle_id)
     uv_idle_stop(&(idle->uv_obj));
     uv_close(reinterpret_cast<uv_handle_t*>(&(idle->uv_obj)), nullptr);
     list_del(&(idle->list));
+
+    idle->~idle_item();
     default_allocator.free(idle);
 
     NX_LOG_D("aio destroy_idle");
@@ -129,6 +133,7 @@ rid create_tcp()
 {
     NX_LOG_D("aio create_tcp");
     auto* tcp = (tcp_item*)default_allocator.allocate(sizeof(tcp_item));
+    new (tcp) tcp_item;
     tcp->id = next_rid++;
     list_add_tail(&(tcp->list), &tcps);
     uv_tcp_init(LOOP, &(tcp->uv_obj));
@@ -143,6 +148,7 @@ void destroy_tcp(rid tcp_id)
     NX_ASSERT(tcp, "tcp_id isn't exist");
     uv_close(reinterpret_cast<uv_handle_t*>(&(tcp->uv_obj)), nullptr);
     list_del(&(tcp->list));
+    tcp->~tcp_item();
     default_allocator.free(tcp);
     NX_LOG_D("aio destroy_tcp");
 }
@@ -152,6 +158,7 @@ static void destroy_tcp_connect(rid con_id)
     auto* con = find_tcp_connect_item(con_id, &tcp_connects);
     NX_ASSERT(con, "con_id isn't exist");
     list_del(&(con->list));
+    con->~tcp_connect_item();
     default_allocator.free(con);
     NX_LOG_D("aio destroy_tcp_connect");
 }
@@ -184,6 +191,7 @@ static bool create_tcp_connect(rid& con_id, tcp_item* tcp, const char* ip,
     NX_ASSERT(tcp->con == nullptr && tcp->ready == false, "");
     auto* con = (tcp_connect_item*)default_allocator.allocate(
         sizeof(tcp_connect_item));
+    new (con) tcp_connect_item;
     con->id = next_rid++;
     list_add_tail(&(con->list), &tcp_connects);
     con->uv_obj.data = con;
@@ -328,8 +336,10 @@ void tcp_read_stop(rid tcp_id)
 
 static void free_write_req(stream_write_req* wr)
 {
-    free(wr->buf.base);
-    free(wr);
+    default_allocator.free(wr->buf.base);
+
+    wr->~stream_write_req();
+    default_allocator.free(wr);
 }
 
 static void stream_write_callback(uv_write_t* req, int status)
@@ -352,6 +362,7 @@ void tcp_write(
 
     auto* req = (stream_write_req*)default_allocator.allocate(
         sizeof(stream_write_req));
+    new (req) stream_write_req;
     req->callback = cb;
     req->buf = uv_buf_init((char*)default_allocator.allocate(size), size);
     memcpy(req->buf.base, buffer, size);
