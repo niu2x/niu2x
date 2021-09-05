@@ -5,7 +5,8 @@ function(warning_as_error_enable target)
 	    target_compile_options(${target} PRIVATE /W4 /WX)
 	else()
 	    # lots of warnings and all warnings as errors
-	    target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+	    # target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+	    target_compile_options(${target} PRIVATE -Wall -Wextra -Werror)
 	endif()
 endfunction()
 

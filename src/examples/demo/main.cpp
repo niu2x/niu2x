@@ -14,71 +14,20 @@
 
 using namespace nx;
 
+static void update(double dt)
+{
+    NX_LOG_D("update interval: %f fps:%f", dt, 1.0 / dt);
+}
+
 int main()
 {
-    // auto tcp = aio::create_tcp();
-    // aio::tcp_connect(tcp, "127.0.0.1", 1994, [](auto status, auto self) {
-    //     if (status != ok) {
-    //         aio::destroy_tcp(self);
-    //         printf("connect fail\n");
-    //         return;
-    //     }
-
-    //     aio::tcp_write(self, (const uint8_t*)"hello world\n", 12,
-    //         [](auto status, auto self) {
-    //             if (status != ok) {
-    //                 printf("write fail\n");
-    //                 aio::tcp_read_stop(self);
-    //                 aio::destroy_tcp(self);
-    //             } else {
-    //                 aio::tcp_read_stop(self);
-    //                 aio::destroy_tcp(self);
-    //             }
-    //         });
-    // });
-
-    // aio::tcp_listen(tcp, "0.0.0.0", 8888, [](auto status, auto id) {
-    //     if (status != ok) {
-    //         NX_LOG_E("callback is not ok");
-    //         aio::destroy_tcp(id);
-    //     } else {
-
-    //         aio::create_idle([id](auto idle) {
-    //             if (!aio::tcp_alive(id)) {
-    //                 aio::destroy_idle(idle);
-    //                 return;
-    //             }
-
-    //             aio::tcp_write(
-    //                 id, "hello world", 11, [](auto status, auto self) {
-    //                     if (status != ok) {
-    //                         aio::destroy_tcp(self);
-    //                     }
-    //                 });
-    // });
-    //     }
-    // });
-
-    // aio::run();
-
-    // std::cout << lexical_cast<int>("2313f", 4) << std::endl;
-
-    auto window0 = gfx::create_window();
-    auto window1 = gfx::create_window();
-    // NX_LOG_D("window0 %p", window0);
-    gfx::window_set_bgcolor(window0, 0xFF00FFFF);
-
-    aio::create_idle([](auto idle) { gfx::frame(); });
-    //
-    //
-    //
-    //
-    // aio::idle_handle c = [](auto idle){unused(idle);};
-
-    aio::run();
-
-    gfx::destroy_window(window0);
-    gfx::destroy_window(window1);
-
+    gfx::config config {
+        .title = "nx window",
+        .width = 800,
+        .height = 600,
+        .options = gfx::default_option,
+        .update = update,
+    };
+    gfx::run(config);
     return 0;
 }

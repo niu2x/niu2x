@@ -2,6 +2,7 @@
 #define NX_GFX_H
 
 #include <functional>
+#include <string>
 
 #include <niu2x/utils.h>
 #include <niu2x/freelist.h>
@@ -13,16 +14,36 @@ API void set_allocator(memory_proxy allocator);
 
 using rid = void*;
 
-enum window_option {
+enum API option {
     MSAA = 1 << 0,
 };
 
-API rid create_window(uint64_t options = 0);
-API void destroy_window(rid window_id);
-// rgba8888
-API void window_set_bgcolor(rid window_id, uint32_t color);
+const uint32_t default_option = MSAA;
 
-API void frame();
+struct API color {
+    union {
+        uint32_t rgba;
+        struct {
+            uint8_t r, g, b, a;
+        };
+    };
+};
+
+inline color make_color(uint32_t rgba8888)
+{
+    color ret;
+    ret.rgba = rgba8888;
+    return ret;
+}
+
+struct API config {
+    std::string title;
+    int width, height;
+    uint64_t options;
+    void (*update)(double);
+};
+
+API void run(const config& c);
 
 } // namespace nx::gfx
 
