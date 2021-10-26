@@ -8,14 +8,13 @@
 #include <memory>
 #include <cstddef>
 
-#include <niu2x/api.h>
-#include <niu2x/utils/noncopyable.h>
+#include <boost/noncopyable.hpp>
 
-class FreeListAllocator;
+#include <niu2x/api.h>
 
 namespace nx {
 
-class API memory : private noncopyable {
+class API memory : private boost::noncopyable {
 public:
     memory();
     virtual ~memory() = 0;
@@ -33,7 +32,8 @@ public:
     virtual void free(void* ptr);
 
 private:
-    std::unique_ptr<FreeListAllocator> delegate_;
+    // std::unique_ptr<FreeListAllocator> delegate_;
+    void* delegate_;
 };
 
 class API mallocfree_memory : public memory {
@@ -45,23 +45,23 @@ public:
     virtual void free(void* ptr);
 };
 
-class API memory_proxy {
-public:
-    memory_proxy(memory* delegate)
-    : delegate_(delegate)
-    {
-    }
-    ~memory_proxy() { }
+// class API memory_proxy {
+// public:
+//     memory_proxy(memory* delegate)
+//     : delegate_(delegate)
+//     {
+//     }
+//     ~memory_proxy() { }
 
-    memory_proxy(const memory_proxy&) = default;
-    memory_proxy& operator=(const memory_proxy&) = default;
+//     memory_proxy(const memory_proxy&) = default;
+//     memory_proxy& operator=(const memory_proxy&) = default;
 
-    void* allocate(size_t size) { return delegate_->allocate(size); }
-    void free(void* ptr) { delegate_->free(ptr); }
+//     void* allocate(size_t size) { return delegate_->allocate(size); }
+//     void free(void* ptr) { delegate_->free(ptr); }
 
-private:
-    memory* delegate_;
-};
+// private:
+//     memory* delegate_;
+// };
 
 } // namespace nx
 #endif
