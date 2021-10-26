@@ -11,4 +11,5 @@ IndentPPDirectives: BeforeHash
 AlwaysBreakTemplateDeclarations: Yes
 NamespaceIndentation: None
 SortIncludes: false
+AlignConsecutiveMacros: true
 ...

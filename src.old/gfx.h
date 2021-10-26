@@ -41,9 +41,28 @@ struct API config {
     int width, height;
     uint64_t options;
     void (*update)(double);
+    void (*setup)();
+    void (*cleanup)();
 };
 
 API void run(const config& c);
+
+enum API attribute {
+    position,
+    color0,
+    uv,
+};
+
+class API vertex_layout_builder {
+};
+class API vertex_layout {
+public:
+    struct API attrinfo {
+        attribute attr;
+    };
+
+private:
+};
 
 } // namespace nx::gfx
 

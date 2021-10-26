@@ -1,1 +1,0 @@
--- _G.event_loop = aio.event_loop:create()

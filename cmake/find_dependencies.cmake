@@ -1,9 +1,9 @@
-# find_package(Boost 
+find_package(Boost 
 	# COMPONENTS 
 		# program_options 
 		# log
-	# REQUIRED
-# )
+	REQUIRED
+)
 
 find_package(Threads REQUIRED)
 

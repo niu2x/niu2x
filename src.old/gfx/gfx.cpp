@@ -61,6 +61,9 @@ void run(const config& c)
 
     auto update = c.update;
 
+    if (c.setup)
+        c.setup();
+
 #define duration_cast(t)                                                       \
     std::chrono::duration_cast<std::chrono::microseconds>((t))
 
@@ -75,6 +78,9 @@ void run(const config& c)
 
         update(dt);
     }
+
+    if (c.cleanup)
+        c.cleanup();
 
     destroy_glfw_window(glfw_window);
 

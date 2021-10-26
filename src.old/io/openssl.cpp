@@ -4,14 +4,14 @@
 
 #if defined(_WIN32) || defined(_WIN64)
     #pragma warning(disable : 4100)
-    // #pragma warning(disable : 4189)
+// #pragma warning(disable : 4189)
 #endif
 
 #include <openssl/err.h>
 
 #define OPENSSL_CHECK(condition, message)                                      \
     if (!(condition)) {                                                        \
-        auto e = ERR_peek_last_error();                                         \
+        auto e = ERR_peek_last_error();                                        \
         NX_LOG_F("%s reason: %d %s", message, e, ERR_reason_error_string(e));  \
         NX_THROW(message);                                                     \
     }
