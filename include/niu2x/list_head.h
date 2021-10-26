@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include <niu2x/api.h>
-#include <niu2x/utils/misc.h>
 
 namespace nx {
 
