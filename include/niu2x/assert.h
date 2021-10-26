@@ -1,7 +1,7 @@
 #ifndef NX_UTILS_ASSERT_H
 #define NX_UTILS_ASSERT_H
 
-#include <niu2x/utils/exception.h>
+#include <niu2x/exception.h>
 
 #define NX_ASSERT(condition, message)                                          \
     if (!(condition)) {                                                        \

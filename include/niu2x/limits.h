@@ -1,5 +1,5 @@
-#ifndef NX_UTILS_LIMIT_H
-#define NX_UTILS_LIMIT_H
+#ifndef NX_LIMIT_H
+#define NX_LIMIT_H
 
 #include <cstddef>
 

@@ -5,11 +5,7 @@
 #include <string>
 
 #include <niu2x/api.h>
-#include <niu2x/utils/limits.h>
-
-#if defined(_WIN32) || defined(_WIN64)
-    #pragma warning(disable : 4275)
-#endif
+#include <niu2x/limits.h>
 
 namespace nx {
 
@@ -18,8 +14,7 @@ class API exception : public std::exception {
 public:
     exception(const char* msg, const char* file, uint32_t line)
     {
-        const char* fmt = "%s\nat: %s line: %d";
-        snprintf(msg_, buffer_size, fmt, msg, file, line);
+        snprintf(msg_, buffer_size, "%s\nat: %s line: %d", msg, file, line);
     }
 
     exception(const std::string& sz, const char* file, uint32_t line)
