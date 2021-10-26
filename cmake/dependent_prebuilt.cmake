@@ -11,7 +11,7 @@ function(dependent_prebuilt)
 
     set(depdir ${CMAKE_SOURCE_DIR}/dependencies)
     foreach(libname IN LISTS P_LIBS)
-        target_include_directories(${P_TARGET} PUBLIC 
+        target_include_directories(${P_TARGET} PUBLIC
             ${depdir}/${libname}/include
         )   
 
@@ -19,17 +19,17 @@ function(dependent_prebuilt)
         string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} arch_name)
 
         set(libdir ${depdir}/${libname}/lib/${system_name}/${arch_name})
-        target_link_directories(${P_TARGET} PRIVATE 
+        target_link_directories(${P_TARGET} PUBLIC
             ${libdir}
         )
 
         set(platform_include ${depdir}/${libname}/platform_include/${system_name}/${arch_name})
-        target_include_directories(${P_TARGET} PUBLIC 
+        target_include_directories(${P_TARGET} PUBLIC
             ${platform_include}
         )  
 
         file(GLOB_RECURSE libfiles PATTERN "${libdir}/*") 
-        target_link_libraries(${P_TARGET} PRIVATE
+        target_link_libraries(${P_TARGET} PUBLIC
             # -Wl,--whole-archive 
             ${libfiles} 
             # -Wl,--no-whole-archive
