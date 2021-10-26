@@ -1,5 +1,5 @@
-#ifndef NX_UTILS_ASSERT_H
-#define NX_UTILS_ASSERT_H
+#ifndef NX_ASSERT_H
+#define NX_ASSERT_H
 
 #include <niu2x/exception.h>
 

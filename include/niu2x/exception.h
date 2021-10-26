@@ -1,5 +1,5 @@
-#ifndef NX_UTILS_EXCEPTION_H
-#define NX_UTILS_EXCEPTION_H
+#ifndef NX_EXCEPTION_H
+#define NX_EXCEPTION_H
 
 #include <exception>
 #include <string>
