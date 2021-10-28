@@ -43,6 +43,8 @@ target_sources(niu2x PRIVATE
 	${c_source}
 )
 
+target_compile_definitions(niu2x PRIVATE niu2x_EXPORTS)
+
 # include(dependent_prebuilt)
 
 # dependent_prebuilt(
@@ -86,3 +88,5 @@ generate_export_header(niu2x
 
 include(warning_as_error)
 warning_as_error_enable(niu2x)
+
+add_subdirectory(test)

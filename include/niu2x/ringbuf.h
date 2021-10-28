@@ -2,6 +2,7 @@
 #define NX_RINGBUF_H
 
 #include <cstddef>
+#include <algorithm>
 
 namespace nx {
 
@@ -35,7 +36,7 @@ public:
     bool put(const Elem* input, size_t isize, size_t* osize) noexcept
     {
         auto rooms = user_capacity - size();
-        auto writen = NX_MIN(isize, rooms);
+        auto writen = std::min(isize, rooms);
         if (osize)
             *osize = writen;
 
@@ -43,7 +44,7 @@ public:
             return false;
 
         if (tail_ >= head_) {
-            auto n = NX_MIN(capacity - tail_, writen);
+            auto n = std::min(capacity - tail_, writen);
             memcpy(data_ + tail_, input, n * sizeof(Elem));
             input += n;
             writen -= n;
@@ -64,7 +65,7 @@ public:
         if (!my_size)
             return false;
 
-        auto readn = NX_MIN(max_osize, my_size);
+        auto readn = std::min(max_osize, my_size);
         if (osize)
             *osize = readn;
 
@@ -72,7 +73,7 @@ public:
             memcpy(output, data_ + head_, readn * sizeof(Elem));
         } else {
             memcpy(output, data_ + head_,
-                NX_MIN(capacity - head_, readn) * sizeof(Elem));
+                std::min(capacity - head_, readn) * sizeof(Elem));
             if (readn > capacity - head_) {
                 memcpy(output + capacity - head_, data_,
                     readn - (capacity - head_) * sizeof(Elem));
@@ -87,11 +88,19 @@ public:
 
     size_t size() const noexcept { return minus(tail_, head_); }
 
-    // void pop(size_t n) noexcept { head_ = add(head_, NX_MIN(n, size())); }
+    // void pop(size_t n) noexcept { head_ = add(head_, std::min(n, size())); }
     // void push(size_t n) noexcept
     // {
-    //     tail_ = add(tail_, NX_MIN(n, user_capacity - size()));
+    //     tail_ = add(tail_, std::min(n, user_capacity - size()));
     // }
+    //
+    void update_size(int delta) noexcept
+    {
+        if (delta > 0)
+            tail_ = add(tail_, std::min((size_t)delta, user_capacity - size()));
+        else
+            head_ = add(head_, std::min((size_t)-delta, size()));
+    }
 
     arrayref<Elem> continuous_elems() noexcept
     {
