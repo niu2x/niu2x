@@ -39,8 +39,6 @@ void unbase64::transform(
     (void)upstream_eof;
     size_t inlen;
     do {
-        rbuf.normalize();
-        wbuf.normalize();
         auto input = rbuf.continuous_elems();
         auto output = wbuf.continuous_slots();
 

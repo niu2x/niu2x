@@ -18,6 +18,8 @@ int filter::read(void* data, size_t bytes)
         return -eof;
 
     read_from_upstream();
+    rbuf_.normalize();
+    wbuf_.normalize();
     transform(rbuf_, wbuf_, upstream_eof_);
     return write_to_downstream(data, bytes);
 }
@@ -36,6 +38,7 @@ void filter::read_from_upstream()
 {
     while ((!rbuf_.full()) && (!upstream_eof_)) {
         auto slots = rbuf_.continuous_slots();
+
         auto ret = std::visit(
             [&slots](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
