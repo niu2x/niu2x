@@ -1,6 +1,8 @@
 #ifndef NX_RINGBUF_H
 #define NX_RINGBUF_H
 
+#include <string.h>
+
 #include <cstddef>
 #include <algorithm>
 
