@@ -3,6 +3,8 @@
 
 #include <niu2x/io.h>
 
+#include "utils.h"
+
 namespace nx::io {
 
 template <class Device>

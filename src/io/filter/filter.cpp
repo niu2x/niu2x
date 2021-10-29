@@ -16,11 +16,12 @@ int filter::read(void* data, size_t bytes)
 {
     if (upstream_eof_ && rbuf_.empty() && wbuf_.empty())
         return -eof;
-
-    read_from_upstream();
     rbuf_.normalize();
     wbuf_.normalize();
+
+    read_from_upstream();
     transform(rbuf_, wbuf_, upstream_eof_);
+
     return write_to_downstream(data, bytes);
 }
 

@@ -3,9 +3,9 @@
 
 #include <niu2x/exception.h>
 
-#define NX_ASSERT(condition, message)                                          \
+#define NX_ASSERT(condition, message, ...)                                     \
     if (!(condition)) {                                                        \
-        NX_LOG_F(message);                                                     \
+        NX_LOG_F(message, ##__VA_ARGS__);                                      \
         NX_THROW((message));                                                   \
     }
 

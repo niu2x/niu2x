@@ -74,6 +74,7 @@ target_compile_definitions(niu2x PRIVATE niu2x_EXPORTS)
 
 target_link_libraries(niu2x PUBLIC
 	# ${runtime}
+	ZLIB::ZLIB
 	Boost::headers
 )
 

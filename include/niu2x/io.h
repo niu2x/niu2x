@@ -9,23 +9,13 @@
 #include <boost/noncopyable.hpp>
 
 #include <niu2x/api.h>
+#include <niu2x/memory.h>
 #include <niu2x/ringbuf.h>
 
 namespace nx::io {
 
-// std::string a = "hello";
-// std::string b;
+extern API memory_proxy mem;
 
-// nx::io::source(a) | nx::io::filter::upper | nx::io::sink(b);
-// nx::io::source(std::cin) | nx::io::filter::upper | nx::io::sink(std::cout);
-// nx::io::source(std::cin) | nx::io::filter::b64enc | nx::io::sink(std::cout);
-// nx::io::source(std::cin) | nx::io::filter::b64dec | nx::io::sink(std::cout);
-
-// class source_adapter {
-// public:
-// };
-//
-//
 enum API status {
     ok = 0,
     again,
@@ -99,9 +89,6 @@ public:
     filter();
     virtual ~filter();
 
-    // filter(const filter&) = default;
-    // filter& operator=(const filter&) = default;
-
     int read(void* data, size_t bytes);
 
     void set_upstream(source p_upstream);
@@ -147,6 +134,7 @@ public:
 class API unhex : public filter {
 public:
     unhex();
+    virtual ~unhex() { }
     virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
@@ -154,23 +142,47 @@ private:
     uint8_t size_;
 };
 
-class base64 : public filter {
+class API base64 : public filter {
 public:
     virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class unbase64 : public filter {
+class API unbase64 : public filter {
 public:
     virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class cut : public filter {
+class API cut : public filter {
 public:
     cut(uint8_t chr);
+    virtual ~cut() { }
     virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     uint8_t chr_;
+};
+
+class API zlib : public filter {
+public:
+    enum { default_level = 6 };
+
+    zlib(int level = default_level);
+    virtual ~zlib();
+
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+
+private:
+    void* zlib_ctx_;
+};
+
+class API unzlib : public filter {
+public:
+    unzlib();
+    virtual ~unzlib();
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+
+private:
+    void* zlib_ctx_;
 };
 
 API filter::proxy_t operator|(

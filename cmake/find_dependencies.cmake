@@ -6,7 +6,8 @@ find_package(Boost
 )
 
 find_package(Threads REQUIRED)
+find_package(ZLIB REQUIRED)
 
-find_package(glfw3)
-find_package(OpenGL)
-find_package(GLEW)
+# find_package(glfw3)
+# find_package(OpenGL)
+# find_package(GLEW)
