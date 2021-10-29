@@ -132,6 +132,26 @@ public:
     virtual uint8_t transform(uint8_t chr) { return tolower(chr); }
 };
 
+class API upper : public simple_filter {
+public:
+    virtual uint8_t transform(uint8_t chr) { return toupper(chr); }
+};
+
+class API hex : public filter {
+public:
+    virtual void transform(ringbuf<uint8_t>&, ringbuf<uint8_t>&);
+};
+
+class API unhex : public filter {
+public:
+    unhex();
+    virtual void transform(ringbuf<uint8_t>&, ringbuf<uint8_t>&);
+
+private:
+    uint8_t buf_[2];
+    uint8_t size_;
+};
+
 }; // namespace filter
 
 API bool operator|(source p_source, sink p_sink);

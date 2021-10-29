@@ -5,6 +5,8 @@
 int main()
 {
     nx::io::filter::lower lower;
-    nx::io::source(std::cin) | lower | nx::io::sink(std::cout);
+    nx::io::filter::hex hex;
+    nx::io::filter::unhex unhex;
+    nx::io::source(std::cin) | unhex | nx::io::sink(std::cout);
     return 0;
 }
