@@ -36,7 +36,7 @@ void filter::set_upstream(proxy_t p_upstream)
 
 void filter::read_from_upstream()
 {
-    while ((!rbuf_.full()) && (!upstream_eof_)) {
+    while (!rbuf_.full() && !upstream_eof_) {
         auto slots = rbuf_.continuous_slots();
 
         auto ret = std::visit(

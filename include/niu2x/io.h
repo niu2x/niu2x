@@ -65,7 +65,9 @@ private:
 
 namespace filter {
 
-class API filter {
+using ringbuf = nx::ringbuf<uint8_t>;
+
+class API filter : private boost::noncopyable {
 public:
     class proxy_t {
     public:
@@ -97,17 +99,15 @@ public:
     filter();
     virtual ~filter();
 
-    filter(const filter&) = default;
-    filter& operator=(const filter&) = default;
+    // filter(const filter&) = default;
+    // filter& operator=(const filter&) = default;
 
     int read(void* data, size_t bytes);
 
     void set_upstream(source p_upstream);
     void set_upstream(proxy_t p_upstream);
 
-    virtual void transform(
-        ringbuf<uint8_t>&, ringbuf<uint8_t>&, bool upstream_eof)
-        = 0;
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof) = 0;
 
     proxy_t proxy() noexcept { return proxy_t(this); }
 
@@ -118,15 +118,14 @@ private:
     int write_to_downstream(void* data, size_t bytes);
 
     std::variant<source, proxy_t, std::nullptr_t> upstream_;
-    ringbuf<uint8_t> rbuf_;
-    ringbuf<uint8_t> wbuf_;
+    ringbuf rbuf_;
+    ringbuf wbuf_;
     bool upstream_eof_;
 };
 
 class API simple_filter : public filter {
 public:
-    virtual void transform(
-        ringbuf<uint8_t>&, ringbuf<uint8_t>&, bool upstream_eof);
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
     virtual uint8_t transform(uint8_t chr) = 0;
 };
 
@@ -142,15 +141,13 @@ public:
 
 class API hex : public filter {
 public:
-    virtual void transform(
-        ringbuf<uint8_t>&, ringbuf<uint8_t>&, bool upstream_eof);
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
 class API unhex : public filter {
 public:
     unhex();
-    virtual void transform(
-        ringbuf<uint8_t>&, ringbuf<uint8_t>&, bool upstream_eof);
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     uint8_t buf_[2];
@@ -159,21 +156,18 @@ private:
 
 class base64 : public filter {
 public:
-    virtual void transform(
-        ringbuf<uint8_t>&, ringbuf<uint8_t>&, bool upstream_eof);
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
 class unbase64 : public filter {
 public:
-    virtual void transform(
-        ringbuf<uint8_t>&, ringbuf<uint8_t>&, bool upstream_eof);
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
 class cut : public filter {
 public:
     cut(uint8_t chr);
-    virtual void transform(
-        ringbuf<uint8_t>&, ringbuf<uint8_t>&, bool upstream_eof);
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     uint8_t chr_;
