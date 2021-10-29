@@ -1,5 +1,5 @@
-#include "io.h"
-
+#include "../io.h"
+#include <niu2x/log.h>
 #include <string.h>
 
 namespace nx::io::filter {
@@ -60,7 +60,6 @@ void filter::read_from_upstream()
 
 int filter::write_to_downstream(void* p_data, size_t bytes)
 {
-
     auto* data = reinterpret_cast<uint8_t*>(p_data);
 
     auto elems = wbuf_.continuous_elems();
@@ -83,13 +82,11 @@ int filter::write_to_downstream(void* p_data, size_t bytes)
     return bytes;
 }
 
-void simple_filter::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
+API filter::proxy_t operator|(
+    filter::proxy_t p_source, filter::proxy_t p_filter)
 {
-    uint8_t chr;
-    while ((!rbuf.empty()) && (!wbuf.full())) {
-        rbuf.get(chr);
-        wbuf.put(transform(chr));
-    }
+    p_filter.set_upstream(p_source);
+    return p_filter;
 }
 
 } // namespace nx::io::filter

@@ -1,4 +1,5 @@
 #include <niu2x/io.h>
+#include <niu2x/log.h>
 #include <niu2x/ringbuf.h>
 #include "utils.h"
 
@@ -42,13 +43,14 @@ API bool operator|(source p_source, sink p_sink)
     return true;
 }
 
-API bool operator|(filter::filter::proxy_t p_source, sink p_sink)
+API bool operator|(filter_proxy p_source, sink p_sink)
 {
     ringbuf<unsigned char> buf;
     bool source_eof = false;
     do {
         while ((!buf.full()) && (!source_eof)) {
             auto slots = buf.continuous_slots();
+
             auto ret = p_source.read(slots.base, slots.size);
 
             if (ret >= 0) {
@@ -78,8 +80,7 @@ API bool operator|(filter::filter::proxy_t p_source, sink p_sink)
     return true;
 }
 
-API filter::filter::proxy_t operator|(
-    source p_source, filter::filter::proxy_t p_filter)
+API filter_proxy operator|(source p_source, filter_proxy p_filter)
 {
     p_filter.set_upstream(p_source);
     return p_filter;

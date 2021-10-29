@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <algorithm>
 
+#include <niu2x/log.h>
+
 namespace nx {
 
 template <class Elem, size_t capacity = 1024>
@@ -90,18 +92,13 @@ public:
 
     size_t size() const noexcept { return minus(tail_, head_); }
 
-    // void pop(size_t n) noexcept { head_ = add(head_, std::min(n, size())); }
-    // void push(size_t n) noexcept
-    // {
-    //     tail_ = add(tail_, std::min(n, user_capacity - size()));
-    // }
-    //
     void update_size(int delta) noexcept
     {
-        if (delta > 0)
+        if (delta > 0) {
             tail_ = add(tail_, std::min((size_t)delta, user_capacity - size()));
-        else
-            head_ = add(head_, std::min((size_t)-delta, size()));
+        } else {
+            head_ = add(head_, std::min((size_t)(-delta), size()));
+        }
     }
 
     arrayref<Elem> continuous_elems() noexcept
@@ -123,6 +120,19 @@ public:
             }
         } else {
             return arrayref<Elem> { data_ + tail_, head_ - tail_ - 1 };
+        }
+    }
+
+    void normalize()
+    {
+        if (head_) {
+            Elem temp[capacity];
+            memcpy(temp, data_ + head_, (capacity - head_) * sizeof(Elem));
+            memcpy(temp + capacity - head_, data_, (head_) * sizeof(Elem));
+            memcpy(data_, temp, capacity * sizeof(Elem));
+            size_t s = size();
+            head_ = 0;
+            tail_ = s;
         }
     }
 

@@ -152,14 +152,37 @@ private:
     uint8_t size_;
 };
 
+class base64 : public filter {
+public:
+    virtual void transform(ringbuf<uint8_t>&, ringbuf<uint8_t>&);
+};
+
+class unbase64 : public filter {
+public:
+    virtual void transform(ringbuf<uint8_t>&, ringbuf<uint8_t>&);
+};
+
+class cut : public filter {
+public:
+    cut(uint8_t chr);
+    virtual void transform(ringbuf<uint8_t>&, ringbuf<uint8_t>&);
+
+private:
+    uint8_t chr_;
+};
+
+API filter::proxy_t operator|(
+    filter::proxy_t p_source, filter::proxy_t p_filter);
+
 }; // namespace filter
+
+using filter_proxy = filter::filter::proxy_t;
 
 API bool operator|(source p_source, sink p_sink);
 
 API bool operator|(filter::filter::proxy_t p_filter, sink p_sink);
 
-API filter::filter::proxy_t operator|(
-    source p_source, filter::filter::proxy_t p_filter);
+API filter_proxy operator|(source p_source, filter_proxy p_filter);
 
 } // namespace nx::io
 
