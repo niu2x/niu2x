@@ -18,7 +18,7 @@ int filter::read(void* data, size_t bytes)
         return -eof;
 
     read_from_upstream();
-    transform(rbuf_, wbuf_);
+    transform(rbuf_, wbuf_, upstream_eof_);
     return write_to_downstream(data, bytes);
 }
 

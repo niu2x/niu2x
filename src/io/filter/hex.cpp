@@ -26,8 +26,10 @@ static uint8_t unhex_digit(uint8_t digit)
 
 } // namespace
 
-void hex::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
+void hex::transform(
+    ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf, bool upstream_eof)
 {
+    (void)upstream_eof;
     uint8_t chr;
     while ((!rbuf.empty()) && (wbuf.user_capacity - wbuf.size() >= 2)) {
         rbuf.get(chr);
@@ -41,8 +43,10 @@ unhex::unhex()
 {
 }
 
-void unhex::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
+void unhex::transform(
+    ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf, bool upstream_eof)
 {
+    (void)upstream_eof;
     while ((!rbuf.empty()) && (!wbuf.full())) {
 
         while (size_ < 2 && (!rbuf.empty())) {

@@ -9,8 +9,10 @@ cut::cut(uint8_t chr)
 {
 }
 
-void cut::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
+void cut::transform(
+    ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf, bool upstream_eof)
 {
+    (void)upstream_eof;
     uint8_t c;
     while ((!rbuf.empty()) && (!wbuf.full())) {
         rbuf.get(c);

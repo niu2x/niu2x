@@ -8,7 +8,8 @@ extern "C" {
 
 namespace nx::io::filter {
 
-void base64::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
+void base64::transform(
+    ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf, bool upstream_eof)
 {
     size_t inlen;
     do {
@@ -16,6 +17,14 @@ void base64::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
         auto output = wbuf.continuous_slots();
 
         inlen = std::min(BASE64_DECODE_OUT_SIZE(output.size), input.size);
+
+        if (!upstream_eof) {
+            inlen = inlen / 3 * 3;
+            if (inlen < 3) {
+                break;
+            }
+        }
+
         auto outlen = base64_encode(
             (const unsigned char*)(input.base), inlen, (char*)(output.base));
 
@@ -24,8 +33,10 @@ void base64::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
     } while (inlen > 0);
 }
 
-void unbase64::transform(ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf)
+void unbase64::transform(
+    ringbuf<uint8_t>& rbuf, ringbuf<uint8_t>& wbuf, bool upstream_eof)
 {
+    (void)upstream_eof;
     size_t inlen;
     do {
         rbuf.normalize();
