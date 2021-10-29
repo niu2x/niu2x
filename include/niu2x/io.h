@@ -107,7 +107,9 @@ public:
 
     virtual void transform(ringbuf<uint8_t>&, ringbuf<uint8_t>&) = 0;
 
-    proxy_t proxy() { return proxy_t(this); }
+    proxy_t proxy() noexcept { return proxy_t(this); }
+
+    operator proxy_t() noexcept { return proxy(); }
 
 private:
     void read_from_upstream();
@@ -133,7 +135,9 @@ public:
 }; // namespace filter
 
 API bool operator|(source p_source, sink p_sink);
+
 API bool operator|(filter::filter::proxy_t p_filter, sink p_sink);
+
 API filter::filter::proxy_t operator|(
     source p_source, filter::filter::proxy_t p_filter);
 
