@@ -185,6 +185,42 @@ private:
     void* zlib_ctx_;
 };
 
+class API digest : public filter {
+public:
+    /**
+     * @brief      { function_description }
+     *
+     * @param[in]  algorithm  The algorithm:
+                                "blake2b512",
+                                "blake2s256",
+                                "md5",
+                                "md5-sha1",
+                                "sha1",
+                                "sha224",
+                                "sha256",
+                                "sha3-224",
+                                "sha3-256",
+                                "sha3-384",
+                                "sha3-512",
+                                "sha384",
+                                "sha512",
+                                "sha512-224",
+                                "sha512-256",
+                                "shake128",
+                                "shake256",
+                                "sm3",
+                                "ssl3-md5",
+                                "ssl3-sha1",
+     */
+    digest(const char* algorithm);
+    virtual ~digest();
+
+    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+
+private:
+    void* digest_ctx_;
+};
+
 API filter::proxy_t operator|(
     filter::proxy_t p_source, filter::proxy_t p_filter);
 

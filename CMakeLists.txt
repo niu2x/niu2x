@@ -76,6 +76,7 @@ target_link_libraries(niu2x PUBLIC
 	# ${runtime}
 	ZLIB::ZLIB
 	Boost::headers
+	/usr/local/lib64/libcrypto.so
 )
 
 include(GenerateExportHeader)

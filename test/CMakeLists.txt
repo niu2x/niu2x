@@ -9,3 +9,6 @@ target_link_libraries(zlib PUBLIC niu2x)
 
 add_executable(unzlib "unzlib.cpp")
 target_link_libraries(unzlib PUBLIC niu2x)
+
+add_executable(digest "digest.cpp")
+target_link_libraries(digest PUBLIC niu2x)
