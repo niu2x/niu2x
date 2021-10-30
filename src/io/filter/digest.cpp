@@ -6,7 +6,7 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
-#include <niu2x/assert.h>
+#include "assert.h"
 
 #define OPENSSL_CHECK(condition, message)                                      \
     if (!(condition)) {                                                        \

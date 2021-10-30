@@ -4,7 +4,7 @@
 
 #include <zlib.h>
 
-#include <niu2x/assert.h>
+#include "assert.h"
 
 namespace nx::io::filter {
 
