@@ -49,7 +49,6 @@ bool cipher::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 
         if (isize > 0) {
             int iwriten;
-            NX_LOG_T("isize %d", isize);
             int status = EVP_CipherUpdate(
                 ctx, output.base, &iwriten, input.base, isize);
 
@@ -72,7 +71,6 @@ bool cipher::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
                     .c_str());
 
             wbuf.update_size(iwriten);
-            NX_LOG_T("final iwriten %d %lu", iwriten, wbuf.size());
             return true;
         } else {
             NX_LOG_E("no enough space for EVP_CipherFinal_ex");

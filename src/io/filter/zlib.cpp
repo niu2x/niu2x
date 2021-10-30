@@ -79,16 +79,11 @@ bool unzlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     strm_->avail_out = static_cast<uInt>(output.size);
     strm_->next_out = output.base;
 
-    NX_LOG_T("%lu %lu %d %lu", strm_->avail_in, strm_->avail_out, flush,
-        rbuf.size());
-
     auto ret = inflate(strm_, flush);
 
     NX_ASSERT(ret == Z_OK || ret == Z_STREAM_END || ret == Z_BUF_ERROR,
         "unzlib failed: %d", ret);
     unused(ret);
-
-    NX_LOG_T("update to %lu", input.size - strm_->avail_in);
 
     wbuf.update_size(output.size - strm_->avail_out);
     rbuf.update_size(-(input.size - strm_->avail_in));
