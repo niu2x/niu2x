@@ -7,6 +7,7 @@ namespace nx::io::filter {
 filter::filter()
 : upstream_(nullptr)
 , upstream_eof_(false)
+, transform_eof_(false)
 {
 }
 
@@ -14,13 +15,17 @@ filter::~filter() { }
 
 int filter::read(void* data, size_t bytes)
 {
-    if (upstream_eof_ && rbuf_.empty() && wbuf_.empty())
+    if (transform_eof_ && wbuf_.empty())
         return -eof;
+
     rbuf_.normalize();
     wbuf_.normalize();
 
     read_from_upstream();
-    transform(rbuf_, wbuf_, upstream_eof_);
+
+    transform_eof_ = transform_eof_
+        || (transform(rbuf_, wbuf_, upstream_eof_) && upstream_eof_
+            && rbuf_.empty());
 
     return write_to_downstream(data, bytes);
 }

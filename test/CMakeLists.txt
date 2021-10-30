@@ -12,3 +12,9 @@ target_link_libraries(unzlib PUBLIC niu2x)
 
 add_executable(digest "digest.cpp")
 target_link_libraries(digest PUBLIC niu2x)
+
+add_executable(encrypt "encrypt.cpp")
+target_link_libraries(encrypt PUBLIC niu2x)
+
+add_executable(decrypt "decrypt.cpp")
+target_link_libraries(decrypt PUBLIC niu2x)

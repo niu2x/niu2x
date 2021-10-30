@@ -55,7 +55,7 @@ private:
 
 namespace filter {
 
-using ringbuf = nx::ringbuf<uint8_t>;
+using ringbuf = nx::ringbuf<uint8_t, 4096>;
 
 class API filter : private boost::noncopyable {
 public:
@@ -94,7 +94,7 @@ public:
     void set_upstream(source p_upstream);
     void set_upstream(proxy_t p_upstream);
 
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof) = 0;
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof) = 0;
 
     proxy_t proxy() noexcept { return proxy_t(this); }
 
@@ -108,11 +108,12 @@ private:
     ringbuf rbuf_;
     ringbuf wbuf_;
     bool upstream_eof_;
+    bool transform_eof_;
 };
 
 class API simple_filter : public filter {
 public:
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
     virtual uint8_t transform(uint8_t chr) = 0;
 };
 
@@ -128,14 +129,14 @@ public:
 
 class API hex : public filter {
 public:
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
 class API unhex : public filter {
 public:
     unhex();
     virtual ~unhex() { }
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     uint8_t buf_[2];
@@ -144,19 +145,19 @@ private:
 
 class API base64 : public filter {
 public:
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
 class API unbase64 : public filter {
 public:
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
 class API cut : public filter {
 public:
     cut(uint8_t chr);
     virtual ~cut() { }
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     uint8_t chr_;
@@ -169,7 +170,7 @@ public:
     zlib(int level = default_level);
     virtual ~zlib();
 
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     void* zlib_ctx_;
@@ -179,7 +180,7 @@ class API unzlib : public filter {
 public:
     unzlib();
     virtual ~unzlib();
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     void* zlib_ctx_;
@@ -215,10 +216,129 @@ public:
     digest(const char* algorithm);
     virtual ~digest();
 
-    virtual void transform(ringbuf&, ringbuf&, bool upstream_eof);
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     void* digest_ctx_;
+};
+
+class API cipher : public filter {
+public:
+    /**
+     * @brief      { function_description }
+     *
+     * @param[in]  algorithm  The algorithm:
+                                    "aes-128-cbc",
+                                    "aes-128-cfb",
+                                    "aes-128-cfb1",
+                                    "aes-128-cfb8",
+                                    "aes-128-ctr",
+                                    "aes-128-ecb",
+                                    "aes-128-ofb",
+                                    "aes-192-cbc",
+                                    "aes-192-cfb",
+                                    "aes-192-cfb1",
+                                    "aes-192-cfb8",
+                                    "aes-192-ctr",
+                                    "aes-192-ecb",
+                                    "aes-192-ofb",
+                                    "aes-256-cbc",
+                                    "aes-256-cfb",
+                                    "aes-256-cfb1",
+                                    "aes-256-cfb8",
+                                    "aes-256-ctr",
+                                    "aes-256-ecb",
+                                    "aes-256-ofb",
+                                    "aes128",
+                                    "aes192",
+                                    "aes256",
+                                    "aria-128-cbc",
+                                    "aria-128-cfb",
+                                    "aria-128-cfb1",
+                                    "aria-128-cfb8",
+                                    "aria-128-ctr",
+                                    "aria-128-ecb",
+                                    "aria-128-ofb",
+                                    "aria-192-cbc",
+                                    "aria-192-cfb",
+                                    "aria-192-cfb1",
+                                    "aria-192-cfb8",
+                                    "aria-192-ctr",
+                                    "aria-192-ecb",
+                                    "aria-192-ofb",
+                                    "aria-256-cbc",
+                                    "aria-256-cfb",
+                                    "aria-256-cfb1",
+                                    "aria-256-cfb8",
+                                    "aria-256-ctr",
+                                    "aria-256-ecb",
+                                    "aria-256-ofb",
+                                    "aria128",
+                                    "aria192",
+                                    "aria256",
+                                    "camellia-128-cbc",
+                                    "camellia-128-cfb",
+                                    "camellia-128-cfb1",
+                                    "camellia-128-cfb8",
+                                    "camellia-128-ctr",
+                                    "camellia-128-ecb",
+                                    "camellia-128-ofb",
+                                    "camellia-192-cbc",
+                                    "camellia-192-cfb",
+                                    "camellia-192-cfb1",
+                                    "camellia-192-cfb8",
+                                    "camellia-192-ctr",
+                                    "camellia-192-ecb",
+                                    "camellia-192-ofb",
+                                    "camellia-256-cbc",
+                                    "camellia-256-cfb",
+                                    "camellia-256-cfb1",
+                                    "camellia-256-cfb8",
+                                    "camellia-256-ctr",
+                                    "camellia-256-ecb",
+                                    "camellia-256-ofb",
+                                    "camellia128",
+                                    "camellia192",
+                                    "camellia256",
+                                    "chacha20",
+                                    "des3",
+                                    "sm4",
+                                    "sm4-cbc",
+                                    "sm4-cfb",
+                                    "sm4-ctr",
+                                    "sm4-ecb",
+                                    "sm4-ofb",
+
+     */
+
+    enum { decrypt = 0, encrypt = 1 };
+
+    cipher(const char* algorithm, int mode, const uint8_t key[],
+        const uint8_t iv[]);
+    virtual ~cipher();
+
+    virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
+
+private:
+    void* cipher_ctx_;
+};
+
+class API encrypt : public cipher {
+public:
+    encrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
+    : cipher(algorithm, cipher::encrypt, key, iv)
+    {
+    }
+    virtual ~encrypt() { }
+};
+
+class API decrypt : public cipher {
+public:
+    decrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
+    : cipher(algorithm, cipher::decrypt, key, iv)
+    {
+    }
+    virtual ~decrypt() { }
 };
 
 API filter::proxy_t operator|(

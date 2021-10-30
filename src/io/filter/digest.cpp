@@ -35,7 +35,7 @@ digest::~digest()
     EVP_MD_CTX_free(ctx);
 }
 
-void digest::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool digest::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     auto* ctx = reinterpret_cast<EVP_MD_CTX*>(digest_ctx_);
 
@@ -50,10 +50,12 @@ void digest::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
             uint32_t digest_len;
             EVP_DigestFinal_ex(ctx, output.base, &digest_len);
             wbuf.update_size(digest_len);
+            return true;
         } else {
             NX_LOG_E("no enough space for digest");
         }
     }
+    return false;
 }
 
 } // namespace nx::io::filter

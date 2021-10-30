@@ -8,7 +8,7 @@ extern "C" {
 
 namespace nx::io::filter {
 
-void base64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool base64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     size_t inlen;
     do {
@@ -30,9 +30,10 @@ void base64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
         rbuf.update_size(-inlen);
         wbuf.update_size(outlen);
     } while (inlen > 0);
+    return true;
 }
 
-void unbase64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool unbase64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     size_t inlen;
@@ -49,6 +50,7 @@ void unbase64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
         rbuf.update_size(-inlen);
         wbuf.update_size(outlen);
     } while (inlen > 0);
+    return true;
 }
 
 } // namespace nx::io::filter

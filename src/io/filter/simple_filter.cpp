@@ -4,7 +4,7 @@
 
 namespace nx::io::filter {
 
-void simple_filter::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool simple_filter::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     uint8_t chr;
@@ -12,6 +12,7 @@ void simple_filter::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
         rbuf.get(chr);
         wbuf.put(transform(chr));
     }
+    return true;
 }
 
 } // namespace nx::io::filter

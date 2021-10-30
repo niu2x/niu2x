@@ -26,7 +26,7 @@ static uint8_t unhex_digit(uint8_t digit)
 
 } // namespace
 
-void hex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool hex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     uint8_t chr;
@@ -35,6 +35,7 @@ void hex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
         wbuf.put(hex_digit(chr >> 4));
         wbuf.put(hex_digit(chr & 0xF));
     }
+    return true;
 }
 
 unhex::unhex()
@@ -42,7 +43,7 @@ unhex::unhex()
 {
 }
 
-void unhex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool unhex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     while (!rbuf.empty() && !wbuf.full()) {
@@ -57,6 +58,7 @@ void unhex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
         wbuf.put((unhex_digit(buf_[0]) << 4) | unhex_digit(buf_[1]));
         size_ = 0;
     }
+    return true;
 }
 
 } // namespace nx::io::filter

@@ -43,7 +43,7 @@ unzlib::~unzlib()
     mem.free(zlib_ctx_);
 }
 
-void zlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool zlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     auto* strm_ = reinterpret_cast<z_stream*>(zlib_ctx_);
 
@@ -51,20 +51,22 @@ void zlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     auto output = wbuf.continuous_slots();
 
     strm_->avail_in = static_cast<uInt>(input.size);
-    int flush = upstream_eof ? Z_FINISH : Z_NO_FLUSH;
+    int flush = (upstream_eof && rbuf.empty()) ? Z_FINISH : Z_NO_FLUSH;
     strm_->next_in = const_cast<Bytef*>(input.base);
     strm_->avail_out = static_cast<uInt>(output.size);
     strm_->next_out = output.base;
 
     auto ret = deflate(strm_, flush);
 
-    NX_ASSERT(ret == Z_OK || ret == Z_STREAM_END, "zlib failed");
+    NX_ASSERT(ret == Z_OK || ret == Z_STREAM_END || ret == Z_BUF_ERROR,
+        "zlib failed");
 
     wbuf.update_size(output.size - strm_->avail_out);
     rbuf.update_size(-(input.size - strm_->avail_in));
+    return ret == Z_STREAM_END;
 }
 
-void unzlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool unzlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     auto* strm_ = reinterpret_cast<z_stream*>(zlib_ctx_);
 
@@ -72,20 +74,25 @@ void unzlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     auto output = wbuf.continuous_slots();
 
     strm_->avail_in = static_cast<uInt>(input.size);
-    int flush = (upstream_eof && !input.size) ? Z_FINISH : Z_NO_FLUSH;
+    int flush = (upstream_eof && rbuf.empty()) ? Z_FINISH : Z_NO_FLUSH;
     strm_->next_in = const_cast<Bytef*>(input.base);
     strm_->avail_out = static_cast<uInt>(output.size);
     strm_->next_out = output.base;
 
-    NX_LOG_T("%lu %lu %d", strm_->avail_in, strm_->avail_out, flush);
+    NX_LOG_T("%lu %lu %d %lu", strm_->avail_in, strm_->avail_out, flush,
+        rbuf.size());
 
     auto ret = inflate(strm_, flush);
 
-    NX_ASSERT(ret == Z_OK || ret == Z_STREAM_END, "unzlib failed: %d", ret);
+    NX_ASSERT(ret == Z_OK || ret == Z_STREAM_END || ret == Z_BUF_ERROR,
+        "unzlib failed: %d", ret);
     unused(ret);
+
+    NX_LOG_T("update to %lu", input.size - strm_->avail_in);
 
     wbuf.update_size(output.size - strm_->avail_out);
     rbuf.update_size(-(input.size - strm_->avail_in));
+    return ret == Z_STREAM_END;
 }
 
 namespace {

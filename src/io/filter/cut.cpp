@@ -9,7 +9,7 @@ cut::cut(uint8_t chr)
 {
 }
 
-void cut::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool cut::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     uint8_t c;
@@ -18,6 +18,7 @@ void cut::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
         if (c != chr_)
             wbuf.put(c);
     }
+    return true;
 }
 
 } // namespace nx::io::filter
