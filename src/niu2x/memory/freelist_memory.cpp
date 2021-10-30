@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-#include "memory-allocators/FreeListAllocator.h"
+#include "niu2x/memory-allocators/FreeListAllocator.h"
 
 namespace nx {
 
@@ -14,6 +14,7 @@ freelist_memory::freelist_memory(size_t mem_size)
     allocator->Init();
     delegate_ = allocator;
 }
+
 freelist_memory::~freelist_memory()
 {
     auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);

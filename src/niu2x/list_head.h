@@ -3,11 +3,9 @@
 
 #include <stdlib.h>
 
-#include <niu2x/api.h>
-
 namespace nx {
 
-struct API list_head {
+struct list_head {
     struct list_head* prev;
     struct list_head* next;
 };

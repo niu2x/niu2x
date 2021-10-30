@@ -29,7 +29,9 @@ include(find_dependencies)
 
 add_library(niu2x "")
 target_include_directories(niu2x 
-	PUBLIC include ${CMAKE_BINARY_DIR}
+	PUBLIC 
+		include 
+		${CMAKE_BINARY_DIR}
 	PRIVATE src
 )
 

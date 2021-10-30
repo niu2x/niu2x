@@ -4,13 +4,12 @@
 #include <exception>
 #include <string>
 
-#include <niu2x/api.h>
-#include <niu2x/limits.h>
+// #include "limits.h"
 
 namespace nx {
 
 // exception
-class API exception : public std::exception {
+class exception : public std::exception {
 public:
     exception(const char* msg, const char* file, uint32_t line)
     {
@@ -26,7 +25,8 @@ public:
     virtual const char* what() const noexcept override { return msg_; }
 
 private:
-    enum { buffer_size = limits::max_error_message };
+    // enum { buffer_size = limits::max_error_message };
+    enum { buffer_size = 1024 };
     char msg_[buffer_size];
 };
 

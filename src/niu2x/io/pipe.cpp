@@ -1,7 +1,8 @@
 #include <niu2x/io.h>
 #include <niu2x/log.h>
 #include <niu2x/ringbuf.h>
-#include "utils.h"
+
+#include "niu2x/utils.h"
 
 namespace nx::io {
 

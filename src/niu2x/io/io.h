@@ -3,7 +3,7 @@
 
 #include <niu2x/io.h>
 
-#include "utils.h"
+#include "niu2x/utils.h"
 
 namespace nx::io {
 
@@ -14,10 +14,10 @@ template <class Device>
 int read(Device device, void* data, size_t bytes);
 
 template <>
-API int read(std::istream* device, void* data, size_t bytes);
+int read(std::istream* device, void* data, size_t bytes);
 
 template <>
-API int write(std::ostream* device, const void* data, size_t bytes);
+int write(std::ostream* device, const void* data, size_t bytes);
 
 }; // namespace nx::io
 
