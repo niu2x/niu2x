@@ -5,7 +5,7 @@
 namespace nx::io {
 
 template <>
-API int read(std::istream* device, void* data, size_t bytes)
+int read(std::istream* device, void* data, size_t bytes)
 {
     device->read(reinterpret_cast<char*>(data), bytes);
     if (device->good()) {
@@ -21,7 +21,7 @@ API int read(std::istream* device, void* data, size_t bytes)
 }
 
 template <>
-API int write(std::ostream* device, const void* data, size_t bytes)
+int write(std::ostream* device, const void* data, size_t bytes)
 {
     device->write(reinterpret_cast<const char*>(data), bytes);
     if (device->good()) {

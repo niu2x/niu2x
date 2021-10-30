@@ -60,8 +60,7 @@ target_compile_definitions(niu2x PRIVATE niu2x_EXPORTS)
 
 # list(APPEND runtime
 # 	glfw
-# 	GLEW::GLEW
-#     OpenGL::OpenGL
+
 # )
 
 # if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -79,6 +78,9 @@ target_link_libraries(niu2x PUBLIC
 	ZLIB::ZLIB
 	Boost::headers
 	/usr/local/lib64/libcrypto.so
+	GLEW::GLEW
+	glfw
+    OpenGL::OpenGL
 )
 
 include(GenerateExportHeader)

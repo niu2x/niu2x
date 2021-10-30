@@ -6,7 +6,7 @@
 
 namespace nx::io {
 
-API bool operator|(source p_source, sink p_sink)
+bool operator|(source p_source, sink p_sink)
 {
     ringbuf<unsigned char> buf;
 
@@ -44,7 +44,7 @@ API bool operator|(source p_source, sink p_sink)
     return true;
 }
 
-API bool operator|(filter_proxy p_source, sink p_sink)
+bool operator|(filter_proxy p_source, sink p_sink)
 {
     ringbuf<unsigned char> buf;
     bool source_eof = false;
@@ -81,7 +81,7 @@ API bool operator|(filter_proxy p_source, sink p_sink)
     return true;
 }
 
-API filter_proxy operator|(source p_source, filter_proxy p_filter)
+filter_proxy operator|(source p_source, filter_proxy p_filter)
 {
     p_filter.set_upstream(p_source);
     return p_filter;

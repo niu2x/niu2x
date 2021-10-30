@@ -15,6 +15,6 @@ find_package(ZLIB REQUIRED)
 # message(STATUS "OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES}")
 
 
-# find_package(glfw3)
-# find_package(OpenGL)
-# find_package(GLEW)
+find_package(glfw3)
+find_package(OpenGL)
+find_package(GLEW)

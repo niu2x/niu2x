@@ -91,8 +91,7 @@ int filter::write_to_downstream(void* p_data, size_t bytes)
     return bytes;
 }
 
-API filter::proxy_t operator|(
-    filter::proxy_t p_source, filter::proxy_t p_filter)
+filter::proxy_t operator|(filter::proxy_t p_source, filter::proxy_t p_filter)
 {
     p_filter.set_upstream(p_source);
     return p_filter;

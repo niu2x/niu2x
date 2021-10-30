@@ -6,6 +6,6 @@ namespace {
 mallocfree_memory memory;
 }
 
-API memory_proxy mem(&memory);
+memory_proxy mem(&memory);
 
 } // namespace nx::io
