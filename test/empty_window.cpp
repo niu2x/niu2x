@@ -10,12 +10,13 @@ int main()
 {
     nx::gfx::window_config cfg;
     cfg.title = "empty window";
+    cfg.options = nx::gfx::MSAA;
     cfg.width = 800;
     cfg.height = 600;
     cfg.setup = nullptr;
     cfg.cleanup = nullptr;
     cfg.update = update;
-    nx::gfx::run(cfg);
 
+    nx::gfx::run(cfg);
     return 0;
 }

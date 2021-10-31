@@ -3,6 +3,10 @@
 
 #include <string>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
 #include <niu2x/api.h>
 
 namespace nx::gfx {
@@ -21,6 +25,9 @@ struct API window_config {
 };
 
 API void run(const window_config& c);
+
+struct API texture_t {
+};
 
 } // namespace nx::gfx
 
