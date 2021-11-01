@@ -50,7 +50,7 @@
 
 namespace nx {
 
-struct API log {
+struct NXAPI log {
     static void write(
         int lvl, const char* filename, int line, const char* message, ...);
 };

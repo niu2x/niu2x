@@ -86,7 +86,7 @@ target_link_libraries(niu2x PUBLIC
 include(GenerateExportHeader)
 generate_export_header(niu2x
 	EXPORT_FILE_NAME niu2x/api.h
-	EXPORT_MACRO_NAME API
+	EXPORT_MACRO_NAME NXAPI
 	DEPRECATED_MACRO_NAME DEPRECATED_API
 	INCLUDE_GUARD_NAME NIU2X_API_H
 )

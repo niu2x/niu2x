@@ -14,16 +14,16 @@
 
 namespace nx::io {
 
-extern API memory_proxy mem;
+extern NXAPI memory_proxy mem;
 
-enum API status {
+enum NXAPI status {
     ok = 0,
     again,
     eof,
     fail,
 };
 
-class API source {
+class NXAPI source {
 public:
     source(std::istream& stream);
     ~source();
@@ -39,7 +39,7 @@ private:
     std::variant<std::istream*> delegate_;
 };
 
-class API sink {
+class NXAPI sink {
 public:
     sink(std::ostream& stream);
     ~sink();
@@ -57,7 +57,7 @@ namespace filter {
 
 using ringbuf = nx::ringbuf<uint8_t, 4096>;
 
-class API filter : private boost::noncopyable {
+class NXAPI filter : private boost::noncopyable {
 public:
     class proxy_t {
     public:
@@ -111,28 +111,28 @@ private:
     bool transform_eof_;
 };
 
-class API simple_filter : public filter {
+class NXAPI simple_filter : public filter {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
     virtual uint8_t transform(uint8_t chr) = 0;
 };
 
-class API lower : public simple_filter {
+class NXAPI lower : public simple_filter {
 public:
     virtual uint8_t transform(uint8_t chr) { return tolower(chr); }
 };
 
-class API upper : public simple_filter {
+class NXAPI upper : public simple_filter {
 public:
     virtual uint8_t transform(uint8_t chr) { return toupper(chr); }
 };
 
-class API hex : public filter {
+class NXAPI hex : public filter {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class API unhex : public filter {
+class NXAPI unhex : public filter {
 public:
     unhex();
     virtual ~unhex() { }
@@ -143,17 +143,17 @@ private:
     uint8_t size_;
 };
 
-class API base64 : public filter {
+class NXAPI base64 : public filter {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class API unbase64 : public filter {
+class NXAPI unbase64 : public filter {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class API cut : public filter {
+class NXAPI cut : public filter {
 public:
     cut(uint8_t chr);
     virtual ~cut() { }
@@ -163,7 +163,7 @@ private:
     uint8_t chr_;
 };
 
-class API zlib : public filter {
+class NXAPI zlib : public filter {
 public:
     enum { default_level = 6 };
 
@@ -176,7 +176,7 @@ private:
     void* zlib_ctx_;
 };
 
-class API unzlib : public filter {
+class NXAPI unzlib : public filter {
 public:
     unzlib();
     virtual ~unzlib();
@@ -186,7 +186,7 @@ private:
     void* zlib_ctx_;
 };
 
-class API digest : public filter {
+class NXAPI digest : public filter {
 public:
     /**
      * @brief      { function_description }
@@ -222,7 +222,7 @@ private:
     void* digest_ctx_;
 };
 
-class API cipher : public filter {
+class NXAPI cipher : public filter {
 public:
     /**
      * @brief      { function_description }
@@ -323,7 +323,7 @@ private:
     void* cipher_ctx_;
 };
 
-class API encrypt : public cipher {
+class NXAPI encrypt : public cipher {
 public:
     encrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
     : cipher(algorithm, cipher::encrypt, key, iv)
@@ -332,7 +332,7 @@ public:
     virtual ~encrypt() { }
 };
 
-class API decrypt : public cipher {
+class NXAPI decrypt : public cipher {
 public:
     decrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
     : cipher(algorithm, cipher::decrypt, key, iv)
@@ -341,18 +341,18 @@ public:
     virtual ~decrypt() { }
 };
 
-API filter::proxy_t operator|(
+NXAPI filter::proxy_t operator|(
     filter::proxy_t p_source, filter::proxy_t p_filter);
 
 }; // namespace filter
 
 using filter_proxy = filter::filter::proxy_t;
 
-API bool operator|(source p_source, sink p_sink);
+NXAPI bool operator|(source p_source, sink p_sink);
 
-API bool operator|(filter::filter::proxy_t p_filter, sink p_sink);
+NXAPI bool operator|(filter::filter::proxy_t p_filter, sink p_sink);
 
-API filter_proxy operator|(source p_source, filter_proxy p_filter);
+NXAPI filter_proxy operator|(source p_source, filter_proxy p_filter);
 
 } // namespace nx::io
 

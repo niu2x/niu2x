@@ -4,19 +4,30 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-static void update(double dt) { glClear(GL_COLOR_BUFFER_BIT); }
+namespace gfx = nx::gfx;
+
+static void setup() { gfx::set_clear_color(gfx::rgba(255, 0, 0, 255)); }
+
+static void cleanup() { }
+
+static void update(double dt)
+{
+    gfx::begin();
+    gfx::clear(0);
+    gfx::end();
+}
 
 int main()
 {
-    nx::gfx::window_config cfg;
+    gfx::window_config cfg;
     cfg.title = "empty window";
-    cfg.options = nx::gfx::MSAA;
+    cfg.options = gfx::MSAA;
     cfg.width = 800;
     cfg.height = 600;
-    cfg.setup = nullptr;
-    cfg.cleanup = nullptr;
+    cfg.setup = setup;
+    cfg.cleanup = cleanup;
     cfg.update = update;
 
-    nx::gfx::run(cfg);
+    gfx::run(cfg);
     return 0;
 }

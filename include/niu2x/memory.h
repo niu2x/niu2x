@@ -14,7 +14,7 @@
 
 namespace nx {
 
-class API memory : private boost::noncopyable {
+class NXAPI memory : private boost::noncopyable {
 public:
     memory();
     virtual ~memory() = 0;
@@ -23,7 +23,7 @@ public:
     virtual void free(void* ptr) = 0;
 };
 
-class API freelist_memory : public memory {
+class NXAPI freelist_memory : public memory {
 public:
     freelist_memory(size_t capacity);
     virtual ~freelist_memory();
@@ -35,7 +35,7 @@ private:
     void* delegate_;
 };
 
-class API mallocfree_memory : public memory {
+class NXAPI mallocfree_memory : public memory {
 public:
     mallocfree_memory();
     virtual ~mallocfree_memory();
@@ -44,7 +44,7 @@ public:
     virtual void free(void* ptr);
 };
 
-class API memory_proxy {
+class NXAPI memory_proxy {
 public:
     memory_proxy(memory* delegate)
     : delegate_(delegate)

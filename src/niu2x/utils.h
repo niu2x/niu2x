@@ -43,4 +43,6 @@ constexpr inline int stoi(const char* str, int value)
 
 } // namespace nx
 
+#define NX_OFFSET_OF(mt, field) (ptrdiff_t)(&(((mt*)nullptr)->field))
+
 #endif

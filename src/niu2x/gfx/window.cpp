@@ -34,8 +34,6 @@ void imgui_update();
 
 void run(const window_config& c)
 {
-    constexpr auto all_buffer_bit
-        = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
     glfw_setup();
 
     auto glfw_window = create_glfw_window(c);
@@ -63,8 +61,6 @@ void run(const window_config& c)
         last_now = now;
 
         glfwPollEvents();
-
-        glClear(all_buffer_bit);
 
         update(dt);
 
