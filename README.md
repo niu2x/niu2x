@@ -3,6 +3,9 @@
 - [io](#io)
 - gfx (TODO)
 
+# Examples
+please goto test/*.cpp
+
 ## log
 ````
 NX_LOG_T(format, ...);
