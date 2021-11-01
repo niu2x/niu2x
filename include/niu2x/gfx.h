@@ -27,7 +27,14 @@ struct API window_config {
 API void run(const window_config& c);
 
 struct API texture_t {
+    GLuint name;
 };
+
+struct API vertex_buffer_t {
+    GLuint name;
+};
+
+// API vertex_buffer_t create_vertex_buffer
 
 } // namespace nx::gfx
 
