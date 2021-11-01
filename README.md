@@ -1,6 +1,6 @@
 # Modules
-- [log](##log)
-- [io](##io)
+- [log](#log)
+- [io](#io)
 - gfx (TODO)
 
 ## log
