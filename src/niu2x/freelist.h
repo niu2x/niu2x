@@ -3,7 +3,7 @@
 
 #include <limits>
 
-#include <niu2x/utils.h>
+#include "utils.h"
 
 namespace nx {
 
@@ -16,7 +16,7 @@ public:
     static constexpr rid nil = 0;
 
     template <class TT>
-    union API slot {
+    union slot {
         TT data;
         rid next;
         slot() { }

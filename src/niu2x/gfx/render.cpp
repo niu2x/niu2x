@@ -15,7 +15,7 @@ static constexpr int cmds_count = 4096;
 static struct cmd_t {
     cmdtype type;
     list_head list;
-
+    vertex_buffer_t* vbo;
 } cmds[cmds_count];
 
 static constexpr int cmd_builder_queue_capacity = 16;
@@ -81,6 +81,12 @@ void set_clear_color(color_t color)
 {
     glClearColor(color.rgba.r / 255.0, color.rgba.g / 255.0,
         color.rgba.b / 255.0, color.rgba.a / 255.0);
+}
+
+void set_vertex_buffer(vertex_buffer_t* vbo)
+{
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.vbo = vbo;
 }
 
 static void handle_cmd_clear(cmd_t* cmd)

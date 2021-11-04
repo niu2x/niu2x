@@ -6,9 +6,15 @@
 
 namespace gfx = nx::gfx;
 
-static void setup() { gfx::set_clear_color(gfx::rgba(255, 0, 0, 255)); }
+static gfx::vertex_buffer_t* vbo;
 
-static void cleanup() { }
+static void setup()
+{
+    gfx::set_clear_color(gfx::rgba(255, 0, 0, 255));
+    vbo = gfx::create_vertex_buffer();
+}
+
+static void cleanup() { gfx::destroy(vbo); }
 
 static void update(double dt)
 {
