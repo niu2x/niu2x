@@ -18,6 +18,10 @@ static struct cmd_t {
 
 } cmds[cmds_count];
 
+static constexpr int cmd_builder_queue_capacity = 16;
+static struct cmd_t cmd_builder_queue[cmd_builder_queue_capacity];
+static int cmd_builder_queue_size = 0;
+
 static int next_cmd_idx = 0;
 
 #define CHECK_CMD_COUNT()                                                      \
@@ -63,8 +67,12 @@ void end()
 void clear(layer_t layer)
 {
     CHECK_CMD_COUNT();
+
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.type = cmdtype::clear;
+
     auto* cmd = &cmds[next_cmd_idx++];
-    cmd->type = cmdtype::clear;
+    *cmd = cmd_builder;
 
     list_add_tail(&(cmd->list), &(layers[layer].cmd_list));
 }

@@ -2,9 +2,10 @@
 
 #include <niu2x/io.h>
 
+namespace io = nx::io;
 int main()
 {
-    nx::io::filter::zlib zlib;
-    nx::io::source(std::cin) | zlib | nx::io::sink(std::cout);
+    io::filter::zlib zlib;
+    io::source(std::cin) | zlib | io::sink(std::cout);
     return 0;
 }
