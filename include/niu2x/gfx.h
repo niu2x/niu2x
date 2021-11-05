@@ -76,7 +76,10 @@ struct NXAPI program_t : object_t {
 };
 
 NXAPI vertex_buffer_t* create_vertex_buffer(
-    vertex_layout_t layout, uint32_t vertices_count);
+    vertex_layout_t layout, uint32_t vertices_count, void* data = nullptr);
+
+NXAPI program_t* create_program(const char* vert, const char* frag);
+
 NXAPI void destroy(object_t*);
 
 // NXAPI void kick();
@@ -104,8 +107,11 @@ NXAPI void begin();
 NXAPI void end();
 
 NXAPI void clear(layer_t layer);
+NXAPI void draw_array(layer_t layer, uint32_t start, uint32_t count);
+
 NXAPI void set_clear_color(color_t color);
 NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
+NXAPI void set_program(program_t* program);
 
 } // namespace nx::gfx
 

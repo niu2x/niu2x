@@ -9,7 +9,7 @@ namespace nx::gfx {
 
 namespace {
 struct object_type {
-    enum { vertex_buffer };
+    enum { vertex_buffer, program };
 };
 } // namespace
 
@@ -26,11 +26,12 @@ struct object_type {
 #define destroy_object(list, obj) list.free(obj->id);
 
 static freelist<vertex_buffer_t, 1024> vertex_buffer_freelist;
+static freelist<program_t, 1024> program_freelist;
 
-static size_t vertex_sizeof(vertex_layout_t layout)
+size_t vertex_sizeof(vertex_layout_t layout)
 {
     size_t size = 0;
-    for (int i = 0; i < 8; i++, layout >>= 4) {
+    for (int i = 0; i < 16; i++, layout >>= 4) {
         auto attr = (vertex_attr_type)(layout & 0xF);
         switch (attr) {
             case vertex_attr_type::nil: {
@@ -62,15 +63,16 @@ static size_t vertex_sizeof(vertex_layout_t layout)
 }
 
 vertex_buffer_t* create_vertex_buffer(
-    vertex_layout_t layout, uint32_t vertices_count)
+    vertex_layout_t layout, uint32_t vertices_count, void* data)
 {
     auto* obj = (create_object(vertex_buffer_freelist, vertex_buffer));
 
     glGenBuffers(1, &(obj->name));
+    obj->layout = layout;
 
     glBindBuffer(GL_ARRAY_BUFFER, obj->name);
     size_t buffer_size = vertex_sizeof(layout) * vertices_count;
-    glBufferData(GL_ARRAY_BUFFER, buffer_size, 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, buffer_size, data, GL_DYNAMIC_DRAW);
 
     return obj;
 }
@@ -79,6 +81,76 @@ static void destroy_vertex_buffer(vertex_buffer_t* obj)
 {
     glDeleteBuffers(1, &(obj->name));
     destroy_object(vertex_buffer_freelist, obj);
+}
+
+static GLuint create_shader(GLenum shader_type, const char* source_code)
+{
+    auto name = glCreateShader(shader_type);
+    glShaderSource(name, 1, &source_code, nullptr);
+    glCompileShader(name);
+    GLint status;
+    glGetShaderiv(name, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE) {
+        GLint max_len;
+        glGetShaderiv(name, GL_INFO_LOG_LENGTH, &max_len);
+        std::vector<GLchar> log(max_len);
+        glGetShaderInfoLog(name, max_len, &max_len, &log[0]);
+        NX_LOG_E("shader compile failed: %s", log.data());
+        glDeleteShader(name);
+        name = 0;
+    }
+    return name;
+}
+static void destroy_shader(GLuint name) { glDeleteShader(name); }
+
+static GLuint create_program(GLuint vert, GLuint frag)
+{
+    auto name = glCreateProgram();
+    glAttachShader(name, vert);
+    glAttachShader(name, frag);
+
+    glLinkProgram(name);
+
+    GLint status = 0;
+    glGetProgramiv(name, GL_LINK_STATUS, &status);
+    if (status != GL_TRUE) {
+        GLint max_len = 0;
+        glGetProgramiv(name, GL_INFO_LOG_LENGTH, &max_len);
+        std::vector<GLchar> log(max_len);
+        glGetProgramInfoLog(name, max_len, &max_len, &log[0]);
+        NX_LOG_E("program link failed: %s", log.data());
+        glDeleteProgram(name);
+        name = 0;
+    }
+    return name;
+}
+static void destroy_program(GLuint name) { glDeleteProgram(name); }
+
+program_t* create_program(const char* vert, const char* frag)
+{
+
+    auto vert_name = create_shader(GL_VERTEX_SHADER, vert);
+    NX_ASSERT(vert_name != 0, "vert compile fail");
+
+    auto frag_name = create_shader(GL_FRAGMENT_SHADER, frag);
+    NX_ASSERT(frag_name != 0, "frag compile fail");
+
+    auto progame_name = create_program(vert_name, frag_name);
+    NX_ASSERT(progame_name != 0, "program link fail");
+
+    destroy_shader(vert_name);
+    destroy_shader(frag_name);
+
+    auto* obj = (create_object(program_freelist, program));
+    obj->name = progame_name;
+    return obj;
+}
+
+static void destroy_program(program_t* obj)
+{
+
+    destroy_program(obj->name);
+    destroy_object(program_freelist, obj);
 }
 
 void destroy(object_t* obj)
@@ -91,6 +163,7 @@ void destroy(object_t* obj)
 
     switch (obj->type) {
         CASE(vertex_buffer, vertex_buffer_t, destroy_vertex_buffer)
+        CASE(program, program_t, destroy_program)
     }
 
 #undef CASE
