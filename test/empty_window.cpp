@@ -7,11 +7,13 @@
 namespace gfx = nx::gfx;
 
 static gfx::vertex_buffer_t* vbo;
+static auto vertex_layout = gfx::vertex_layout(
+    gfx::vertex_attr_type::position, gfx::vertex_attr_type::color);
 
 static void setup()
 {
     gfx::set_clear_color(gfx::rgba(255, 0, 0, 255));
-    vbo = gfx::create_vertex_buffer();
+    vbo = gfx::create_vertex_buffer(vertex_layout, 3);
 }
 
 static void cleanup() { gfx::destroy(vbo); }
