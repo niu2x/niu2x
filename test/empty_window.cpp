@@ -7,9 +7,11 @@
 namespace gfx = nx::gfx;
 
 static gfx::vertex_buffer_t* vbo;
+static gfx::indice_buffer_t* ibo;
 static auto vertex_layout = gfx::vertex_layout(
     gfx::vertex_attr_type::position, gfx::vertex_attr_type::color);
 static gfx::program_t* program = nullptr;
+static gfx::render_state_t render_state = gfx::CULL_BACK | gfx::CULL_FRONT;
 
 static const char* vert_shader = R"RAW(
 #version 300 es
@@ -42,42 +44,25 @@ void main()
 
 static void setup()
 {
-    static float vertices[] = {
-        0,
-        0,
-        0,
-
-        1,
-        1,
-        1,
-        1,
-
-        0,
-        1,
-        0,
-
-        1,
-        1,
-        1,
-        1,
-
-        1,
-        0,
-        0,
-
-        1,
-        0,
-        1,
-        1,
+    // clang-format off
+    static float vertices[][7] = {
+        { 0, 0, 0, 1, 0, 1, 1 },
+        { 0, 1, 0, 1, 1, 0, 1 },
+        { 1, 0, 0, 0, 1, 1, 1 },
+        { 1, 1, 0, 1, 1, 1, 1 },
     };
+    // clang-format on
+    static uint32_t indices[] = { 0, 2, 1, 1, 2, 3 };
     gfx::set_clear_color(gfx::rgba(255, 0, 0, 255));
-    vbo = gfx::create_vertex_buffer(vertex_layout, 3, vertices);
+    vbo = gfx::create_vertex_buffer(vertex_layout, 4, vertices);
+    ibo = gfx::create_indice_buffer(6, indices);
     program = gfx::create_program(vert_shader, frag_shader);
 }
 
 static void cleanup()
 {
     gfx::destroy(vbo);
+    gfx::destroy(ibo);
     gfx::destroy(program);
 }
 
@@ -85,9 +70,12 @@ static void update(double dt)
 {
     gfx::begin();
     gfx::clear(0);
+    gfx::reset();
     gfx::set_vertex_buffer(vbo);
+    gfx::set_indice_buffer(ibo);
     gfx::set_program(program);
-    gfx::draw_array(0, 0, 3);
+    gfx::set_render_state(render_state);
+    gfx::draw_element(0, 0, 6);
     gfx::end();
 }
 

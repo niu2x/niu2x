@@ -147,7 +147,7 @@ void imgui_cleanup()
 
 void imgui_update()
 {
-    static bool show_demo_window = true;
+    static bool show_demo_window = false;
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();

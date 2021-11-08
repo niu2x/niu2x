@@ -1,5 +1,4 @@
-#include <niu2x/gfx.h>
-
+#include "gfx.h"
 #include "niu2x/utils.h"
 #include "niu2x/list_head.h"
 #include "niu2x/assert.h"
@@ -9,8 +8,9 @@ namespace nx::gfx {
 
 namespace {
 struct object_type {
-    enum { vertex_buffer, program };
+    enum { vertex_buffer, indice_buffer, program };
 };
+
 } // namespace
 
 #define create_object(list, type_t)                                            \
@@ -26,6 +26,7 @@ struct object_type {
 #define destroy_object(list, obj) list.free(obj->id);
 
 static freelist<vertex_buffer_t, 1024> vertex_buffer_freelist;
+static freelist<indice_buffer_t, 1024> indice_buffer_freelist;
 static freelist<program_t, 1024> program_freelist;
 
 size_t vertex_sizeof(vertex_layout_t layout)
@@ -75,6 +76,26 @@ vertex_buffer_t* create_vertex_buffer(
     glBufferData(GL_ARRAY_BUFFER, buffer_size, data, GL_DYNAMIC_DRAW);
 
     return obj;
+}
+
+indice_buffer_t* create_indice_buffer(uint32_t indices_count, void* data)
+{
+
+    auto* obj = (create_object(indice_buffer_freelist, indice_buffer));
+
+    glGenBuffers(1, &(obj->name));
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, obj->name);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_count * sizeof(indice_t),
+        data, GL_DYNAMIC_DRAW);
+
+    return obj;
+}
+
+static void destroy_indice_buffer(indice_buffer_t* obj)
+{
+    glDeleteBuffers(1, &(obj->name));
+    destroy_object(indice_buffer_freelist, obj);
 }
 
 static void destroy_vertex_buffer(vertex_buffer_t* obj)
@@ -163,6 +184,7 @@ void destroy(object_t* obj)
 
     switch (obj->type) {
         CASE(vertex_buffer, vertex_buffer_t, destroy_vertex_buffer)
+        CASE(indice_buffer, indice_buffer_t, destroy_indice_buffer)
         CASE(program, program_t, destroy_program)
     }
 

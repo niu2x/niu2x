@@ -78,11 +78,12 @@ struct NXAPI program_t : object_t {
 NXAPI vertex_buffer_t* create_vertex_buffer(
     vertex_layout_t layout, uint32_t vertices_count, void* data = nullptr);
 
+NXAPI indice_buffer_t* create_indice_buffer(
+    uint32_t indices_count, void* data = nullptr);
+
 NXAPI program_t* create_program(const char* vert, const char* frag);
 
 NXAPI void destroy(object_t*);
-
-// NXAPI void kick();
 
 struct NXAPI rgba8888_t {
     uint8_t r;
@@ -103,15 +104,26 @@ inline color_t rgba(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 
 using layer_t = uint8_t;
 
+enum NXAPI render_state_constant {
+    CULL_FRONT = 1 << 0,
+    CULL_BACK = 1 << 1,
+};
+
+using render_state_t = uint32_t;
+
 NXAPI void begin();
 NXAPI void end();
 
 NXAPI void clear(layer_t layer);
 NXAPI void draw_array(layer_t layer, uint32_t start, uint32_t count);
+NXAPI void draw_element(layer_t layer, uint32_t start, uint32_t count);
 
 NXAPI void set_clear_color(color_t color);
 NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
+NXAPI void set_indice_buffer(indice_buffer_t* vbo);
 NXAPI void set_program(program_t* program);
+NXAPI void set_render_state(render_state_t rs);
+NXAPI void reset();
 
 } // namespace nx::gfx
 

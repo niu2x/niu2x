@@ -1,15 +1,17 @@
-#include <niu2x/gfx.h>
+#include "gfx.h"
+
+#include <string.h>
 
 #include "niu2x/utils.h"
 #include "niu2x/list_head.h"
 #include "niu2x/assert.h"
-#include "gfx.h"
 
 namespace nx::gfx {
 
 enum class cmdtype {
     clear,
     draw_array,
+    draw_element,
 };
 
 static constexpr int cmds_count = 4096;
@@ -18,8 +20,9 @@ static struct cmd_t {
     cmdtype type;
     list_head list;
     vertex_buffer_t* vbo;
+    indice_buffer_t* ibo;
     program_t* program;
-
+    render_state_t render_state;
     uint32_t start;
     uint32_t count;
 } cmds[cmds_count];
@@ -35,6 +38,7 @@ static int next_cmd_idx = 0;
 
 static void handle_cmd_clear(cmd_t*);
 static void handle_cmd_draw_array(cmd_t* cmd);
+static void handle_cmd_draw_element(cmd_t* cmd);
 
 static constexpr int renderlayers_count = 16;
 
@@ -70,9 +74,19 @@ void end()
                     handle_cmd_draw_array(cmd);
                     break;
                 }
+                case cmdtype::draw_element: {
+                    handle_cmd_draw_element(cmd);
+                    break;
+                }
             }
         }
     }
+}
+
+void reset()
+{
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    memset(&cmd_builder, 0, sizeof(cmd_t));
 }
 
 void clear(layer_t layer)
@@ -113,6 +127,12 @@ void set_vertex_buffer(vertex_buffer_t* vbo)
     cmd_builder.vbo = vbo;
 }
 
+void set_indice_buffer(indice_buffer_t* ibo)
+{
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.ibo = ibo;
+}
+
 void set_program(program_t* program)
 {
     auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
@@ -132,8 +152,6 @@ static void vertex_layout_active(vertex_layout_t layout)
 {
 
     auto size = vertex_sizeof(layout);
-
-    NX_LOG_D("size %lu, %lu", layout, size);
 
     size_t offset = 0;
     for (int i = 0; i < 16; i++, layout >>= 4) {
@@ -181,13 +199,63 @@ static void vertex_layout_active(vertex_layout_t layout)
     }
 }
 
+void draw_element(layer_t layer, uint32_t start, uint32_t count)
+{
+    CHECK_CMD_COUNT();
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.type = cmdtype::draw_element;
+    cmd_builder.start = start;
+    cmd_builder.count = count;
+    auto* cmd = &cmds[next_cmd_idx++];
+    *cmd = cmd_builder;
+    list_add_tail(&(cmd->list), &(layers[layer].cmd_list));
+}
+
+static void handle_render_state(render_state_t rs)
+{
+    static render_state_t last_render_state = (render_state_t)0;
+    if (last_render_state != rs) {
+        last_render_state = rs;
+        auto should_cull_front = (rs & CULL_FRONT);
+        auto should_cull_back = (rs & CULL_BACK);
+        if (should_cull_front || should_cull_back) {
+            glEnable(GL_CULL_FACE);
+            if (should_cull_front && should_cull_back) {
+                glCullFace(GL_FRONT_AND_BACK);
+            } else if (should_cull_front) {
+                glCullFace(GL_FRONT);
+            } else
+                glCullFace(GL_BACK);
+        } else {
+            glDisable(GL_CULL_FACE);
+        }
+    }
+}
+
 static void handle_cmd_draw_array(cmd_t* cmd)
 {
+    handle_render_state(cmd->render_state);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     vertex_layout_active(cmd->vbo->layout);
     glUseProgram(cmd->program->name);
     glDrawArrays(GL_TRIANGLES, cmd->start, cmd->count);
-    NX_LOG_D("draw_array");
+}
+
+static void handle_cmd_draw_element(cmd_t* cmd)
+{
+    handle_render_state(cmd->render_state);
+    glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd->ibo->name);
+    vertex_layout_active(cmd->vbo->layout);
+    glUseProgram(cmd->program->name);
+    glDrawElements(GL_TRIANGLES, cmd->count, GL_UNSIGNED_INT,
+        (void*)(cmd->start * sizeof(indice_t)));
+}
+
+void set_render_state(render_state_t rs)
+{
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.render_state = rs;
 }
 
 } // namespace nx::gfx
