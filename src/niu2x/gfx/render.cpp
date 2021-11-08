@@ -216,6 +216,7 @@ static void handle_render_state(render_state_t rs)
     static render_state_t last_render_state = (render_state_t)0;
     if (last_render_state != rs) {
         last_render_state = rs;
+
         auto should_cull_front = (rs & CULL_FRONT);
         auto should_cull_back = (rs & CULL_BACK);
         if (should_cull_front || should_cull_back) {
@@ -229,6 +230,22 @@ static void handle_render_state(render_state_t rs)
         } else {
             glDisable(GL_CULL_FACE);
         }
+
+        GLboolean write_r = GL_FALSE;
+        GLboolean write_g = GL_FALSE;
+        GLboolean write_b = GL_FALSE;
+        GLboolean write_a = GL_FALSE;
+
+        if (rs & WRITE_R)
+            write_r = GL_TRUE;
+        if (rs & WRITE_G)
+            write_g = GL_TRUE;
+        if (rs & WRITE_B)
+            write_b = GL_TRUE;
+        if (rs & WRITE_A)
+            write_a = GL_TRUE;
+
+        glColorMask(write_r, write_g, write_b, write_a);
     }
 }
 

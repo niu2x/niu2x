@@ -11,7 +11,8 @@ static gfx::indice_buffer_t* ibo;
 static auto vertex_layout = gfx::vertex_layout(
     gfx::vertex_attr_type::position, gfx::vertex_attr_type::color);
 static gfx::program_t* program = nullptr;
-static gfx::render_state_t render_state = gfx::CULL_BACK | gfx::CULL_FRONT;
+static gfx::render_state_t render_state = gfx::CULL_BACK | gfx::WRITE_G
+    | gfx::WRITE_R | gfx::WRITE_B | gfx::WRITE_A;
 
 static const char* vert_shader = R"RAW(
 #version 300 es

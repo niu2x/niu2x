@@ -107,6 +107,11 @@ using layer_t = uint8_t;
 enum NXAPI render_state_constant {
     CULL_FRONT = 1 << 0,
     CULL_BACK = 1 << 1,
+    WRITE_R = 1 << 2,
+    WRITE_G = 1 << 3,
+    WRITE_B = 1 << 4,
+    WRITE_A = 1 << 5,
+    WRITE_RGBA = WRITE_R | WRITE_G | WRITE_B | WRITE_A,
 };
 
 using render_state_t = uint32_t;
