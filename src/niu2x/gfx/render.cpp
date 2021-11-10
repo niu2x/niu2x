@@ -39,6 +39,7 @@ static int next_cmd_idx = 0;
 static void handle_cmd_clear(cmd_t*);
 static void handle_cmd_draw_array(cmd_t* cmd);
 static void handle_cmd_draw_element(cmd_t* cmd);
+static void handle_render_state(render_state_t rs);
 
 static constexpr int renderlayers_count = 16;
 
@@ -141,8 +142,8 @@ void set_program(program_t* program)
 
 static void handle_cmd_clear(cmd_t* cmd)
 {
-    unused(cmd);
-#define BIT(name) GL_##COLOR##_BUFFER_BIT
+    handle_render_state(cmd->render_state);
+#define BIT(name) GL_##name##_BUFFER_BIT
     static constexpr auto all = BIT(COLOR) | BIT(DEPTH) | BIT(STENCIL);
 #undef BIT
     glClear(all);
@@ -246,6 +247,20 @@ static void handle_render_state(render_state_t rs)
             write_a = GL_TRUE;
 
         glColorMask(write_r, write_g, write_b, write_a);
+
+        glDepthMask((rs & WRITE_DEPTH) ? GL_TRUE : GL_FALSE);
+        glStencilMask((rs & WRITE_STENCIL) ? GL_TRUE : GL_FALSE);
+
+        if (rs & DEPTH_TEST) {
+            glEnable(GL_DEPTH_TEST);
+        } else {
+            glDisable(GL_DEPTH_TEST);
+        }
+        if (rs & STENCIL_TEST) {
+            glEnable(GL_STENCIL_TEST);
+        } else {
+            glDisable(GL_STENCIL_TEST);
+        }
     }
 }
 

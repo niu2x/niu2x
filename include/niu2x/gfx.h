@@ -112,6 +112,10 @@ enum NXAPI render_state_constant {
     WRITE_B = 1 << 4,
     WRITE_A = 1 << 5,
     WRITE_RGBA = WRITE_R | WRITE_G | WRITE_B | WRITE_A,
+    WRITE_DEPTH = 1 << 6,
+    WRITE_STENCIL = 1 << 7,
+    DEPTH_TEST = 1 << 8,
+    STENCIL_TEST = 1 << 9,
 };
 
 using render_state_t = uint32_t;
