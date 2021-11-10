@@ -12,8 +12,8 @@ static gfx::indice_buffer_t* ibo;
 static auto vertex_layout = gfx::vertex_layout(
     gfx::vertex_attr_type::position, gfx::vertex_attr_type::color);
 static gfx::program_t* program = nullptr;
-static gfx::render_state_t render_state
-    = gfx::CULL_BACK | gfx::WRITE_G | gfx::WRITE_RGBA;
+static gfx::render_state_t render_state = gfx::CULL_BACK | gfx::WRITE_G
+    | gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH;
 
 static const char* vert_shader = R"RAW(
 #version 300 es
@@ -83,11 +83,11 @@ static void update(double dt)
     gfx::begin();
 
     gfx::reset();
-    gfx::set_render_state(render_state | gfx::DEPTH_TEST | gfx::WRITE_DEPTH);
+    gfx::set_render_state(render_state);
     gfx::clear(0);
 
     gfx::reset();
-    gfx::set_render_state(render_state | gfx::WRITE_DEPTH | gfx::DEPTH_TEST);
+    gfx::set_render_state(render_state);
     gfx::set_vertex_buffer(vbo);
     gfx::set_indice_buffer(ibo);
     gfx::set_program(program);

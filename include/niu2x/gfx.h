@@ -134,6 +134,21 @@ NXAPI void set_program(program_t* program);
 NXAPI void set_render_state(render_state_t rs);
 NXAPI void reset();
 
+struct NXAPI mat4x4_t {
+    double data[16];
+};
+
+NXAPI void mat4x4_set(struct mat4x4_t* output, const double*);
+NXAPI void mat4x4_mul(struct mat4x4_t* output, const struct mat4x4_t& a,
+    const struct mat4x4_t& b);
+NXAPI void mat4x4_add(struct mat4x4_t* output, const struct mat4x4_t& a,
+    const struct mat4x4_t& b);
+NXAPI void mat4x4_dump(const struct mat4x4_t& a);
+
+NXAPI void set_model_transform(const struct mat4x4_t&);
+NXAPI void set_view_transform(const struct mat4x4_t&);
+NXAPI void set_project_transform(const struct mat4x4_t&);
+
 } // namespace nx::gfx
 
 #endif
