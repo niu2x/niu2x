@@ -31,6 +31,8 @@ static struct cmd_t {
 static struct environment_t {
     struct mat4x4_t view;
     struct mat4x4_t projection;
+    struct mat4x4_t vp;
+    bool vp_dirty;
 } environment;
 
 static constexpr int cmd_builder_queue_capacity = 16;
@@ -65,8 +67,18 @@ void begin()
     }
 }
 
+static void update_environment()
+{
+    if (environment.vp_dirty) {
+        environment.vp_dirty = false;
+        mat4x4_mul(&(environment.vp), environment.projection, environment.view);
+    }
+}
+
 void end()
 {
+    update_environment();
+
     cmd_t* cmd;
     for (int i = renderlayers_count - 1; i >= 0; i--) {
         NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
@@ -270,7 +282,16 @@ static void handle_render_state(render_state_t rs)
     }
 }
 
-static void program_active(cmd_t* cmd) { glUseProgram(cmd->program->name); }
+static void program_active(cmd_t* cmd)
+{
+    glUseProgram(cmd->program->name);
+    auto mvp_location = program_uniform_location(cmd->program, "mvp");
+    if (mvp_location != -1) {
+        struct mat4x4_t mvp;
+        mat4x4_mul(&mvp, environment.vp, cmd->model);
+        glUniformMatrix4fv(mvp_location, 1, GL_TRUE, mvp.data);
+    }
+}
 
 static void handle_cmd_draw_array(cmd_t* cmd)
 {
@@ -304,11 +325,16 @@ void set_model_transform(const struct mat4x4_t& m)
     cmd_builder.model = m;
 }
 
-void set_view_transform(const struct mat4x4_t& m) { environment.view = m; }
+void set_view_transform(const struct mat4x4_t& m)
+{
+    environment.view = m;
+    environment.vp_dirty = true;
+}
 
 void set_projection_transform(const struct mat4x4_t& m)
 {
     environment.projection = m;
+    environment.vp_dirty = true;
 }
 
 } // namespace nx::gfx

@@ -5,7 +5,8 @@
 namespace nx::gfx {
 
 template <int N>
-static void multiply(const double A[][N], const double B[][N], double C[][N])
+static void multiply(const mat4x4_element_t A[][N],
+    const mat4x4_element_t B[][N], mat4x4_element_t C[][N])
 {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
@@ -20,7 +21,7 @@ static void multiply(const double A[][N], const double B[][N], double C[][N])
 void mat4x4_mul(
     struct mat4x4_t* output, const struct mat4x4_t& a, const struct mat4x4_t& b)
 {
-    using temp = double[4];
+    using temp = mat4x4_element_t[4];
     multiply<4>((temp*)(a.data), (temp*)(b.data), (temp*)(output->data));
 }
 
@@ -42,9 +43,20 @@ void mat4x4_dump(const struct mat4x4_t& a)
     }
 }
 
-void mat4x4_set(struct mat4x4_t* output, const double* data)
+void mat4x4_set(struct mat4x4_t* output, const mat4x4_element_t* data)
 {
-    memcpy(output->data, data, sizeof(double) << 4);
+    memcpy(output->data, data, sizeof(mat4x4_element_t) << 4);
 }
+
+// clang-format off
+struct mat4x4_t mat4x4_identity = {
+    .data={
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
+    }
+};
+// clang-format on
 
 } // namespace nx::gfx

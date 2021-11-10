@@ -1,4 +1,7 @@
 #include "gfx.h"
+
+#include <string.h>
+
 #include "niu2x/utils.h"
 #include "niu2x/list_head.h"
 #include "niu2x/assert.h"
@@ -184,6 +187,15 @@ program_t* create_program(const char* vert, const char* frag)
     }
 
     return obj;
+}
+
+GLint program_uniform_location(struct program_t* obj, const char* name)
+{
+    for (int i = 0; i < obj->uniforms_size; i++) {
+        if (strcmp(obj->uniforms[i].name, name) == 0)
+            return obj->uniforms[i].location;
+    }
+    return -1;
 }
 
 static void destroy_program(program_t* obj)

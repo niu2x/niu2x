@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
     gfx::mat4x4_t m;
     gfx::mat4x4_t n;
 
-    double d[] = { 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 4 };
+    float d[] = { 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 4 };
 
     gfx::mat4x4_set(&m, d);
     gfx::mat4x4_dump(m);
