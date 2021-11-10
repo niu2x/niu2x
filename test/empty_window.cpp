@@ -18,9 +18,11 @@ static gfx::render_state_t render_state = gfx::CULL_BACK | gfx::WRITE_G
 static const char* vert_shader = R"RAW(
 #version 300 es
 
+
 layout(location = 0) in highp vec3 position;
 layout(location = 1) in highp vec4 color;
 
+uniform  mat4 mvp1;
 out highp vec4 v_color;
 
 void main()
@@ -34,12 +36,15 @@ void main()
 static const char* frag_shader = R"RAW(
 #version 300 es
 
+uniform highp mat4 mvp0;
+uniform highp mat4 mvp;
+
 in highp vec4 v_color;
 out highp vec4 color;
 
 void main()
 {
-  color = v_color;
+  color = mvp * mvp0* v_color;
 }
 
 )RAW";

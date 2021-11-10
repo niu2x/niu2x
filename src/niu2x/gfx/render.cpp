@@ -17,6 +17,7 @@ enum class cmdtype {
 static constexpr int cmds_count = 4096;
 
 static struct cmd_t {
+    struct mat4x4_t model;
     cmdtype type;
     list_head list;
     vertex_buffer_t* vbo;
@@ -26,6 +27,11 @@ static struct cmd_t {
     uint32_t start;
     uint32_t count;
 } cmds[cmds_count];
+
+static struct environment_t {
+    struct mat4x4_t view;
+    struct mat4x4_t projection;
+} environment;
 
 static constexpr int cmd_builder_queue_capacity = 16;
 static struct cmd_t cmd_builder_queue[cmd_builder_queue_capacity];
@@ -264,12 +270,14 @@ static void handle_render_state(render_state_t rs)
     }
 }
 
+static void program_active(cmd_t* cmd) { glUseProgram(cmd->program->name); }
+
 static void handle_cmd_draw_array(cmd_t* cmd)
 {
     handle_render_state(cmd->render_state);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     vertex_layout_active(cmd->vbo->layout);
-    glUseProgram(cmd->program->name);
+    program_active(cmd);
     glDrawArrays(GL_TRIANGLES, cmd->start, cmd->count);
 }
 
@@ -279,7 +287,7 @@ static void handle_cmd_draw_element(cmd_t* cmd)
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd->ibo->name);
     vertex_layout_active(cmd->vbo->layout);
-    glUseProgram(cmd->program->name);
+    program_active(cmd);
     glDrawElements(GL_TRIANGLES, cmd->count, GL_UNSIGNED_INT,
         (void*)(cmd->start * sizeof(indice_t)));
 }
@@ -288,6 +296,19 @@ void set_render_state(render_state_t rs)
 {
     auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
     cmd_builder.render_state = rs;
+}
+
+void set_model_transform(const struct mat4x4_t& m)
+{
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.model = m;
+}
+
+void set_view_transform(const struct mat4x4_t& m) { environment.view = m; }
+
+void set_projection_transform(const struct mat4x4_t& m)
+{
+    environment.projection = m;
 }
 
 } // namespace nx::gfx

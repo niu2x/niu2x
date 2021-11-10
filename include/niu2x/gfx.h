@@ -71,7 +71,23 @@ struct NXAPI indice_buffer_t : object_t {
     GLuint name;
 };
 
+struct NXAPI limits {
+    enum {
+        max_uniform_name = 32,
+        max_uniform = 32,
+    };
+};
+
+struct NXAPI program_uniform_info_t {
+    char name[limits::max_uniform_name];
+    GLint location;
+    GLenum type;
+    GLint size;
+};
+
 struct NXAPI program_t : object_t {
+    struct program_uniform_info_t uniforms[limits::max_uniform];
+    int uniforms_size;
     GLuint name;
 };
 
@@ -147,7 +163,7 @@ NXAPI void mat4x4_dump(const struct mat4x4_t& a);
 
 NXAPI void set_model_transform(const struct mat4x4_t&);
 NXAPI void set_view_transform(const struct mat4x4_t&);
-NXAPI void set_project_transform(const struct mat4x4_t&);
+NXAPI void set_projection_transform(const struct mat4x4_t&);
 
 } // namespace nx::gfx
 

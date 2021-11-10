@@ -164,6 +164,25 @@ program_t* create_program(const char* vert, const char* frag)
 
     auto* obj = (create_object(program_freelist, program));
     obj->name = progame_name;
+
+    GLint uniforms_size;
+    glGetProgramiv(obj->name, GL_ACTIVE_UNIFORMS, &uniforms_size);
+    NX_ASSERT(uniforms_size <= limits::max_uniform, "too many uniform");
+    obj->uniforms_size = uniforms_size;
+
+    NX_LOG_D("program uniforms_size: %d", obj->uniforms_size);
+
+    for (int i = 0; i < uniforms_size; i++) {
+        auto* uniform = &(obj->uniforms[i]);
+        glGetActiveUniform(obj->name, i, limits::max_uniform_name, nullptr,
+            &(uniform->size), &(uniform->type), uniform->name);
+        uniform->location = glGetUniformLocation(obj->name, uniform->name);
+
+        NX_ASSERT(
+            uniform->location != -1, "no such uniform: %s", uniform->name);
+        NX_LOG_D("program uniform: %s %d", uniform->name, uniform->location);
+    }
+
     return obj;
 }
 
