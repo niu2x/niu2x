@@ -11,7 +11,6 @@
 namespace gfx = nx::gfx;
 
 static gfx::vertex_buffer_t* vbo;
-static gfx::vertex_buffer_t* vbo2;
 static gfx::indice_buffer_t* ibo;
 
 static auto vertex_layout = gfx::vertex_layout(
@@ -20,9 +19,11 @@ static auto vertex_layout = gfx::vertex_layout(
 static gfx::program_t* program = nullptr;
 
 static gfx::render_state_t render_state
-    = gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH | gfx::CULL_BACK;
+    = gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH
+    // | gfx::CULL_BACK;
+    ;
 
-static gfx::mat4x4 view, model, projection;
+static gfx::mat4x4 view, model0, model1, projection;
 
 static const char* vert_shader = R"RAW(
 #version 300 es
@@ -59,40 +60,48 @@ void main()
 
 static void setup()
 {
-    gfx::mat4x4_identity(model);
+    gfx::mat4x4_identity(model0);
+    gfx::mat4x4_identity(model1);
     gfx::mat4x4_identity(projection);
     gfx::mat4x4_identity(view);
 
+    gfx::mat4x4_translate(model0, -0.5, -0.5, -0.5);
+
     // clang-format off
 
-    float eye[] = {0.5, 0.5, 10};
-    float center[] = {0.5, 0.5, 0};
-    float up[] = {0, 1, 0};
+    float eye[] = {8, 8, 8};
+    float center[] = {0.5, 0.5, 0.5};
+    float up[] = {0, 0, 1};
     gfx::mat4x4_look_at(view, eye, center, up);
 
-    gfx::mat4x4_perspective(projection, PI*0.06, 1, 0.05, 14);
+    gfx::mat4x4_perspective(projection, PI*0.06, 1, 0.05, 50);
     // gfx::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
 
     static float vertices[][7] = {
-        { 0, 0, 0.5, 1, 0, 1, 1 },
-        { 0, 1, 0.5, 1, 1, 0, 1 },
-        { 1, 0, 0.5, 0, 1, 1, 1 },
-        { 1, 1, 0.5, 1, 1, 1, 1 },
+        { 0, 0, 0, 1, 0, 1, 1 },
+        { 1, 0, 0, 0, 1, 1, 1 },
+        { 1, 1, 0, 1, 1, 1, 1 },
+        { 0, 1, 0, 1, 1, 0, 1 },
+
+        
+        { 0, 0, 1, 1, 0, 1, 1 },
+        { 1, 0, 1, 0, 1, 1, 1 },
+        { 1, 1, 1, 1, 1, 1, 1 },
+        { 0, 1, 1, 1, 1, 0, 1 },
     };
 
-    static float vertices2[][7] = {
-        { 0, 0, 0.1, 0, 0, 1, 1 },
-        { 0, 1, 0.1, 0, 0, 1, 1 },
-        { 1, 0, 0.9, 0, 0, 1, 1 },
-        { 1, 1, 0.9, 0, 0, 1, 1 },
+    static uint32_t indices[] = { 
+        0, 2, 1, 0, 3, 2 ,
+        0+4, 2+4, 1+4, 0+4, 3+4, 2 +4,
+        0,1,5,  0, 4,5,
+        2,3,6, 3, 7,6,
+        1,2,5,  2, 6,5,
+        3,0,7,  0, 4,7,
     };
-
     // clang-format on
-    static uint32_t indices[] = { 0, 2, 1, 1, 2, 3 };
     gfx::set_clear_color(gfx::rgba(255, 0, 0, 255));
-    vbo = gfx::create_vertex_buffer(vertex_layout, 4, vertices);
-    vbo2 = gfx::create_vertex_buffer(vertex_layout, 4, vertices2);
-    ibo = gfx::create_indice_buffer(6, indices);
+    vbo = gfx::create_vertex_buffer(vertex_layout, 8, vertices);
+    ibo = gfx::create_indice_buffer(36, indices);
     program = gfx::create_program(vert_shader, frag_shader);
 
     gfx::set_projection_transform(projection);
@@ -102,14 +111,24 @@ static void setup()
 static void cleanup()
 {
     gfx::destroy(vbo);
-    gfx::destroy(vbo2);
     gfx::destroy(ibo);
     gfx::destroy(program);
 }
 
 static void update(double dt)
 {
-    gfx::mat4x4_rotate_X(model, model, 0.01);
+    // gfx::mat4x4_rotate_X(model0, model0, 0.01);
+
+    gfx::mat4x4 rotate;
+
+    gfx::mat4x4_rotate_X(rotate, 0.01);
+    gfx::mat4x4_mul(model0, model0, rotate);
+
+    gfx::mat4x4_rotate_Y(rotate, 0.015);
+    gfx::mat4x4_mul(model0, model0, rotate);
+
+    gfx::mat4x4_rotate_Z(rotate, 0.005);
+    gfx::mat4x4_mul(model0, model0, rotate);
 
     gfx::begin();
 
@@ -118,15 +137,16 @@ static void update(double dt)
     gfx::clear(0);
 
     gfx::reset();
-    gfx::set_model_transform(model);
+    gfx::set_model_transform(model0);
     gfx::set_render_state(render_state);
     gfx::set_vertex_buffer(vbo);
     gfx::set_indice_buffer(ibo);
     gfx::set_program(program);
-    gfx::draw_element(0, 0, 6);
+    gfx::draw_element(0, 0, 36);
 
-    gfx::set_vertex_buffer(vbo2);
-    gfx::draw_element(0, 0, 6);
+    // gfx::mat4x4_rotate_X(model1, model1, 0.02);
+    // gfx::set_model_transform(model1);
+    // gfx::draw_element(0, 0, 6);
 
     gfx::end();
 }

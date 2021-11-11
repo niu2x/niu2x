@@ -41,6 +41,8 @@ void run(const window_config& c)
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
 
+    glEnable(GL_POLYGON_SMOOTH_HINT);
+
     auto last_now = std::chrono::steady_clock::now();
     auto now = last_now;
     float dt = 0;

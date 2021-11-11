@@ -11,7 +11,7 @@ namespace nx::gfx {
 
 namespace {
 struct object_type {
-    enum { vertex_buffer, indice_buffer, program };
+    enum { vertex_buffer, indice_buffer, program, texture };
 };
 
 } // namespace
@@ -31,6 +31,7 @@ struct object_type {
 static freelist<vertex_buffer_t, 1024> vertex_buffer_freelist;
 static freelist<indice_buffer_t, 1024> indice_buffer_freelist;
 static freelist<program_t, 1024> program_freelist;
+static freelist<texture_t, 4096> texture_freelist;
 
 size_t vertex_sizeof(vertex_layout_t layout)
 {
@@ -127,6 +128,12 @@ static GLuint create_shader(GLenum shader_type, const char* source_code)
 }
 static void destroy_shader(GLuint name) { glDeleteShader(name); }
 
+static void destroy_texture(texture_t* obj)
+{
+    glDeleteTextures(1, &(obj->name));
+    destroy_object(program_freelist, obj);
+}
+
 static GLuint create_program(GLuint vert, GLuint frag)
 {
     auto name = glCreateProgram();
@@ -217,6 +224,7 @@ void destroy(object_t* obj)
         CASE(vertex_buffer, vertex_buffer_t, destroy_vertex_buffer)
         CASE(indice_buffer, indice_buffer_t, destroy_indice_buffer)
         CASE(program, program_t, destroy_program)
+        CASE(texture, texture_t, destroy_texture)
     }
 
 #undef CASE
@@ -245,6 +253,34 @@ vertex_layout_t vertex_layout(vertex_attr_type a0, vertex_attr_type a1,
         | (((vertex_layout_t)(a13)&0xF) << (4 * 13))
         | (((vertex_layout_t)(a14)&0xF) << (4 * 14))
         | (((vertex_layout_t)(a15)&0xF) << (4 * 15));
+}
+
+texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
+{
+    auto* obj = (create_object(texture_freelist, texture));
+    glGenTextures(1, &(obj->name));
+    glBindBuffer(GL_TEXTURE_2D, obj->name);
+    switch (pf) {
+        case pixel_format::rgba8: {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA,
+                GL_UNSIGNED_BYTE, data);
+            break;
+        }
+        default: {
+            NX_ASSERT(false, "unsopport format: %d", pf);
+        }
+    }
+
+    glTexParameteri(
+        GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // GL_TEXTURE_WRAP_S
+    // GL_TEXTURE_WRAP_T
+    // GL_TEXTURE_WRAP_R
+    obj->width = w;
+    obj->height = h;
+    return obj;
 }
 
 } // namespace nx::gfx

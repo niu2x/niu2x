@@ -214,7 +214,7 @@ LINMATH_H_FUNC void mat4x4_from_vec3_mul_outer(
             M[i][j] = i < 3 && j < 3 ? a[i] * b[j] : 0.f;
 }
 LINMATH_H_FUNC void mat4x4_rotate(
-    mat4x4 R, mat4x4 const M, float x, float y, float z, float angle)
+    mat4x4 R, float x, float y, float z, float angle)
 {
     float s = sinf(angle);
     float c = cosf(angle);
@@ -239,34 +239,34 @@ LINMATH_H_FUNC void mat4x4_rotate(
         mat4x4_add(T, T, S);
 
         T[3][3] = 1.f;
-        mat4x4_mul(R, M, T);
+        mat4x4_dup(R, T);
     } else {
-        mat4x4_dup(R, M);
+        mat4x4_identity(R);
     }
 }
-LINMATH_H_FUNC void mat4x4_rotate_X(mat4x4 Q, mat4x4 const M, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_X(mat4x4 Q, float angle)
 {
     float s = sinf(angle);
     float c = cosf(angle);
     mat4x4 R = { { 1.f, 0.f, 0.f, 0.f }, { 0.f, c, s, 0.f },
         { 0.f, -s, c, 0.f }, { 0.f, 0.f, 0.f, 1.f } };
-    mat4x4_mul(Q, M, R);
+    mat4x4_dup(Q, R);
 }
-LINMATH_H_FUNC void mat4x4_rotate_Y(mat4x4 Q, mat4x4 const M, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_Y(mat4x4 Q, float angle)
 {
     float s = sinf(angle);
     float c = cosf(angle);
     mat4x4 R = { { c, 0.f, -s, 0.f }, { 0.f, 1.f, 0.f, 0.f },
         { s, 0.f, c, 0.f }, { 0.f, 0.f, 0.f, 1.f } };
-    mat4x4_mul(Q, M, R);
+    mat4x4_dup(Q, R);
 }
-LINMATH_H_FUNC void mat4x4_rotate_Z(mat4x4 Q, mat4x4 const M, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_Z(mat4x4 Q, float angle)
 {
     float s = sinf(angle);
     float c = cosf(angle);
     mat4x4 R = { { c, s, 0.f, 0.f }, { -s, c, 0.f, 0.f },
         { 0.f, 0.f, 1.f, 0.f }, { 0.f, 0.f, 0.f, 1.f } };
-    mat4x4_mul(Q, M, R);
+    mat4x4_dup(Q, R);
 }
 LINMATH_H_FUNC void mat4x4_invert(mat4x4 T, mat4x4 const M)
 {
@@ -571,7 +571,7 @@ LINMATH_H_FUNC void quat_from_mat4x4(quat q, mat4x4 const M)
 }
 
 LINMATH_H_FUNC void mat4x4_arcball(
-    mat4x4 R, mat4x4 const M, vec2 const _a, vec2 const _b, float s)
+    mat4x4 R, vec2 const _a, vec2 const _b, float s)
 {
     vec2 a;
     memcpy(a, _a, sizeof(a));
@@ -600,7 +600,7 @@ LINMATH_H_FUNC void mat4x4_arcball(
     vec3_mul_cross(c_, a_, b_);
 
     float const angle = acos(vec3_mul_inner(a_, b_)) * s;
-    mat4x4_rotate(R, M, c_[0], c_[1], c_[2], angle);
+    mat4x4_rotate(R, c_[0], c_[1], c_[2], angle);
 }
 
 } // namespace nx::gfx

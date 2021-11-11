@@ -35,6 +35,13 @@ struct NXAPI object_t {
 
 struct NXAPI texture_t : object_t {
     GLuint name;
+    int width;
+    int height;
+};
+
+enum class NXAPI pixel_format {
+    rgba8,
+    rgb8,
 };
 
 enum class vertex_attr_type : uint8_t {
@@ -100,6 +107,9 @@ NXAPI indice_buffer_t* create_indice_buffer(
 
 NXAPI program_t* create_program(const char* vert, const char* frag);
 
+NXAPI texture_t* create_texture_2d(
+    int w, int h, pixel_format pf, const void* data);
+
 NXAPI void destroy(object_t*);
 
 struct NXAPI rgba8888_t {
@@ -136,6 +146,7 @@ enum NXAPI render_state_constant {
 };
 
 using render_state_t = uint32_t;
+using texture_id_t = uint8_t;
 
 NXAPI void begin();
 NXAPI void end();
@@ -149,6 +160,7 @@ NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
 NXAPI void set_indice_buffer(indice_buffer_t* vbo);
 NXAPI void set_program(program_t* program);
 NXAPI void set_render_state(render_state_t rs);
+NXAPI void set_texture(texture_id_t tex_id, texture_t* tex);
 NXAPI void reset();
 
 // using mat4x4_element_t = float;

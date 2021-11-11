@@ -15,9 +15,10 @@ enum class cmdtype {
 };
 
 static constexpr int cmds_count = 4096;
-
+static constexpr int max_cmd_textures = 8;
 static struct cmd_t {
     mat4x4 model;
+    texture_t* textures[max_cmd_textures];
     cmdtype type;
     list_head list;
     vertex_buffer_t* vbo;
@@ -291,6 +292,28 @@ static void program_active(cmd_t* cmd)
         mat4x4_mul(mvp, cmd->model, environment.vp);
         glUniformMatrix4fv(mvp_location, 1, GL_TRUE, (const float*)(mvp));
     }
+
+    char texture_uniform_name[] = "texture0";
+    for (int i = 0; i < max_cmd_textures; i++) {
+        if (cmd->textures[i]) {
+            texture_uniform_name[7] = i + '0';
+            auto location
+                = program_uniform_location(cmd->program, texture_uniform_name);
+            if (location != -1) {
+                glUniform1i(location, i);
+            }
+
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, cmd->textures[i]->name);
+        }
+    }
+}
+void set_texture(texture_id_t tex_id, texture_t* tex)
+{
+    NX_ASSERT(tex_id < max_cmd_textures, "too large tex_id %d", tex_id);
+
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.textures[tex_id] = tex;
 }
 
 static void handle_cmd_draw_array(cmd_t* cmd)
