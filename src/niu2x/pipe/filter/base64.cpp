@@ -1,4 +1,4 @@
-#include "../io.h"
+#include "../pipe.h"
 
 #include <string.h>
 
@@ -6,7 +6,7 @@ extern "C" {
 #include "base64/base64.h"
 }
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 bool base64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
@@ -53,4 +53,4 @@ bool unbase64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return true;
 }
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter

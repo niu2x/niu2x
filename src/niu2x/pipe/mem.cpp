@@ -1,6 +1,6 @@
-#include <niu2x/io.h>
+#include <niu2x/pipe.h>
 
-namespace nx::io {
+namespace nx::pipe {
 
 namespace {
 mallocfree_memory memory;
@@ -8,4 +8,4 @@ mallocfree_memory memory;
 
 memory_proxy mem(&memory);
 
-} // namespace nx::io
+} // namespace nx::pipe

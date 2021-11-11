@@ -1,10 +1,10 @@
-#include <niu2x/io.h>
+#include <niu2x/pipe.h>
 #include <niu2x/log.h>
 #include <niu2x/ringbuf.h>
 
 #include "niu2x/utils.h"
 
-namespace nx::io {
+namespace nx::pipe {
 
 bool operator|(source p_source, sink p_sink)
 {
@@ -87,4 +87,4 @@ filter_proxy operator|(source p_source, filter_proxy p_filter)
     return p_filter;
 }
 
-} // namespace nx::io
+} // namespace nx::pipe

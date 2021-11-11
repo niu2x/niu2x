@@ -1,12 +1,12 @@
 #include <sstream>
 
-#include <niu2x/io.h>
+#include <niu2x/pipe.h>
 
 int main()
 {
-    nx::io::filter::unzlib unzlib;
-    // nx::io::source(std::cin) | base64 | nx::io::sink(std::cout);
-    nx::io::source(std::cin) | unzlib | nx::io::sink(std::cout);
+    nx::pipe::filter::unzlib unzlib;
+    // nx::pipe::source(std::cin) | base64 | nx::pipe::sink(std::cout);
+    nx::pipe::source(std::cin) | unzlib | nx::pipe::sink(std::cout);
 
     return 0;
 }

@@ -1,15 +1,13 @@
 #include <sstream>
 
-#include <niu2x/io.h>
-
-namespace io = nx::io;
+#include <niu2x/pipe.h>
 
 int main()
 {
-    nx::io::filter::unbase64 unbase64;
-    nx::io::filter::cut cut('\n');
+    nx::pipe::filter::unbase64 unbase64;
+    nx::pipe::filter::cut cut('\n');
 
-    nx::io::source(std::cin) | cut | unbase64 | nx::io::sink(std::cout);
+    nx::pipe::source(std::cin) | cut | unbase64 | nx::pipe::sink(std::cout);
 
     return 0;
 }

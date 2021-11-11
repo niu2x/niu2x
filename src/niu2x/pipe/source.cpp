@@ -1,8 +1,8 @@
-#include <niu2x/io.h>
+#include <niu2x/pipe.h>
 
-#include "io.h"
+#include "pipe.h"
 
-namespace nx::io {
+namespace nx::pipe {
 
 source::source(std::istream& stream)
 : delegate_(&stream)
@@ -16,9 +16,9 @@ int source::read(void* data, size_t bytes)
     return std::visit(
         [data, bytes](auto&& arg) {
             using T = std::decay_t<decltype(arg)>;
-            return io::read(std::forward<T>(arg), data, bytes);
+            return pipe::read(std::forward<T>(arg), data, bytes);
         },
         delegate_);
 }
 
-} // namespace nx::io
+} // namespace nx::pipe

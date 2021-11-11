@@ -1,11 +1,10 @@
 #include <sstream>
 
-#include <niu2x/io.h>
+#include <niu2x/pipe.h>
 
-namespace io = nx::io;
 int main()
 {
-    io::filter::zlib zlib;
-    io::source(std::cin) | zlib | io::sink(std::cout);
+    nx::pipe::filter::zlib zlib;
+    nx::pipe::source(std::cin) | zlib | nx::pipe::sink(std::cout);
     return 0;
 }

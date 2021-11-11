@@ -1,5 +1,5 @@
-#ifndef NX_IO_H
-#define NX_IO_H
+#ifndef NX_PIPE_H
+#define NX_PIPE_H
 
 #include <iostream>
 #include <functional>
@@ -12,7 +12,7 @@
 #include <niu2x/memory.h>
 #include <niu2x/ringbuf.h>
 
-namespace nx::io {
+namespace nx::pipe {
 
 extern NXAPI memory_proxy mem;
 
@@ -354,6 +354,6 @@ NXAPI bool operator|(filter::filter::proxy_t p_filter, sink p_sink);
 
 NXAPI filter_proxy operator|(source p_source, filter_proxy p_filter);
 
-} // namespace nx::io
+} // namespace nx::pipe
 
 #endif

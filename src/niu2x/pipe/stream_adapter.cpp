@@ -1,8 +1,8 @@
-#include "io.h"
+#include "pipe.h"
 
 #include <iostream>
 
-namespace nx::io {
+namespace nx::pipe {
 
 template <>
 int read(std::istream* device, void* data, size_t bytes)
@@ -30,4 +30,4 @@ int write(std::ostream* device, const void* data, size_t bytes)
         return -fail;
 }
 
-} // namespace nx::io
+} // namespace nx::pipe

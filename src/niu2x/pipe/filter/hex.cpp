@@ -1,8 +1,8 @@
-#include "../io.h"
+#include "../pipe.h"
 
 #include <string.h>
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 namespace {
 
@@ -61,4 +61,4 @@ bool unhex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return true;
 }
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter

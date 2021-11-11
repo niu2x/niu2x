@@ -1,4 +1,4 @@
-#include "../io.h"
+#include "../pipe.h"
 
 #include <string.h>
 
@@ -6,7 +6,7 @@
 
 #include "niu2x/assert.h"
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 namespace {
 
@@ -118,4 +118,4 @@ void unzlib_cleanup(z_stream* strm) { inflateEnd(strm); }
 
 } // namespace
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter

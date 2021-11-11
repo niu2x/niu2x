@@ -1,4 +1,4 @@
-#include "../io.h"
+#include "../pipe.h"
 
 #include <string.h>
 
@@ -15,7 +15,7 @@
         NX_THROW(message);                                                     \
     }
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 cipher::cipher(const char* p_algorithm_name, int mode, const uint8_t key[],
     const uint8_t iv[])
@@ -79,4 +79,4 @@ bool cipher::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return false;
 }
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter

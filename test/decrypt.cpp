@@ -1,13 +1,13 @@
 #include <sstream>
 
-#include <niu2x/io.h>
+#include <niu2x/pipe.h>
 
 int main(int argc, char* argv[])
 {
-    nx::io::filter::decrypt decrypt(
+    nx::pipe::filter::decrypt decrypt(
         argv[1], (const uint8_t*)argv[2], (const uint8_t*)argv[3]);
 
-    nx::io::source(std::cin) | decrypt | nx::io::sink(std::cout);
+    nx::pipe::source(std::cin) | decrypt | nx::pipe::sink(std::cout);
 
     return 0;
 }

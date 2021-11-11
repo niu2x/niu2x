@@ -1,8 +1,8 @@
-#include "../io.h"
+#include "../pipe.h"
 
 #include <string.h>
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 bool simple_filter::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
@@ -15,4 +15,4 @@ bool simple_filter::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return true;
 }
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter

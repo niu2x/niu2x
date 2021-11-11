@@ -1,8 +1,8 @@
-#include "../io.h"
+#include "../pipe.h"
 
 #include <string.h>
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 cut::cut(uint8_t chr)
 : chr_(chr)
@@ -21,4 +21,4 @@ bool cut::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return true;
 }
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter

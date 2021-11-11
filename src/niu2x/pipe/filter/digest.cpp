@@ -1,4 +1,4 @@
-#include "../io.h"
+#include "../pipe.h"
 
 #include <string.h>
 
@@ -15,7 +15,7 @@
         NX_THROW(message);                                                     \
     }
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 digest::digest(const char* p_algorithm_anme)
 {
@@ -58,4 +58,4 @@ bool digest::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return false;
 }
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter

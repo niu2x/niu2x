@@ -1,8 +1,8 @@
-#include "../io.h"
+#include "../pipe.h"
 #include <niu2x/log.h>
 #include <string.h>
 
-namespace nx::io::filter {
+namespace nx::pipe::filter {
 
 filter::filter()
 : upstream_(nullptr)
@@ -97,4 +97,4 @@ filter::proxy_t operator|(filter::proxy_t p_source, filter::proxy_t p_filter)
     return p_filter;
 }
 
-} // namespace nx::io::filter
+} // namespace nx::pipe::filter
