@@ -38,6 +38,8 @@ void run(const window_config& c)
 
     auto glfw_window = create_glfw_window(c);
 
+    glfwSetWindowUserPointer(glfw_window, (void*)&c);
+
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
 
@@ -165,8 +167,16 @@ void imgui_update()
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 {
-    unused(window);
-    glViewport(0, 0, w, h);
+    void* ud = glfwGetWindowUserPointer(window);
+    if (ud) {
+        const window_config* c = reinterpret_cast<const window_config*>(ud);
+        double scale = std::min(double(w) / c->width, double(h) / c->height);
+        int viewport_width = scale * c->width;
+        int viewport_height = scale * c->height;
+        int viewport_x = (w - viewport_width) >> 1;
+        int viewport_y = (h - viewport_height) >> 1;
+        glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
+    }
 }
 
 } // namespace
