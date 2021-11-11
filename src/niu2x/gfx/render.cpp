@@ -17,7 +17,7 @@ enum class cmdtype {
 static constexpr int cmds_count = 4096;
 
 static struct cmd_t {
-    struct mat4x4_t model;
+    mat4x4 model;
     cmdtype type;
     list_head list;
     vertex_buffer_t* vbo;
@@ -29,9 +29,9 @@ static struct cmd_t {
 } cmds[cmds_count];
 
 static struct environment_t {
-    struct mat4x4_t view;
-    struct mat4x4_t projection;
-    struct mat4x4_t vp;
+    mat4x4 view;
+    mat4x4 projection;
+    mat4x4 vp;
     bool vp_dirty;
 } environment;
 
@@ -71,7 +71,7 @@ static void update_environment()
 {
     if (environment.vp_dirty) {
         environment.vp_dirty = false;
-        mat4x4_mul(&(environment.vp), environment.projection, environment.view);
+        mat4x4_mul(environment.vp, environment.view, environment.projection);
     }
 }
 
@@ -287,9 +287,9 @@ static void program_active(cmd_t* cmd)
     glUseProgram(cmd->program->name);
     auto mvp_location = program_uniform_location(cmd->program, "mvp");
     if (mvp_location != -1) {
-        struct mat4x4_t mvp;
-        mat4x4_mul(&mvp, environment.vp, cmd->model);
-        glUniformMatrix4fv(mvp_location, 1, GL_TRUE, mvp.data);
+        mat4x4 mvp;
+        mat4x4_mul(mvp, cmd->model, environment.vp);
+        glUniformMatrix4fv(mvp_location, 1, GL_TRUE, (const float*)(mvp));
     }
 }
 
@@ -319,21 +319,21 @@ void set_render_state(render_state_t rs)
     cmd_builder.render_state = rs;
 }
 
-void set_model_transform(const struct mat4x4_t& m)
+void set_model_transform(const mat4x4 m)
 {
     auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
-    cmd_builder.model = m;
+    mat4x4_dup(cmd_builder.model, m);
 }
 
-void set_view_transform(const struct mat4x4_t& m)
+void set_view_transform(const mat4x4 m)
 {
-    environment.view = m;
+    mat4x4_dup(environment.view, m);
     environment.vp_dirty = true;
 }
 
-void set_projection_transform(const struct mat4x4_t& m)
+void set_projection_transform(const mat4x4 m)
 {
-    environment.projection = m;
+    mat4x4_dup(environment.projection, m);
     environment.vp_dirty = true;
 }
 

@@ -19,11 +19,10 @@ static auto vertex_layout = gfx::vertex_layout(
 
 static gfx::program_t* program = nullptr;
 
-static gfx::render_state_t render_state = gfx::CULL_BACK | gfx::WRITE_G
-    | gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH;
+static gfx::render_state_t render_state
+    = gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH | gfx::CULL_BACK;
 
-static gfx::mat4x4_t view = gfx::mat4x4_identity, model = gfx::mat4x4_identity,
-                     projection = gfx::mat4x4_identity;
+static gfx::mat4x4 view, model, projection;
 
 static const char* vert_shader = R"RAW(
 #version 300 es
@@ -37,7 +36,8 @@ out highp vec4 v_color;
 
 void main()
 {
-  gl_Position = mvp * vec4(position, 1.0);
+  gl_Position =  vec4(position, 1.0) * mvp;
+  
   v_color = color;
 }
 
@@ -59,7 +59,20 @@ void main()
 
 static void setup()
 {
+    gfx::mat4x4_identity(model);
+    gfx::mat4x4_identity(projection);
+    gfx::mat4x4_identity(view);
+
     // clang-format off
+
+    float eye[] = {0.5, 0.5, 10};
+    float center[] = {0.5, 0.5, 0};
+    float up[] = {0, 1, 0};
+    gfx::mat4x4_look_at(view, eye, center, up);
+
+    gfx::mat4x4_perspective(projection, PI*0.06, 1, 0.05, 14);
+    // gfx::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
+
     static float vertices[][7] = {
         { 0, 0, 0.5, 1, 0, 1, 1 },
         { 0, 1, 0.5, 1, 1, 0, 1 },
@@ -96,11 +109,7 @@ static void cleanup()
 
 static void update(double dt)
 {
-    static double k = 0;
-    k += 0.01;
-    model = { .data
-        = { cos(PI / 6 + k), -sin(PI / 6 + k), 0, 0, sin(PI / 6 + 2 * k),
-            cos(PI / 6 + k), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 } };
+    gfx::mat4x4_rotate_X(model, model, 0.01);
 
     gfx::begin();
 

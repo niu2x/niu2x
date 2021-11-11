@@ -22,5 +22,3 @@ target_link_libraries(decrypt PUBLIC niu2x)
 add_executable(empty_window "empty_window.cpp")
 target_link_libraries(empty_window PUBLIC niu2x)
 
-add_executable(mat4x4 "mat4x4.cpp")
-target_link_libraries(mat4x4 PUBLIC niu2x)

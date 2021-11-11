@@ -9,6 +9,7 @@
 #include <GLFW/glfw3native.h>
 
 #include <niu2x/api.h>
+#include <niu2x/linmath.h>
 
 namespace nx::gfx {
 
@@ -150,22 +151,31 @@ NXAPI void set_program(program_t* program);
 NXAPI void set_render_state(render_state_t rs);
 NXAPI void reset();
 
-using mat4x4_element_t = float;
-struct NXAPI mat4x4_t {
-    mat4x4_element_t data[16];
-};
+// using mat4x4_element_t = float;
+// struct NXAPI mat4x4_t {
+//     mat4x4_element_t data[16];
+// };
 
-NXAPI void mat4x4_set(struct mat4x4_t* output, const mat4x4_element_t*);
-NXAPI void mat4x4_mul(struct mat4x4_t* output, const struct mat4x4_t& a,
-    const struct mat4x4_t& b);
-NXAPI void mat4x4_add(struct mat4x4_t* output, const struct mat4x4_t& a,
-    const struct mat4x4_t& b);
-NXAPI void mat4x4_dump(const struct mat4x4_t& a);
-extern NXAPI struct mat4x4_t mat4x4_identity;
+// NXAPI void mat4x4_set(struct mat4x4_t* output, const mat4x4_element_t*);
+// NXAPI void mat4x4_mul(struct mat4x4_t* output, const struct mat4x4_t& a,
+//     const struct mat4x4_t& b);
+// NXAPI void mat4x4_add(struct mat4x4_t* output, const struct mat4x4_t& a,
+//     const struct mat4x4_t& b);
+// NXAPI void mat4x4_translate(struct mat4x4_t* output, float x, float y, float
+// z); NXAPI void mat4x4_rotate_x(struct mat4x4_t* output, float r); NXAPI void
+// mat4x4_rotate_y(struct mat4x4_t* output, float r); NXAPI void
+// mat4x4_rotate_z(struct mat4x4_t* output, float r);
 
-NXAPI void set_model_transform(const struct mat4x4_t&);
-NXAPI void set_view_transform(const struct mat4x4_t&);
-NXAPI void set_projection_transform(const struct mat4x4_t&);
+// NXAPI void mat4x4_lookat(struct mat4x4_t* output, float eyex, float eyey,
+// float eyez, float lookx, float looky, float lookz, float upx, float upy,
+// float upz); NXAPI void mat4x4_projection(struct mat4x4_t* output);
+
+NXAPI void mat4x4_dump(const mat4x4 a);
+// extern NXAPI struct mat4x4_t mat4x4_identity;
+
+NXAPI void set_model_transform(const mat4x4);
+NXAPI void set_view_transform(const mat4x4);
+NXAPI void set_projection_transform(const mat4x4);
 
 } // namespace nx::gfx
 
