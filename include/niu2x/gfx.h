@@ -46,9 +46,13 @@ enum class NXAPI pixel_format {
 
 enum class vertex_attr_type : uint8_t {
     nil = 0,
+    // vec3
     position,
+    // vec4
     color,
+    // vec3
     normal,
+    // vec3
     uv,
 };
 
@@ -109,6 +113,7 @@ NXAPI program_t* create_program(const char* vert, const char* frag);
 
 NXAPI texture_t* create_texture_2d(
     int w, int h, pixel_format pf, const void* data);
+NXAPI texture_t* create_texture_2d_from_file(const char* pathname);
 
 NXAPI void destroy(object_t*);
 

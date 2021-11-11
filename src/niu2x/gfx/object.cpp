@@ -2,6 +2,11 @@
 
 #include <string.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
+#include <niu2x/fs.h>
+
 #include "niu2x/utils.h"
 #include "niu2x/list_head.h"
 #include "niu2x/assert.h"
@@ -58,8 +63,8 @@ size_t vertex_sizeof(vertex_layout_t layout)
                 break;
             }
             case vertex_attr_type::uv: {
-                // vec4
-                size += 4 * sizeof(GLfloat);
+                // vec3
+                size += 3 * sizeof(GLfloat);
                 break;
             }
         }
@@ -79,6 +84,7 @@ vertex_buffer_t* create_vertex_buffer(
     size_t buffer_size = vertex_sizeof(layout) * vertices_count;
     glBufferData(GL_ARRAY_BUFFER, buffer_size, data, GL_DYNAMIC_DRAW);
 
+    NX_CHECK_GL_ERROR();
     return obj;
 }
 
@@ -93,6 +99,7 @@ indice_buffer_t* create_indice_buffer(uint32_t indices_count, void* data)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_count * sizeof(indice_t),
         data, GL_DYNAMIC_DRAW);
 
+    NX_CHECK_GL_ERROR();
     return obj;
 }
 
@@ -124,6 +131,7 @@ static GLuint create_shader(GLenum shader_type, const char* source_code)
         glDeleteShader(name);
         name = 0;
     }
+    NX_CHECK_GL_ERROR();
     return name;
 }
 static void destroy_shader(GLuint name) { glDeleteShader(name); }
@@ -153,6 +161,7 @@ static GLuint create_program(GLuint vert, GLuint frag)
         glDeleteProgram(name);
         name = 0;
     }
+    NX_CHECK_GL_ERROR();
     return name;
 }
 static void destroy_program(GLuint name) { glDeleteProgram(name); }
@@ -180,19 +189,17 @@ program_t* create_program(const char* vert, const char* frag)
     NX_ASSERT(uniforms_size <= limits::max_uniform, "too many uniform");
     obj->uniforms_size = uniforms_size;
 
-    NX_LOG_D("program uniforms_size: %d", obj->uniforms_size);
 
     for (int i = 0; i < uniforms_size; i++) {
         auto* uniform = &(obj->uniforms[i]);
         glGetActiveUniform(obj->name, i, limits::max_uniform_name, nullptr,
             &(uniform->size), &(uniform->type), uniform->name);
         uniform->location = glGetUniformLocation(obj->name, uniform->name);
-
         NX_ASSERT(
             uniform->location != -1, "no such uniform: %s", uniform->name);
-        NX_LOG_D("program uniform: %s %d", uniform->name, uniform->location);
     }
 
+    NX_CHECK_GL_ERROR();
     return obj;
 }
 
@@ -255,14 +262,48 @@ vertex_layout_t vertex_layout(vertex_attr_type a0, vertex_attr_type a1,
         | (((vertex_layout_t)(a15)&0xF) << (4 * 15));
 }
 
+texture_t* create_texture_2d_from_file(const char* pathname)
+{
+    auto file = fs::read_file(pathname);
+    int w, h;
+    int channels;
+    auto* image
+        = stbi_load_from_memory(file.data(), file.size(), &w, &h, &channels, 0);
+    pixel_format pf;
+    switch (channels) {
+        case 3: {
+            pf = pixel_format::rgb8;
+            break;
+        }
+        case 4: {
+            pf = pixel_format::rgba8;
+            break;
+        }
+        default: {
+            NX_ASSERT(
+                false, "unsupport channels: %d (size: %dx%d)", channels, w, h);
+        }
+    }
+
+    auto obj = create_texture_2d(w, h, pf, image);
+    stbi_image_free(image);
+
+    return obj;
+}
+
 texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
 {
     auto* obj = (create_object(texture_freelist, texture));
     glGenTextures(1, &(obj->name));
-    glBindBuffer(GL_TEXTURE_2D, obj->name);
+    glBindTexture(GL_TEXTURE_2D, obj->name);
     switch (pf) {
         case pixel_format::rgba8: {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA,
+                GL_UNSIGNED_BYTE, data);
+            break;
+        }
+        case pixel_format::rgb8: {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB,
                 GL_UNSIGNED_BYTE, data);
             break;
         }
@@ -270,16 +311,20 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
             NX_ASSERT(false, "unsopport format: %d", pf);
         }
     }
+    NX_CHECK_GL_ERROR();
 
+    //
     glTexParameteri(
         GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    glGenerateMipmap(GL_TEXTURE_2D);
     // GL_TEXTURE_WRAP_S
     // GL_TEXTURE_WRAP_T
     // GL_TEXTURE_WRAP_R
     obj->width = w;
     obj->height = h;
+    NX_CHECK_GL_ERROR();
     return obj;
 }
 

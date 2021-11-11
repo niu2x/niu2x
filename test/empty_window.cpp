@@ -13,8 +13,8 @@ namespace gfx = nx::gfx;
 static gfx::vertex_buffer_t* vbo;
 static gfx::indice_buffer_t* ibo;
 
-static auto vertex_layout = gfx::vertex_layout(
-    gfx::vertex_attr_type::position, gfx::vertex_attr_type::color);
+static auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr_type::position,
+    gfx::vertex_attr_type::color, gfx::vertex_attr_type::uv);
 
 static gfx::program_t* program = nullptr;
 
@@ -22,6 +22,7 @@ static gfx::render_state_t render_state
     = gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH
     // | gfx::CULL_BACK;
     ;
+static gfx::texture_t* tex;
 
 static gfx::mat4x4 view, model0, model1, projection;
 
@@ -31,15 +32,24 @@ static const char* vert_shader = R"RAW(
 
 layout(location = 0) in highp vec3 position;
 layout(location = 1) in highp vec4 color;
+layout(location = 2) in highp vec3 uv;
 
-uniform  mat4 mvp;
+uniform mat4 mvp;
+uniform mat4 mv;
+
 out highp vec4 v_color;
+out highp vec3 v_uv;
+out highp vec4 v_view_pos;
+out highp vec4 v_proj_pos;
 
 void main()
 {
   gl_Position =  vec4(position, 1.0) * mvp;
   
   v_color = color;
+  v_uv = uv;
+  v_view_pos = vec4(position, 1.0) * mv;
+  v_proj_pos = gl_Position;
 }
 
 )RAW";
@@ -47,13 +57,19 @@ void main()
 static const char* frag_shader = R"RAW(
 #version 300 es
 
+uniform sampler2D tex0;
 
 in highp vec4 v_color;
+in highp vec3 v_uv;
+in highp vec4 v_view_pos;
+in highp vec4 v_proj_pos;
+
 out highp vec4 color;
 
 void main()
 {
-  color = v_color;
+    highp float d = length(v_view_pos.xyz/v_view_pos.w);
+    color = texture(tex0, v_uv.xy + vec2(d, 0.0));
 }
 
 )RAW";
@@ -77,17 +93,17 @@ static void setup()
     gfx::mat4x4_perspective(projection, PI*0.06, 1, 0.05, 50);
     // gfx::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
 
-    static float vertices[][7] = {
-        { 0, 0, 0, 1, 0, 1, 1 },
-        { 1, 0, 0, 0, 1, 1, 1 },
-        { 1, 1, 0, 1, 1, 1, 1 },
-        { 0, 1, 0, 1, 1, 0, 1 },
+    static float vertices[][10] = {
+        { 0, 0, 0, 1, 0, 1, 1 ,0,0,0,},
+        { 1, 0, 0, 0, 1, 1, 1 ,1,0,0,},
+        { 1, 1, 0, 1, 1, 1, 1 ,1,1,0,},
+        { 0, 1, 0, 1, 1, 0, 1 ,0,1,0,},
 
         
-        { 0, 0, 1, 1, 0, 1, 1 },
-        { 1, 0, 1, 0, 1, 1, 1 },
-        { 1, 1, 1, 1, 1, 1, 1 },
-        { 0, 1, 1, 1, 1, 0, 1 },
+        { 0, 0, 1, 1, 0, 1, 1 ,0,1,0,},
+        { 1, 0, 1, 0, 1, 1, 1 ,1,1,0,},
+        { 1, 1, 1, 1, 1, 1, 1 ,1,0,0,},
+        { 0, 1, 1, 1, 1, 0, 1 ,0,0,0,},
     };
 
     static uint32_t indices[] = { 
@@ -106,10 +122,13 @@ static void setup()
 
     gfx::set_projection_transform(projection);
     gfx::set_view_transform(view);
+
+    tex = gfx::create_texture_2d_from_file("../test/mu-wan-qing.jpeg");
 }
 
 static void cleanup()
 {
+    gfx::destroy(tex);
     gfx::destroy(vbo);
     gfx::destroy(ibo);
     gfx::destroy(program);
@@ -142,6 +161,7 @@ static void update(double dt)
     gfx::set_vertex_buffer(vbo);
     gfx::set_indice_buffer(ibo);
     gfx::set_program(program);
+    gfx::set_texture(0, tex);
     gfx::draw_element(0, 0, 36);
 
     // gfx::mat4x4_rotate_X(model1, model1, 0.02);

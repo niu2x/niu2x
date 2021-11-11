@@ -1,4 +1,4 @@
-#include <niu2x/gfx.h>
+#include "gfx.h"
 
 #include <chrono>
 
@@ -43,7 +43,11 @@ void run(const window_config& c)
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
 
-    glEnable(GL_POLYGON_SMOOTH_HINT);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_POLYGON_SMOOTH);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     auto last_now = std::chrono::steady_clock::now();
     auto now = last_now;

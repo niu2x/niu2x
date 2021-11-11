@@ -101,6 +101,8 @@ void end()
             }
         }
     }
+
+    NX_CHECK_GL_ERROR();
 }
 
 void reset()
@@ -211,8 +213,8 @@ static void vertex_layout_active(vertex_layout_t layout)
             case vertex_attr_type::uv: {
                 // vec4
                 glVertexAttribPointer(
-                    i, 4, GL_FLOAT, GL_FALSE, size, (void*)offset);
-                offset += 4 * sizeof(GLfloat);
+                    i, 3, GL_FLOAT, GL_FALSE, size, (void*)offset);
+                offset += 3 * sizeof(GLfloat);
                 break;
             }
         }
@@ -293,18 +295,25 @@ static void program_active(cmd_t* cmd)
         glUniformMatrix4fv(mvp_location, 1, GL_TRUE, (const float*)(mvp));
     }
 
-    char texture_uniform_name[] = "texture0";
+    auto mv_location = program_uniform_location(cmd->program, "mv");
+    if (mv_location != -1) {
+        mat4x4 mv;
+        mat4x4_mul(mv, cmd->model, environment.view);
+        glUniformMatrix4fv(mv_location, 1, GL_TRUE, (const float*)(mv));
+    }
+
+    char texture_uniform_name[] = "tex0";
     for (int i = 0; i < max_cmd_textures; i++) {
         if (cmd->textures[i]) {
-            texture_uniform_name[7] = i + '0';
+            texture_uniform_name[3] = i + '0';
             auto location
                 = program_uniform_location(cmd->program, texture_uniform_name);
             if (location != -1) {
                 glUniform1i(location, i);
-            }
 
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, cmd->textures[i]->name);
+                glActiveTexture(GL_TEXTURE0 + i);
+                glBindTexture(GL_TEXTURE_2D, cmd->textures[i]->name);
+            }
         }
     }
 }
