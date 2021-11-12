@@ -18,10 +18,8 @@ static auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr_type::position,
 
 static gfx::program_t* program = nullptr;
 
-static gfx::render_state_t render_state
-    = gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH
-    // | gfx::CULL_BACK;
-    ;
+static gfx::render_state_t render_state = gfx::WRITE_RGBA | gfx::DEPTH_TEST
+    | gfx::WRITE_DEPTH | gfx::CULL_BACK | gfx::BLEND;
 static gfx::texture_t* tex;
 
 static gfx::mat4x4 view, model0, model1, projection;
@@ -70,6 +68,7 @@ void main()
 {
     highp float d = length(v_view_pos.xyz/v_view_pos.w);
     color = texture(tex0, v_uv.xy + vec2(d, 0.0));
+    color.a = sin(d);
 }
 
 )RAW";
@@ -85,7 +84,7 @@ static void setup()
 
     // clang-format off
 
-    float eye[] = {8, 8, 8};
+    float eye[] = {16, 8, 8};
     float center[] = {0.5, 0.5, 0.5};
     float up[] = {0, 0, 1};
     gfx::mat4x4_look_at(view, eye, center, up);
@@ -98,8 +97,6 @@ static void setup()
         { 1, 0, 0, 0, 1, 1, 1 ,1,0,0,},
         { 1, 1, 0, 1, 1, 1, 1 ,1,1,0,},
         { 0, 1, 0, 1, 1, 0, 1 ,0,1,0,},
-
-        
         { 0, 0, 1, 1, 0, 1, 1 ,0,1,0,},
         { 1, 0, 1, 0, 1, 1, 1 ,1,1,0,},
         { 1, 1, 1, 1, 1, 1, 1 ,1,0,0,},
@@ -108,14 +105,14 @@ static void setup()
 
     static uint32_t indices[] = { 
         0, 2, 1, 0, 3, 2 ,
-        0+4, 2+4, 1+4, 0+4, 3+4, 2 +4,
+        2+4, 0+4, 1+4, 3+4, 0+4,  2 +4,
         0,1,5,  0, 4,5,
         2,3,6, 3, 7,6,
         1,2,5,  2, 6,5,
-        3,0,7,  0, 4,7,
+        7,3,0, 0,4,7,
     };
     // clang-format on
-    gfx::set_clear_color(gfx::rgba(255, 0, 0, 255));
+    gfx::set_clear_color(gfx::rgba(255, 255, 255, 255));
     vbo = gfx::create_vertex_buffer(vertex_layout, 8, vertices);
     ibo = gfx::create_indice_buffer(36, indices);
     program = gfx::create_program(vert_shader, frag_shader);
@@ -162,8 +159,14 @@ static void update(double dt)
     gfx::set_indice_buffer(ibo);
     gfx::set_program(program);
     gfx::set_texture(0, tex);
+    gfx::set_blend_func(gfx::blend::zero, gfx::blend::src_color);
     gfx::draw_element(0, 0, 36);
 
+    gfx::mat4x4 model1;
+    gfx::mat4x4_translate(model1, 1.0, 0, 0);
+    gfx::mat4x4_mul(model1, model0, model1);
+    gfx::set_model_transform(model1);
+    gfx::draw_element(0, 0, 36);
     // gfx::mat4x4_rotate_X(model1, model1, 0.02);
     // gfx::set_model_transform(model1);
     // gfx::draw_element(0, 0, 6);

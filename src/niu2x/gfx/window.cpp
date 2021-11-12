@@ -46,9 +46,7 @@ void run(const window_config& c)
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_POLYGON_SMOOTH);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    // glEnable(GL_BLEND);
     auto last_now = std::chrono::steady_clock::now();
     auto now = last_now;
     float dt = 0;
@@ -56,6 +54,8 @@ void run(const window_config& c)
     auto update = c.update;
 
     imgui_setup(glfw_window);
+
+    setup();
 
     if (c.setup)
         c.setup();
@@ -79,6 +79,8 @@ void run(const window_config& c)
 
     if (c.cleanup)
         c.cleanup();
+
+    cleanup();
 
     imgui_cleanup();
 

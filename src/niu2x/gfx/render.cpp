@@ -18,15 +18,17 @@ static constexpr int cmds_count = 4096;
 static constexpr int max_cmd_textures = 8;
 static struct cmd_t {
     mat4x4 model;
-    texture_t* textures[max_cmd_textures];
-    cmdtype type;
     list_head list;
+    texture_t* textures[max_cmd_textures];
     vertex_buffer_t* vbo;
     indice_buffer_t* ibo;
     program_t* program;
+    cmdtype type;
     render_state_t render_state;
     uint32_t start;
     uint32_t count;
+    blend_t bf_src;
+    blend_t bf_dst;
 } cmds[cmds_count];
 
 static struct environment_t {
@@ -282,6 +284,11 @@ static void handle_render_state(render_state_t rs)
         } else {
             glDisable(GL_STENCIL_TEST);
         }
+
+        if (rs & BLEND)
+            glEnable(GL_BLEND);
+        else
+            glDisable(GL_BLEND);
     }
 }
 
@@ -317,6 +324,13 @@ static void program_active(cmd_t* cmd)
         }
     }
 }
+void set_blend_func(uint8_t src_func, uint8_t dst_func)
+{
+    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    cmd_builder.bf_src = src_func;
+    cmd_builder.bf_dst = dst_func;
+}
+
 void set_texture(texture_id_t tex_id, texture_t* tex)
 {
     NX_ASSERT(tex_id < max_cmd_textures, "too large tex_id %d", tex_id);
@@ -325,9 +339,30 @@ void set_texture(texture_id_t tex_id, texture_t* tex)
     cmd_builder.textures[tex_id] = tex;
 }
 
+static GLuint blend_func_map[] = {
+    GL_SRC_ALPHA,
+    GL_ONE_MINUS_SRC_ALPHA,
+    GL_ONE,
+    GL_ZERO,
+    GL_SRC_COLOR,
+    GL_ONE_MINUS_SRC_COLOR,
+    GL_DST_COLOR,
+    GL_ONE_MINUS_DST_COLOR,
+    GL_DST_ALPHA,
+    GL_ONE_MINUS_DST_ALPHA,
+};
+
+static void handle_blend_func(cmd_t* cmd)
+{
+    if (cmd->render_state & BLEND) {
+        glBlendFunc(blend_func_map[cmd->bf_src], blend_func_map[cmd->bf_dst]);
+    }
+}
+
 static void handle_cmd_draw_array(cmd_t* cmd)
 {
     handle_render_state(cmd->render_state);
+    handle_blend_func(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     vertex_layout_active(cmd->vbo->layout);
     program_active(cmd);
@@ -337,6 +372,7 @@ static void handle_cmd_draw_array(cmd_t* cmd)
 static void handle_cmd_draw_element(cmd_t* cmd)
 {
     handle_render_state(cmd->render_state);
+    handle_blend_func(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd->ibo->name);
     vertex_layout_active(cmd->vbo->layout);

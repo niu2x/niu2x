@@ -19,4 +19,7 @@ GLint program_uniform_location(struct program_t* obj, const char* name);
 
 } // namespace nx::gfx
 
+void setup();
+void cleanup();
+
 #endif
