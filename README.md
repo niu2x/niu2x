@@ -1,6 +1,6 @@
 # Modules
 - [log](#log)
-- [pipe](#pipe (crypto/digest/base64/hex))
+- [pipe (crypto/digest/base64/zlib)](#pipe)
 - gfx (TODO)
 
 # Examples
