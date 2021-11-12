@@ -18,13 +18,13 @@ NX_LOG_F(format, ...);
 - pipe style
 ````
 //read stdin -> compress -> write to stdout.
-io::filter::zlib zlib;
-io::source(std::cin) | zlib | io::sink(std::cout);
+nx::pipe::filter::zlib zlib;
+nx::pipe::source(std::cin) | zlib | nx::pipe::sink(std::cout);
 
 //read stdin -> remove all '\n' -> unbase64 -> write to stdout
-nx::io::filter::unbase64 unbase64;
-nx::io::filter::cut cut('\n');
-nx::io::source(std::cin) | cut | unbase64 | nx::io::sink(std::cout);
+nx::pipe::filter::unbase64 unbase64;
+nx::pipe::filter::cut cut('\n');
+nx::pipe::source(std::cin) | cut | unbase64 | nx::pipe::sink(std::cout);
 
 ````
 - supported filters
