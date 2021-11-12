@@ -1,6 +1,6 @@
 # Modules
 - [log](#log)
-- [io](#io)
+- [pipe](#pipe (crypto/digest/base64/hex))
 - gfx (TODO)
 
 # Examples
@@ -14,7 +14,7 @@ NX_LOG_W(format, ...);
 NX_LOG_E(format, ...);
 NX_LOG_F(format, ...);
 ````
-## io
+## pipe
 - pipe style
 ````
 //read stdin -> compress -> write to stdout.
