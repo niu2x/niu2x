@@ -174,6 +174,13 @@ static void update(double dt)
     gfx::end();
 }
 
+static void key_callback(int keycode, int action, int mods)
+{
+    if (keycode == gfx::KEY_ESCAPE && action == gfx::KEY_RELEASE) {
+        gfx::exit();
+    }
+}
+
 int main()
 {
     gfx::window_config cfg;
@@ -184,6 +191,7 @@ int main()
     cfg.setup = setup;
     cfg.cleanup = cleanup;
     cfg.update = update;
+    cfg.key_callback = key_callback;
 
     gfx::run(cfg);
     return 0;

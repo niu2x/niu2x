@@ -32,11 +32,16 @@ void imgui_update();
 
 } // namespace
 
+static GLFWwindow* current_glfw_window = nullptr;
+
 void run(const window_config& c)
 {
+    NX_ASSERT(current_glfw_window == nullptr, "already had a glfw_window.");
+
     glfw_setup();
 
     auto glfw_window = create_glfw_window(c);
+    current_glfw_window = glfw_window;
 
     glfwSetWindowUserPointer(glfw_window, (void*)&c);
 
@@ -84,9 +89,16 @@ void run(const window_config& c)
 
     imgui_cleanup();
 
+    current_glfw_window = nullptr;
     destroy_glfw_window(glfw_window);
 
     glfw_cleanup();
+}
+
+void exit()
+{
+    NX_ASSERT(current_glfw_window != nullptr, "no glfw_window.");
+    glfwSetWindowShouldClose(current_glfw_window, GLFW_TRUE);
 }
 
 namespace {
@@ -124,11 +136,24 @@ void destroy_glfw_window(GLFWwindow* glfw_window)
     glfwDestroyWindow(glfw_window);
 }
 
+const window_config* get_window_option(GLFWwindow* window)
+{
+    void* ud = glfwGetWindowUserPointer(window);
+    if (ud) {
+        const window_config* c = reinterpret_cast<const window_config*>(ud);
+        return c;
+    } else
+        return nullptr;
+}
+
 void key_callback(
     GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    unused(window);
     NX_LOG_D("%d %d %d %d", key, scancode, action, mods);
+    auto* c = get_window_option(window);
+    if (c && c->key_callback) {
+        c->key_callback(key, action, mods);
+    }
 }
 
 void glfw_error_callback(int error, const char* description)
@@ -173,9 +198,8 @@ void imgui_update()
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 {
-    void* ud = glfwGetWindowUserPointer(window);
-    if (ud) {
-        const window_config* c = reinterpret_cast<const window_config*>(ud);
+    auto* c = get_window_option(window);
+    if (c) {
         double scale = std::min(double(w) / c->width, double(h) / c->height);
         int viewport_width = scale * c->width;
         int viewport_height = scale * c->height;
