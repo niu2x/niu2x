@@ -48,16 +48,13 @@ target_sources(niu2x PRIVATE
 
 target_compile_definitions(niu2x PRIVATE niu2x_EXPORTS)
 
-# include(dependent_prebuilt)
+include(dependent_prebuilt)
 
-# dependent_prebuilt(
-# 	TARGET niu2x 
-# 	LIBS 
-# 		zlib
-# 		libuv
-# 		openssl
-# 		boost
-# )
+dependent_prebuilt(
+	TARGET niu2x 
+	LIBS 
+		assimp
+)
 
 # list(APPEND runtime
 # 	glfw
