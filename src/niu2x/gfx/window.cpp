@@ -28,7 +28,7 @@ void framebuffer_size_callback(GLFWwindow*, int w, int h);
 
 void imgui_setup(GLFWwindow* window);
 void imgui_cleanup();
-void imgui_update();
+void imgui_update(double dt);
 
 } // namespace
 
@@ -51,7 +51,6 @@ void run(const window_config& c)
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_POLYGON_SMOOTH);
 
-    // glEnable(GL_BLEND);
     auto last_now = std::chrono::steady_clock::now();
     auto now = last_now;
     float dt = 0;
@@ -77,7 +76,7 @@ void run(const window_config& c)
 
         update(dt);
 
-        imgui_update();
+        imgui_update(dt);
 
         glfwSwapBuffers(glfw_window);
     }
@@ -180,16 +179,17 @@ void imgui_cleanup()
     ImGui::DestroyContext();
 }
 
-void imgui_update()
+void imgui_update(double dt)
 {
-    static bool show_demo_window = false;
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
+
     ImGui::NewFrame();
 
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    ImGui::LabelText("FPS", "%d", (int)(1 / dt));
+    ImGui::LabelText("dt", "%.4f", dt);
+
+    ImGui::EndFrame();
 
     ImGui::Render();
 
