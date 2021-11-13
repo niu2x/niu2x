@@ -24,7 +24,9 @@ void destroy_glfw_window(GLFWwindow* window);
 void glfw_error_callback(int error, const char* description);
 
 void key_callback(GLFWwindow*, int key, int scancode, int action, int mods);
+void mouse_key_callback(GLFWwindow*, int key, int action, int mods);
 void framebuffer_size_callback(GLFWwindow*, int w, int h);
+void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
 
 void imgui_setup(GLFWwindow* window);
 void imgui_cleanup();
@@ -47,6 +49,8 @@ void run(const window_config& c)
 
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(glfw_window, cursor_pos_callback);
+    glfwSetMouseButtonCallback(glfw_window, mouse_key_callback);
 
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_POLYGON_SMOOTH);
@@ -155,6 +159,15 @@ void key_callback(
     }
 }
 
+void mouse_key_callback(GLFWwindow* window, int key, int action, int mods)
+{
+    NX_LOG_D("%d %d %d", key, action, mods);
+    auto* c = get_window_option(window);
+    if (c && c->key_callback) {
+        c->key_callback(key, action, mods);
+    }
+}
+
 void glfw_error_callback(int error, const char* description)
 {
     NX_LOG_E("Glfw Error %d: %s\n", error, description);
@@ -206,6 +219,14 @@ void framebuffer_size_callback(GLFWwindow* window, int w, int h)
         int viewport_x = (w - viewport_width) >> 1;
         int viewport_y = (h - viewport_height) >> 1;
         glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
+    }
+}
+
+void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    auto* c = get_window_option(window);
+    if (c && c->mouse_pos_callback) {
+        c->mouse_pos_callback(xpos, ypos);
     }
 }
 

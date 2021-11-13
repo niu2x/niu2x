@@ -1,4 +1,5 @@
 #include <niu2x/gfx.h>
+#include <niu2x/log.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -181,6 +182,11 @@ static void key_callback(int keycode, int action, int mods)
     }
 }
 
+static void mouse_pos_callback(double xpos, double ypos)
+{
+    NX_LOG_D("mouse pos: %f %f", xpos, ypos);
+}
+
 int main()
 {
     gfx::window_config cfg;
@@ -192,6 +198,7 @@ int main()
     cfg.cleanup = cleanup;
     cfg.update = update;
     cfg.key_callback = key_callback;
+    cfg.mouse_pos_callback = mouse_pos_callback;
 
     gfx::run(cfg);
     return 0;

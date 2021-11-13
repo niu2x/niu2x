@@ -25,6 +25,7 @@ struct NXAPI window_config {
     void (*setup)();
     void (*cleanup)();
     void (*key_callback)(int keycode, int action, int mods);
+    void (*mouse_pos_callback)(double xpos, double ypos);
 };
 
 NXAPI void run(const window_config& c);
@@ -192,27 +193,7 @@ NXAPI void set_texture(texture_id_t tex_id, texture_t* tex);
 NXAPI void set_blend_func(blend_t src_func, blend_t dst_func);
 NXAPI void reset();
 
-// using mat4x4_element_t = float;
-// struct NXAPI mat4x4_t {
-//     mat4x4_element_t data[16];
-// };
-
-// NXAPI void mat4x4_set(struct mat4x4_t* output, const mat4x4_element_t*);
-// NXAPI void mat4x4_mul(struct mat4x4_t* output, const struct mat4x4_t& a,
-//     const struct mat4x4_t& b);
-// NXAPI void mat4x4_add(struct mat4x4_t* output, const struct mat4x4_t& a,
-//     const struct mat4x4_t& b);
-// NXAPI void mat4x4_translate(struct mat4x4_t* output, float x, float y, float
-// z); NXAPI void mat4x4_rotate_x(struct mat4x4_t* output, float r); NXAPI void
-// mat4x4_rotate_y(struct mat4x4_t* output, float r); NXAPI void
-// mat4x4_rotate_z(struct mat4x4_t* output, float r);
-
-// NXAPI void mat4x4_lookat(struct mat4x4_t* output, float eyex, float eyey,
-// float eyez, float lookx, float looky, float lookz, float upx, float upy,
-// float upz); NXAPI void mat4x4_projection(struct mat4x4_t* output);
-
 NXAPI void mat4x4_dump(const mat4x4 a);
-// extern NXAPI struct mat4x4_t mat4x4_identity;
 
 NXAPI void set_model_transform(const mat4x4);
 NXAPI void set_view_transform(const mat4x4);
