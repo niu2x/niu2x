@@ -152,7 +152,8 @@ const window_config* get_window_option(GLFWwindow* window)
 void key_callback(
     GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    NX_LOG_D("%d %d %d %d", key, scancode, action, mods);
+    // NX_LOG_D("%d %d %d %d", key, scancode, action, mods);
+    unused(scancode);
     auto* c = get_window_option(window);
     if (c && c->key_callback) {
         c->key_callback(key, action, mods);
@@ -161,7 +162,7 @@ void key_callback(
 
 void mouse_key_callback(GLFWwindow* window, int key, int action, int mods)
 {
-    NX_LOG_D("%d %d %d", key, action, mods);
+    // NX_LOG_D("%d %d %d", key, action, mods);
     auto* c = get_window_option(window);
     if (c && c->key_callback) {
         c->key_callback(key, action, mods);

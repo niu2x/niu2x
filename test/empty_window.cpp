@@ -184,7 +184,7 @@ static void key_callback(int keycode, int action, int mods)
 
 static void mouse_pos_callback(double xpos, double ypos)
 {
-    NX_LOG_D("mouse pos: %f %f", xpos, ypos);
+    // NX_LOG_D("mouse pos: %f %f", xpos, ypos);
 }
 
 int main()
