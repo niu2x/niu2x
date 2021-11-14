@@ -2,8 +2,18 @@
 
 #include <string.h>
 
+#include "niu2x/assert.h"
+
+#define STBRP_ASSERT(condition) NX_ASSERT(condition, "")
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
+
+#define STB_RECT_PACK_IMPLEMENTATION
+#include "stb/stb_rect_pack.h"
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb/stb_truetype.h"
 
 #include <niu2x/fs.h>
 
@@ -12,11 +22,13 @@
 #include "niu2x/assert.h"
 #include "niu2x/freelist.h"
 
+#include "noto_scans_sc_regular.h"
+
 namespace nx::gfx {
 
 namespace {
 struct object_type {
-    enum { vertex_buffer, indice_buffer, program, texture };
+    enum { vertex_buffer, indice_buffer, program, texture, font };
 };
 
 } // namespace
@@ -37,6 +49,7 @@ static freelist<vertex_buffer_t, 1024> vertex_buffer_freelist;
 static freelist<indice_buffer_t, 1024> indice_buffer_freelist;
 static freelist<program_t, 1024> program_freelist;
 static freelist<texture_t, 4096> texture_freelist;
+static freelist<font_t, 64> font_freelist;
 
 size_t vertex_sizeof(vertex_layout_t layout)
 {
@@ -86,6 +99,59 @@ vertex_buffer_t* create_vertex_buffer(
 
     NX_CHECK_GL_ERROR();
     return obj;
+}
+
+namespace {
+struct font_private_data_t {
+    stbtt_packedchar chardata[127];
+    stbtt_pack_context spc;
+    texture_t* textures[1];
+};
+
+constexpr auto font_texture_width = 2048;
+constexpr auto font_texture_height = 2048;
+} // namespace
+
+struct font_t* create_builtin_font()
+{
+    auto* obj = (create_object(font_freelist, font));
+    obj->private_data = mem.allocate(sizeof(font_private_data_t));
+    NX_ASSERT(obj->private_data, "out of memory");
+
+    struct font_private_data_t* font_data
+        = reinterpret_cast<struct font_private_data_t*>(obj->private_data);
+
+    std::vector<uint8_t> image;
+    image.resize(font_texture_width * font_texture_height);
+
+    stbtt_PackBegin(&(font_data->spc), image.data(), font_texture_width,
+        font_texture_height, 0, 1, nullptr);
+
+    stbtt_pack_range ascii {
+        .font_size = 32,
+        .first_unicode_codepoint_in_range = 1,
+        .array_of_unicode_codepoints = nullptr,
+        .num_chars = 127,
+        .chardata_for_range = font_data->chardata,
+        .h_oversample = 0,
+        .v_oversample = 0,
+    };
+    stbtt_PackFontRanges(
+        &(font_data->spc), noto_scans_sc_regular, 0, &ascii, 1);
+
+    stbtt_PackEnd(&(font_data->spc));
+
+    font_data->textures[0] = create_texture_2d(font_texture_width,
+        font_texture_height, pixel_format::r8, image.data());
+
+    return obj;
+}
+
+texture_t* font_texture(struct font_t* obj, int index)
+{
+    struct font_private_data_t* font_data
+        = reinterpret_cast<struct font_private_data_t*>(obj->private_data);
+    return font_data->textures[index];
 }
 
 indice_buffer_t* create_indice_buffer(uint32_t indices_count, void* data)
@@ -140,6 +206,17 @@ static void destroy_texture(texture_t* obj)
 {
     glDeleteTextures(1, &(obj->name));
     destroy_object(program_freelist, obj);
+}
+
+static void destroy_font(font_t* obj)
+{
+    struct font_private_data_t* font_data
+        = reinterpret_cast<struct font_private_data_t*>(obj->private_data);
+    destroy_texture(font_data->textures[0]);
+
+    mem.free(obj->private_data);
+
+    destroy_object(font_freelist, obj);
 }
 
 static GLuint create_program(GLuint vert, GLuint frag)
@@ -232,6 +309,7 @@ void destroy(object_t* obj)
         CASE(indice_buffer, indice_buffer_t, destroy_indice_buffer)
         CASE(program, program_t, destroy_program)
         CASE(texture, texture_t, destroy_texture)
+        CASE(font, font_t, destroy_font)
     }
 
 #undef CASE
@@ -271,6 +349,10 @@ texture_t* create_texture_2d_from_file(const char* pathname)
         = stbi_load_from_memory(file.data(), file.size(), &w, &h, &channels, 0);
     pixel_format pf;
     switch (channels) {
+        case 1: {
+            pf = pixel_format::r8;
+            break;
+        }
         case 3: {
             pf = pixel_format::rgb8;
             break;
@@ -304,6 +386,11 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
         }
         case pixel_format::rgb8: {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB,
+                GL_UNSIGNED_BYTE, data);
+            break;
+        }
+        case pixel_format::r8: {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED,
                 GL_UNSIGNED_BYTE, data);
             break;
         }

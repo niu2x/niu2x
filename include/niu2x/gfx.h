@@ -9,9 +9,12 @@
 #include <GLFW/glfw3native.h>
 
 #include <niu2x/api.h>
+#include <niu2x/memory.h>
 #include <niu2x/linmath.h>
 
 namespace nx::gfx {
+
+extern NXAPI memory_proxy mem;
 
 enum NXAPI window_option_constant {
     MSAA = 1 << 0,
@@ -45,6 +48,7 @@ struct NXAPI texture_t : object_t {
 enum class NXAPI pixel_format {
     rgba8,
     rgb8,
+    r8,
 };
 
 enum class vertex_attr_type : uint8_t {
@@ -335,6 +339,17 @@ enum NXAPI key_mods_constant {
     KEY_MOD_ALT = GLFW_MOD_ALT,
     KEY_MOD_SUPER = GLFW_MOD_SUPER,
 };
+
+struct NXAPI font_t : object_t {
+    void* private_data;
+};
+
+NXAPI struct font_t* create_builtin_font();
+NXAPI texture_t* font_texture(struct font_t*, int index);
+
+NXAPI void test_font();
+
+// struct mesh_t {};
 
 } // namespace nx::gfx
 
