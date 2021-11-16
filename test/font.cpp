@@ -68,8 +68,15 @@ out highp vec4 color;
 void main()
 {
     highp float red = texture(tex0, v_uv.xy ).r;
-    color = vec4(red) + vec4(0.5);
-
+    if(red > 0.5){
+        color = vec4(1.0);
+    }
+    else if (red > 0.45) {
+        color = vec4(0.0, 0.0, 1.0, 1.0);
+    }
+    else{
+        color = vec4(0.0);
+    }
 }
 
 )RAW";
@@ -84,7 +91,7 @@ static void setup()
 
     gfx::mat4x4 tmp;
     gfx::mat4x4_identity(tmp);
-    gfx::mat4x4_scale_aniso(tmp, tmp, 100, 100, 100);
+    gfx::mat4x4_scale_aniso(tmp, tmp, 10000, 10000, 10000);
 
     gfx::mat4x4_mul(model0, model0, tmp);
 
@@ -102,10 +109,10 @@ static void setup()
     // gfx::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
 
     static float vertices[][10] = {
-        { 0, 0, 0, 1, 0, 1, 1 ,0,0,0,},
-        { 1, 0, 0, 0, 1, 1, 1 ,1,0,0,},
-        { 1, 1, 0, 1, 1, 1, 1 ,1,1,0,},
-        { 0, 1, 0, 1, 1, 0, 1 ,0,1,0,},
+        { 0, 0, 0, 1, 0, 1, 1 ,0,1,0,},
+        { 1, 0, 0, 0, 1, 1, 1 ,1,1,0,},
+        { 1, 1, 0, 1, 1, 1, 1 ,1,0,0,},
+        { 0, 1, 0, 1, 1, 0, 1 ,0,0,0,},
     };
 
     static uint32_t indices[] = { 

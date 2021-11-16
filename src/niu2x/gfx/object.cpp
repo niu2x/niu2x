@@ -103,7 +103,7 @@ vertex_buffer_t* create_vertex_buffer(
 
 namespace {
 struct font_private_data_t {
-    stbtt_packedchar chardata[127];
+    stbtt_packedchar chardata[127 + 0x4DBF - 0x3400 + 1];
     stbtt_pack_context spc;
     texture_t* textures[1];
 };
@@ -111,6 +111,74 @@ struct font_private_data_t {
 constexpr auto font_texture_width = 2048;
 constexpr auto font_texture_height = 2048;
 } // namespace
+
+#include "font/edtaa3func.h"
+constexpr auto radius = 4;
+unsigned char* makeDistanceMap(unsigned char* img, long width, long height)
+{
+    long pixelAmount = (width + 2 * radius) * (height + 2 * radius);
+
+    short* xdist = (short*)malloc(pixelAmount * sizeof(short));
+    short* ydist = (short*)malloc(pixelAmount * sizeof(short));
+    double* gx = (double*)calloc(pixelAmount, sizeof(double));
+    double* gy = (double*)calloc(pixelAmount, sizeof(double));
+    double* data = (double*)calloc(pixelAmount, sizeof(double));
+    double* outside = (double*)calloc(pixelAmount, sizeof(double));
+    double* inside = (double*)calloc(pixelAmount, sizeof(double));
+    long i, j;
+
+    // Convert img into double (data) rescale image levels between 0 and 1
+    long outWidth = width + 2 * radius;
+    for (i = 0; i < width; ++i) {
+        for (j = 0; j < height; ++j) {
+            data[j * outWidth + radius + i] = img[j * width + i] / 255.0;
+        }
+    }
+
+    width += 2 * radius;
+    height += 2 * radius;
+
+    // Transform background (outside contour, in areas of 0's)
+    computegradient(data, (int)width, (int)height, gx, gy);
+    edtaa3(data, gx, gy, (int)width, (int)height, xdist, ydist, outside);
+    for (i = 0; i < pixelAmount; i++)
+        if (outside[i] < 0.0)
+            outside[i] = 0.0;
+
+    // Transform foreground (inside contour, in areas of 1's)
+    for (i = 0; i < pixelAmount; i++)
+        data[i] = 1 - data[i];
+    computegradient(data, (int)width, (int)height, gx, gy);
+    edtaa3(data, gx, gy, (int)width, (int)height, xdist, ydist, inside);
+    for (i = 0; i < pixelAmount; i++)
+        if (inside[i] < 0.0)
+            inside[i] = 0.0;
+
+    // The bipolar distance field is now outside-inside
+    double dist;
+    /* Single channel 8-bit output (bad precision and range, but simple) */
+    unsigned char* out
+        = (unsigned char*)malloc(pixelAmount * sizeof(unsigned char));
+    for (i = 0; i < pixelAmount; i++) {
+        dist = outside[i] - inside[i];
+        dist = 128.0 - dist * 16;
+        if (dist < 0)
+            dist = 0;
+        if (dist > 255)
+            dist = 255;
+        out[i] = (unsigned char)dist;
+    }
+
+    free(xdist);
+    free(ydist);
+    free(gx);
+    free(gy);
+    free(data);
+    free(outside);
+    free(inside);
+
+    return out;
+}
 
 struct font_t* create_builtin_font()
 {
@@ -127,22 +195,86 @@ struct font_t* create_builtin_font()
     stbtt_PackBegin(&(font_data->spc), image.data(), font_texture_width,
         font_texture_height, 0, 1, nullptr);
 
-    stbtt_pack_range ascii {
-        .font_size = 32,
-        .first_unicode_codepoint_in_range = 1,
-        .array_of_unicode_codepoints = nullptr,
-        .num_chars = 127,
-        .chardata_for_range = font_data->chardata,
-        .h_oversample = 0,
-        .v_oversample = 0,
-    };
+    stbtt_pack_range ranges[] = { {
+                                      .font_size = 32,
+                                      .first_unicode_codepoint_in_range = 1,
+                                      .array_of_unicode_codepoints = nullptr,
+                                      .num_chars = 127,
+                                      .chardata_for_range = font_data->chardata,
+                                      .h_oversample = 0,
+                                      .v_oversample = 0,
+                                  },
+        {
+            .font_size = 32,
+            .first_unicode_codepoint_in_range = 0x3400,
+            .array_of_unicode_codepoints = nullptr,
+            .num_chars = 0x4DBF - 0x3400 + 1,
+            .chardata_for_range = font_data->chardata,
+            .h_oversample = 0,
+            .v_oversample = 0,
+        } };
     stbtt_PackFontRanges(
-        &(font_data->spc), noto_scans_sc_regular, 0, &ascii, 1);
+        &(font_data->spc), noto_scans_sc_regular, 0, ranges, 2);
 
     stbtt_PackEnd(&(font_data->spc));
 
-    font_data->textures[0] = create_texture_2d(font_texture_width,
-        font_texture_height, pixel_format::r8, image.data());
+    // std::vector<uint8_t> dstImage;
+    // dstImage.resize(font_texture_width * font_texture_height);
+    // auto r = 4.0;
+    // auto s = 0.125f / (r * r);
+    // for (auto y = 0; y < font_texture_height; y++) {
+    //     for (auto x = 0; x < font_texture_width; x++) {
+    //         auto index = y * font_texture_width + x;
+
+    //         auto a0 = image.data()[index];
+    //         dstImage[index] = image.data()[index];
+
+    //         auto minDistSq = INT32_MAX;
+    //         for (auto yy = -r; yy <= r; yy++) {
+    //             for (auto xx = -r; xx <= r; xx++) {
+    //                 auto xxx = xx + x;
+    //                 if (xxx < 0 || xxx >= font_texture_width) {
+    //                     continue;
+    //                 }
+
+    //                 auto yyy = yy + y;
+    //                 if (yyy < 0 || yyy >= font_texture_height) {
+    //                     continue;
+    //                 }
+
+    //                 auto a = image.data()[(int)(yyy * font_texture_width +
+    //                 xxx)]; auto diff = abs(static_cast<int32_t>(a) - a0); if
+    //                 (diff > 128) {
+    //                     auto distSq = xx * xx + yy * yy;
+    //                     if (minDistSq > distSq) {
+    //                         minDistSq = distSq;
+    //                     }
+    //                 }
+    //             }
+    //         }
+
+    //         int result = 0;
+    //         if (minDistSq == INT32_MAX) {
+    //             result = a0 < 128 ? 0x00 : 0xff;
+    //         } else {
+    //             auto distSq = sqrt(s * minDistSq);
+    //             distSq = ((a0 < 128) ? -distSq : distSq) + 0.5f;
+    //             result = static_cast<uint8_t>(round(255.0f * distSq));
+    //         }
+
+    //         dstImage[index + 0] = result;
+    //     }
+    // }
+
+    auto* ptr = makeDistanceMap(
+        image.data(), font_texture_width, font_texture_height);
+    // font_data->textures[0] = create_texture_2d(font_texture_width,
+    //     font_texture_height, pixel_format::r8, image.data());
+
+    font_data->textures[0] = create_texture_2d(font_texture_width + 2 * radius,
+        font_texture_height + 2 * radius, pixel_format::r8, ptr);
+
+    free(ptr);
 
     return obj;
 }
