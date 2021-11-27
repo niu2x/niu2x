@@ -93,12 +93,19 @@ inline void hashtab_del(struct hashtab_entry_t* entry)
     list_del(&(entry->list));
 }
 
+inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity);
+
 inline void hashtab_set(
     struct hashtab_t* ht, uint64_t key, struct hashtab_entry_t* entry)
 {
     auto* hh = hashtab_get(ht, key);
     if (hh)
         hashtab_del(hh);
+    else {
+        if (ht->size >= ht->capacity) {
+            hashtab_resize(ht, (ht->size) << 1);
+        }
+    }
 
     __hashtab_set(ht, hashtab_hash(key), entry);
 
