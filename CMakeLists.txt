@@ -54,6 +54,7 @@ dependent_prebuilt(
 	TARGET niu2x 
 	LIBS 
 		assimp
+		freetype
 )
 
 # list(APPEND runtime
