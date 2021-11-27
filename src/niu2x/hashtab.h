@@ -125,6 +125,7 @@ inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity)
                 = NX_LIST_ENTRY(head->next, struct hashtab_entry_t, list);
             list_del(&(entry->list));
             hashtab_set(&new_ht, entry->key.u64, entry);
+            entry->hashtab = ht;
         }
     }
     hashtab_cleanup(ht);
