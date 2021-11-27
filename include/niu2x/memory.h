@@ -44,7 +44,7 @@ public:
 
     virtual void* allocate(size_t size) noexcept;
     virtual void free(void* ptr) noexcept;
-    virtual uint64_t used() noexcept { return 0xFFFFFFFFFFFFFFFF; }
+    virtual uint64_t used() noexcept { return 0; }
 };
 
 class NXAPI memory_proxy {

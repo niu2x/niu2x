@@ -51,7 +51,7 @@ target_compile_definitions(niu2x PRIVATE
 	niu2x_EXPORTS 
 
 	#
-	# NX_MAX_MEM=64_m
+	NX_MAX_MEM=64_m
 )
 
 include(dependent_prebuilt)
