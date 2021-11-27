@@ -27,6 +27,8 @@ public:
 
     virtual void Init() = 0;
 
+    std::size_t used() const noexcept { return m_used; }
+
     friend class Benchmark;
 };
 

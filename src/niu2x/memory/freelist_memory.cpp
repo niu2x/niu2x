@@ -21,17 +21,25 @@ freelist_memory::~freelist_memory()
     delete allocator;
 }
 
-void* freelist_memory::allocate(size_t size)
+void* freelist_memory::allocate(size_t size) noexcept
 {
     auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);
     // FreeListAllocator-Node's size is 16.
     return allocator->Allocate(std::max(size, 16ul), alignof(std::max_align_t));
 }
 
-void freelist_memory::free(void* ptr)
+void freelist_memory::free(void* ptr) noexcept
 {
     auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);
     allocator->Free(ptr);
+}
+
+uint64_t freelist_memory::used() noexcept
+{
+
+    auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);
+
+    return allocator->used();
 }
 
 } // namespace nx

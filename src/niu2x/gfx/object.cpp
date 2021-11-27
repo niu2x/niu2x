@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "niu2x/assert.h"
+#include "niu2x/global.h"
 
 #define STBRP_ASSERT(condition) NX_ASSERT(condition, "")
 
@@ -112,78 +113,12 @@ constexpr auto font_texture_width = 2048;
 constexpr auto font_texture_height = 2048;
 } // namespace
 
-#include "font/edtaa3func.h"
 constexpr auto radius = 4;
-unsigned char* makeDistanceMap(unsigned char* img, long width, long height)
-{
-    long pixelAmount = (width + 2 * radius) * (height + 2 * radius);
-
-    short* xdist = (short*)malloc(pixelAmount * sizeof(short));
-    short* ydist = (short*)malloc(pixelAmount * sizeof(short));
-    double* gx = (double*)calloc(pixelAmount, sizeof(double));
-    double* gy = (double*)calloc(pixelAmount, sizeof(double));
-    double* data = (double*)calloc(pixelAmount, sizeof(double));
-    double* outside = (double*)calloc(pixelAmount, sizeof(double));
-    double* inside = (double*)calloc(pixelAmount, sizeof(double));
-    long i, j;
-
-    // Convert img into double (data) rescale image levels between 0 and 1
-    long outWidth = width + 2 * radius;
-    for (i = 0; i < width; ++i) {
-        for (j = 0; j < height; ++j) {
-            data[j * outWidth + radius + i] = img[j * width + i] / 255.0;
-        }
-    }
-
-    width += 2 * radius;
-    height += 2 * radius;
-
-    // Transform background (outside contour, in areas of 0's)
-    computegradient(data, (int)width, (int)height, gx, gy);
-    edtaa3(data, gx, gy, (int)width, (int)height, xdist, ydist, outside);
-    for (i = 0; i < pixelAmount; i++)
-        if (outside[i] < 0.0)
-            outside[i] = 0.0;
-
-    // Transform foreground (inside contour, in areas of 1's)
-    for (i = 0; i < pixelAmount; i++)
-        data[i] = 1 - data[i];
-    computegradient(data, (int)width, (int)height, gx, gy);
-    edtaa3(data, gx, gy, (int)width, (int)height, xdist, ydist, inside);
-    for (i = 0; i < pixelAmount; i++)
-        if (inside[i] < 0.0)
-            inside[i] = 0.0;
-
-    // The bipolar distance field is now outside-inside
-    double dist;
-    /* Single channel 8-bit output (bad precision and range, but simple) */
-    unsigned char* out
-        = (unsigned char*)malloc(pixelAmount * sizeof(unsigned char));
-    for (i = 0; i < pixelAmount; i++) {
-        dist = outside[i] - inside[i];
-        dist = 128.0 - dist * 16;
-        if (dist < 0)
-            dist = 0;
-        if (dist > 255)
-            dist = 255;
-        out[i] = (unsigned char)dist;
-    }
-
-    free(xdist);
-    free(ydist);
-    free(gx);
-    free(gy);
-    free(data);
-    free(outside);
-    free(inside);
-
-    return out;
-}
 
 struct font_t* create_builtin_font()
 {
     auto* obj = (create_object(font_freelist, font));
-    obj->private_data = mem.allocate(sizeof(font_private_data_t));
+    obj->private_data = global::mem.allocate(sizeof(font_private_data_t));
     NX_ASSERT(obj->private_data, "out of memory");
 
     struct font_private_data_t* font_data
@@ -266,11 +201,7 @@ struct font_t* create_builtin_font()
     //     }
     // }
 
-    auto* ptr = makeDistanceMap(
-        image.data(), font_texture_width, font_texture_height);
-    // font_data->textures[0] = create_texture_2d(font_texture_width,
-    //     font_texture_height, pixel_format::r8, image.data());
-
+    unsigned char* ptr = nullptr;
     font_data->textures[0] = create_texture_2d(font_texture_width + 2 * radius,
         font_texture_height + 2 * radius, pixel_format::r8, ptr);
 
@@ -346,7 +277,7 @@ static void destroy_font(font_t* obj)
         = reinterpret_cast<struct font_private_data_t*>(obj->private_data);
     destroy_texture(font_data->textures[0]);
 
-    mem.free(obj->private_data);
+    global::mem.free(obj->private_data);
 
     destroy_object(font_freelist, obj);
 }

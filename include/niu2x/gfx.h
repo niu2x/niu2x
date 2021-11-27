@@ -14,8 +14,6 @@
 
 namespace nx::gfx {
 
-extern NXAPI memory_proxy mem;
-
 enum NXAPI window_option_constant {
     MSAA = 1 << 0,
 };

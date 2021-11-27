@@ -5,6 +5,7 @@
 #include <zlib.h>
 
 #include "niu2x/assert.h"
+#include "niu2x/global.h"
 
 namespace nx::pipe::filter {
 
@@ -20,19 +21,19 @@ void unzlib_cleanup(z_stream* strm);
 
 zlib::zlib(int level)
 {
-    zlib_ctx_ = mem.allocate(sizeof(z_stream));
+    zlib_ctx_ = NX_ALLOC(z_stream, 1);
     NX_ASSERT(zlib_ctx_, "out of memory");
     zlib_setup(reinterpret_cast<z_stream*>(zlib_ctx_), level);
 }
 zlib::~zlib()
 {
     zlib_cleanup(reinterpret_cast<z_stream*>(zlib_ctx_));
-    mem.free(zlib_ctx_);
+    NX_FREE(zlib_ctx_);
 }
 
 unzlib::unzlib()
 {
-    zlib_ctx_ = mem.allocate(sizeof(z_stream));
+    zlib_ctx_ = NX_ALLOC(z_stream, 1);
     NX_ASSERT(zlib_ctx_, "out of memory");
     unzlib_setup(reinterpret_cast<z_stream*>(zlib_ctx_));
 }
@@ -40,7 +41,7 @@ unzlib::unzlib()
 unzlib::~unzlib()
 {
     unzlib_cleanup(reinterpret_cast<z_stream*>(zlib_ctx_));
-    mem.free(zlib_ctx_);
+    NX_FREE(zlib_ctx_);
 }
 
 bool zlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)

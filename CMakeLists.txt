@@ -46,7 +46,13 @@ target_sources(niu2x PRIVATE
 	${c_source}
 )
 
-target_compile_definitions(niu2x PRIVATE niu2x_EXPORTS)
+target_compile_definitions(niu2x PRIVATE 
+	# build shared library
+	niu2x_EXPORTS 
+
+	#
+	# NX_MAX_MEM=64_m
+)
 
 include(dependent_prebuilt)
 
