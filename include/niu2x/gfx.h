@@ -37,16 +37,21 @@ struct NXAPI object_t {
     uint64_t id;
 };
 
-struct NXAPI texture_t : object_t {
-    GLuint name;
-    int width;
-    int height;
-};
-
 enum class NXAPI pixel_format {
     rgba8,
     rgb8,
     r8,
+};
+
+struct NXAPI texture_t : object_t {
+    GLuint name;
+    int width;
+    int height;
+    pixel_format pf;
+};
+
+struct NXAPI font_t : object_t {
+    void* private_data;
 };
 
 enum class vertex_attr_type : uint8_t {
@@ -108,6 +113,19 @@ struct NXAPI program_t : object_t {
     GLuint name;
 };
 
+struct NXAPI font_char_info_t {
+    texture_t* texture;
+    int uv_x;
+    int uv_y;
+    int uv_w;
+    int uv_h;
+    int x, y, w, h;
+    int advance;
+};
+
+NXAPI font_t* create_builtin_font(int font_size);
+NXAPI font_char_info_t font_char_info(font_t* self, uint32_t code);
+
 NXAPI vertex_buffer_t* create_vertex_buffer(
     vertex_layout_t layout, uint32_t vertices_count, void* data = nullptr);
 
@@ -118,6 +136,10 @@ NXAPI program_t* create_program(const char* vert, const char* frag);
 
 NXAPI texture_t* create_texture_2d(
     int w, int h, pixel_format pf, const void* data);
+
+NXAPI void texture_2d_update_region(
+    texture_t* self, int x, int y, int w, int h, const void* data);
+
 NXAPI texture_t* create_texture_2d_from_file(const char* pathname);
 
 NXAPI void destroy(object_t*);
@@ -337,13 +359,6 @@ enum NXAPI key_mods_constant {
     KEY_MOD_ALT = GLFW_MOD_ALT,
     KEY_MOD_SUPER = GLFW_MOD_SUPER,
 };
-
-struct NXAPI font_t : object_t {
-    void* private_data;
-};
-
-NXAPI struct font_t* create_builtin_font();
-NXAPI texture_t* font_texture(struct font_t*, int index);
 
 NXAPI void test_font();
 

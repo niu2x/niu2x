@@ -23,8 +23,6 @@
 #include "niu2x/assert.h"
 #include "niu2x/freelist.h"
 
-#include "noto_scans_sc_regular.h"
-
 namespace nx::gfx {
 
 namespace {
@@ -50,7 +48,7 @@ static freelist<vertex_buffer_t, 1024> vertex_buffer_freelist;
 static freelist<indice_buffer_t, 1024> indice_buffer_freelist;
 static freelist<program_t, 1024> program_freelist;
 static freelist<texture_t, 4096> texture_freelist;
-static freelist<font_t, 64> font_freelist;
+static freelist<font_t, 256> font_freelist;
 
 size_t vertex_sizeof(vertex_layout_t layout)
 {
@@ -102,119 +100,13 @@ vertex_buffer_t* create_vertex_buffer(
     return obj;
 }
 
-namespace {
-struct font_private_data_t {
-    stbtt_packedchar chardata[127 + 0x4DBF - 0x3400 + 1];
-    stbtt_pack_context spc;
-    texture_t* textures[1];
-};
-
-constexpr auto font_texture_width = 2048;
-constexpr auto font_texture_height = 2048;
-} // namespace
-
-constexpr auto radius = 4;
-
-struct font_t* create_builtin_font()
+font_t* create_builtin_font(int font_size)
 {
     auto* obj = (create_object(font_freelist, font));
-    obj->private_data = global::mem.allocate(sizeof(font_private_data_t));
-    NX_ASSERT(obj->private_data, "out of memory");
-
-    struct font_private_data_t* font_data
-        = reinterpret_cast<struct font_private_data_t*>(obj->private_data);
-
-    std::vector<uint8_t> image;
-    image.resize(font_texture_width * font_texture_height);
-
-    stbtt_PackBegin(&(font_data->spc), image.data(), font_texture_width,
-        font_texture_height, 0, 1, nullptr);
-
-    stbtt_pack_range ranges[] = { {
-                                      .font_size = 32,
-                                      .first_unicode_codepoint_in_range = 1,
-                                      .array_of_unicode_codepoints = nullptr,
-                                      .num_chars = 127,
-                                      .chardata_for_range = font_data->chardata,
-                                      .h_oversample = 0,
-                                      .v_oversample = 0,
-                                  },
-        {
-            .font_size = 32,
-            .first_unicode_codepoint_in_range = 0x3400,
-            .array_of_unicode_codepoints = nullptr,
-            .num_chars = 0x4DBF - 0x3400 + 1,
-            .chardata_for_range = font_data->chardata,
-            .h_oversample = 0,
-            .v_oversample = 0,
-        } };
-    stbtt_PackFontRanges(
-        &(font_data->spc), noto_scans_sc_regular, 0, ranges, 2);
-
-    stbtt_PackEnd(&(font_data->spc));
-
-    // std::vector<uint8_t> dstImage;
-    // dstImage.resize(font_texture_width * font_texture_height);
-    // auto r = 4.0;
-    // auto s = 0.125f / (r * r);
-    // for (auto y = 0; y < font_texture_height; y++) {
-    //     for (auto x = 0; x < font_texture_width; x++) {
-    //         auto index = y * font_texture_width + x;
-
-    //         auto a0 = image.data()[index];
-    //         dstImage[index] = image.data()[index];
-
-    //         auto minDistSq = INT32_MAX;
-    //         for (auto yy = -r; yy <= r; yy++) {
-    //             for (auto xx = -r; xx <= r; xx++) {
-    //                 auto xxx = xx + x;
-    //                 if (xxx < 0 || xxx >= font_texture_width) {
-    //                     continue;
-    //                 }
-
-    //                 auto yyy = yy + y;
-    //                 if (yyy < 0 || yyy >= font_texture_height) {
-    //                     continue;
-    //                 }
-
-    //                 auto a = image.data()[(int)(yyy * font_texture_width +
-    //                 xxx)]; auto diff = abs(static_cast<int32_t>(a) - a0); if
-    //                 (diff > 128) {
-    //                     auto distSq = xx * xx + yy * yy;
-    //                     if (minDistSq > distSq) {
-    //                         minDistSq = distSq;
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         int result = 0;
-    //         if (minDistSq == INT32_MAX) {
-    //             result = a0 < 128 ? 0x00 : 0xff;
-    //         } else {
-    //             auto distSq = sqrt(s * minDistSq);
-    //             distSq = ((a0 < 128) ? -distSq : distSq) + 0.5f;
-    //             result = static_cast<uint8_t>(round(255.0f * distSq));
-    //         }
-
-    //         dstImage[index + 0] = result;
-    //     }
-    // }
-
-    unsigned char* ptr = nullptr;
-    font_data->textures[0] = create_texture_2d(font_texture_width + 2 * radius,
-        font_texture_height + 2 * radius, pixel_format::r8, ptr);
-
-    free(ptr);
+    obj->private_data = NX_ALLOC(struct font::font_altas_t, 1);
+    font::font_altas_setup((font::font_altas_t*)(obj->private_data), font_size);
 
     return obj;
-}
-
-texture_t* font_texture(struct font_t* obj, int index)
-{
-    struct font_private_data_t* font_data
-        = reinterpret_cast<struct font_private_data_t*>(obj->private_data);
-    return font_data->textures[index];
 }
 
 indice_buffer_t* create_indice_buffer(uint32_t indices_count, void* data)
@@ -244,6 +136,26 @@ static void destroy_vertex_buffer(vertex_buffer_t* obj)
     destroy_object(vertex_buffer_freelist, obj);
 }
 
+font_char_info_t font_char_info(font_t* self, uint32_t code)
+{
+    auto* font_altas = (font::font_altas_t*)(self->private_data);
+
+    auto* ci = font::font_altas_char_info(font_altas, code);
+
+    return {
+        .texture = font_altas->pages[ci->page],
+        .uv_x = ci->xi * font_altas->cell_edge,
+        .uv_y = ci->yi * font_altas->cell_edge,
+        .uv_w = ci->w,
+        .uv_h = ci->h,
+        .x = ci->x,
+        .y = ci->y,
+        .w = ci->w,
+        .h = ci->h,
+        .advance = ci->advance,
+    };
+}
+
 static GLuint create_shader(GLenum shader_type, const char* source_code)
 {
     auto name = glCreateShader(shader_type);
@@ -268,17 +180,13 @@ static void destroy_shader(GLuint name) { glDeleteShader(name); }
 static void destroy_texture(texture_t* obj)
 {
     glDeleteTextures(1, &(obj->name));
-    destroy_object(program_freelist, obj);
+    destroy_object(texture_freelist, obj);
 }
 
 static void destroy_font(font_t* obj)
 {
-    struct font_private_data_t* font_data
-        = reinterpret_cast<struct font_private_data_t*>(obj->private_data);
-    destroy_texture(font_data->textures[0]);
-
-    global::mem.free(obj->private_data);
-
+    font::font_altas_cleanup((font::font_altas_t*)(obj->private_data));
+    NX_FREE(obj->private_data);
     destroy_object(font_freelist, obj);
 }
 
@@ -436,6 +344,37 @@ texture_t* create_texture_2d_from_file(const char* pathname)
     return obj;
 }
 
+void texture_2d_update_region(
+    texture_t* obj, int x, int y, int w, int h, const void* data)
+{
+
+    glBindTexture(GL_TEXTURE_2D, obj->name);
+    switch (obj->pf) {
+        case pixel_format::rgba8: {
+            glTexSubImage2D(
+                GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            break;
+        }
+        case pixel_format::rgb8: {
+            glTexSubImage2D(
+                GL_TEXTURE_2D, 0, x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+            break;
+        }
+        case pixel_format::r8: {
+            glTexSubImage2D(
+                GL_TEXTURE_2D, 0, x, y, w, h, GL_RED, GL_UNSIGNED_BYTE, data);
+            break;
+        }
+        default: {
+            NX_ASSERT(false, "unsopport format: %d", obj->pf);
+        }
+    }
+    NX_CHECK_GL_ERROR();
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+    NX_CHECK_GL_ERROR();
+}
+
 texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
 {
     auto* obj = (create_object(texture_freelist, texture));
@@ -474,6 +413,7 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
     // GL_TEXTURE_WRAP_R
     obj->width = w;
     obj->height = h;
+    obj->pf = pf;
     NX_CHECK_GL_ERROR();
     return obj;
 }

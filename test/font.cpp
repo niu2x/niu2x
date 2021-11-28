@@ -68,15 +68,7 @@ out highp vec4 color;
 void main()
 {
     highp float red = texture(tex0, v_uv.xy ).r;
-    if(red > 0.5){
-        color = vec4(1.0);
-    }
-    else if (red > 0.45) {
-        color = vec4(0.0, 0.0, 1.0, 1.0);
-    }
-    else{
-        color = vec4(0.0);
-    }
+    color = vec4(1,0,0,red) + vec4(0.2);   
 }
 
 )RAW";
@@ -91,7 +83,7 @@ static void setup()
 
     gfx::mat4x4 tmp;
     gfx::mat4x4_identity(tmp);
-    gfx::mat4x4_scale_aniso(tmp, tmp, 10000, 10000, 10000);
+    gfx::mat4x4_scale_aniso(tmp, tmp, 101, 101, 101);
 
     gfx::mat4x4_mul(model0, model0, tmp);
 
@@ -128,7 +120,10 @@ static void setup()
     gfx::set_projection_transform(projection);
     gfx::set_view_transform(view);
 
-    font = gfx::create_builtin_font();
+    font = gfx::create_builtin_font(196);
+
+    for (char c = 'A'; c <= 'Z'; c++)
+        gfx::font_char_info(font, c);
 }
 
 static void cleanup()
@@ -153,8 +148,9 @@ static void update(double dt)
     gfx::set_vertex_buffer(vbo);
     gfx::set_indice_buffer(ibo);
     gfx::set_program(program);
-    gfx::set_texture(0, gfx::font_texture(font, 0));
-    gfx::set_blend_func(gfx::blend::one, gfx::blend::zero);
+
+    gfx::set_texture(0, gfx::font_char_info(font, 'K').texture);
+    gfx::set_blend_func(gfx::blend::src_alpha, gfx::blend::zero);
     gfx::draw_element(0, 0, 6);
 
     gfx::end();
@@ -186,5 +182,6 @@ int main()
     cfg.mouse_pos_callback = mouse_pos_callback;
 
     gfx::run(cfg);
+
     return 0;
 }

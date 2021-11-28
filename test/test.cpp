@@ -3,5 +3,6 @@
 int main()
 {
     nx::test::test_hashtab();
+
     return 0;
 }

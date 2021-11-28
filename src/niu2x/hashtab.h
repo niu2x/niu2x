@@ -14,10 +14,12 @@ struct hashtab_t {
     struct list_head* entries;
     size_t capacity;
     size_t size;
+    struct list_head all;
 };
 
 struct hashtab_entry_t {
     struct list_head list;
+    struct list_head all;
     union {
         uint64_t u64;
     } key;
@@ -38,6 +40,8 @@ inline void hashtab_setup(struct hashtab_t* ht, size_t capacity = 32)
         auto* head = &(ht->entries[i]);
         head->prev = head->next = head;
     }
+
+    ht->all.prev = ht->all.next = &(ht->all);
 }
 
 inline void hashtab_cleanup(struct hashtab_t* ht)
@@ -45,6 +49,8 @@ inline void hashtab_cleanup(struct hashtab_t* ht)
     NX_ASSERT(ht && ht->entries != nullptr && ht->capacity != 0, "");
     NX_FREE(ht->entries);
     ht->capacity = 0;
+    ht->size = 0;
+    ht->all.prev = ht->all.next = &(ht->all);
 }
 
 inline void __hashtab_set(
@@ -53,6 +59,7 @@ inline void __hashtab_set(
     auto idx = hash % ht->capacity;
     auto* head = &(ht->entries[idx]);
     list_add(&(entry->list), head);
+    list_add(&(entry->all), &(ht->all));
 }
 
 inline struct list_head* __hashtab_get(struct hashtab_t* ht, uint64_t hash)
@@ -91,6 +98,7 @@ inline void hashtab_del(struct hashtab_entry_t* entry)
     --entry->hashtab->size;
     entry->hashtab = nullptr;
     list_del(&(entry->list));
+    list_del(&(entry->all));
 }
 
 inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity);
@@ -123,13 +131,21 @@ inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity)
         while (!list_empty(head)) {
             struct hashtab_entry_t* entry
                 = NX_LIST_ENTRY(head->next, struct hashtab_entry_t, list);
-            list_del(&(entry->list));
+            hashtab_del(entry);
             hashtab_set(&new_ht, entry->key.u64, entry);
             entry->hashtab = ht;
         }
     }
     hashtab_cleanup(ht);
     *ht = new_ht;
+}
+
+inline struct hashtab_entry_t* hashtab_first(struct hashtab_t* ht)
+{
+    if (ht->size > 0) {
+        return NX_LIST_ENTRY(ht->all.next, struct hashtab_entry_t, all);
+    }
+    return nullptr;
 }
 
 } // namespace nx

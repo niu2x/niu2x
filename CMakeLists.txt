@@ -61,6 +61,7 @@ dependent_prebuilt(
 	LIBS 
 		assimp
 		freetype
+		libpng
 )
 
 # list(APPEND runtime

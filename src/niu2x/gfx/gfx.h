@@ -1,7 +1,13 @@
 #ifndef NX_GFX_GFX_H
 #define NX_GFX_GFX_H
 
+#include <ft2build.h>
+#include <freetype/freetype.h>
+#include <freetype/ftadvanc.h>
+
 #include <niu2x/gfx.h>
+
+#include "niu2x/hashtab.h"
 
 namespace nx::gfx {
 
@@ -17,9 +23,43 @@ GLint program_uniform_location(struct program_t* obj, const char* name);
         NX_ASSERT(e == GL_NO_ERROR, "opengl error: %x", e);                    \
     } while (false);
 
-} // namespace nx::gfx
-
 void setup();
 void cleanup();
+
+namespace font {
+
+void font_system_setup();
+void font_system_cleanup();
+
+struct font_altas_t {
+    enum { PAGES_CAPACITY = 32 };
+    struct texture_t* pages[PAGES_CAPACITY];
+    struct hashtab_t charmap;
+    int size;
+    FT_Face face;
+    int font_size;
+    int cell_edge;
+    int cell_capacity;
+    int cell_size;
+    int cell_row;
+    int cell_col;
+};
+
+struct char_info_t {
+    int advance;
+    int page;
+    struct hashtab_entry_t hash;
+
+    int x, y, w, h;
+    int xi, yi;
+};
+
+void font_altas_setup(font_altas_t* self, int font_size);
+void font_altas_cleanup(font_altas_t* self);
+char_info_t* font_altas_char_info(font_altas_t* self, uint32_t code);
+
+} // namespace font
+
+} // namespace nx::gfx
 
 #endif

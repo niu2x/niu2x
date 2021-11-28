@@ -52,9 +52,6 @@ void run(const window_config& c)
     glfwSetCursorPosCallback(glfw_window, cursor_pos_callback);
     glfwSetMouseButtonCallback(glfw_window, mouse_key_callback);
 
-    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    glEnable(GL_POLYGON_SMOOTH);
-
     auto last_now = std::chrono::steady_clock::now();
     auto now = last_now;
     float dt = 0;
@@ -96,6 +93,8 @@ void run(const window_config& c)
     destroy_glfw_window(glfw_window);
 
     glfw_cleanup();
+
+    printf("test_hashtab: used: %lu\n", global::mem.used());
 }
 
 void exit()

@@ -6,7 +6,7 @@
 namespace nx::test {
 
 void NXAPI test_hashtab();
-
+void NXAPI test_font_altas();
 }
 
 #endif
