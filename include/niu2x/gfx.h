@@ -11,6 +11,7 @@
 #include <niu2x/api.h>
 #include <niu2x/memory.h>
 #include <niu2x/linmath.h>
+#include <niu2x/list_head.h>
 
 namespace nx::gfx {
 
@@ -35,6 +36,7 @@ NXAPI void exit();
 struct NXAPI object_t {
     uint8_t type;
     uint64_t id;
+    list_head list;
 };
 
 enum class NXAPI pixel_format {
@@ -126,11 +128,11 @@ struct NXAPI font_char_info_t {
 NXAPI font_t* create_builtin_font(int font_size);
 NXAPI font_char_info_t font_char_info(font_t* self, uint32_t code);
 
-NXAPI vertex_buffer_t* create_vertex_buffer(
-    vertex_layout_t layout, uint32_t vertices_count, void* data = nullptr);
+NXAPI vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
+    uint32_t vertices_count, void* data = nullptr, bool auto_destroy = false);
 
 NXAPI indice_buffer_t* create_indice_buffer(
-    uint32_t indices_count, void* data = nullptr);
+    uint32_t indices_count, void* data = nullptr, bool auto_destroy = false);
 
 NXAPI program_t* create_program(const char* vert, const char* frag);
 
@@ -204,24 +206,27 @@ using texture_id_t = uint8_t;
 NXAPI void begin();
 NXAPI void end();
 
+NXAPI void set_clear_color(color_t color);
+
 NXAPI void clear(layer_t layer);
 NXAPI void draw_array(layer_t layer, uint32_t start, uint32_t count);
 NXAPI void draw_element(layer_t layer, uint32_t start, uint32_t count);
 
-NXAPI void set_clear_color(color_t color);
 NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
 NXAPI void set_indice_buffer(indice_buffer_t* vbo);
 NXAPI void set_program(program_t* program);
 NXAPI void set_render_state(render_state_t rs);
 NXAPI void set_texture(texture_id_t tex_id, texture_t* tex);
 NXAPI void set_blend_func(blend_t src_func, blend_t dst_func);
+NXAPI void set_model_transform(const mat4x4);
+NXAPI void set_view_transform(const mat4x4);
+NXAPI void set_projection_transform(const mat4x4);
+
 NXAPI void reset();
 
 NXAPI void mat4x4_dump(const mat4x4 a);
 
-NXAPI void set_model_transform(const mat4x4);
-NXAPI void set_view_transform(const mat4x4);
-NXAPI void set_projection_transform(const mat4x4);
+NXAPI void printf(int x, int y, const char*, ...);
 
 enum NXAPI keycode_constant {
     KEY_UNKNOWN = -1,

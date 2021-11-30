@@ -32,23 +32,27 @@ struct object_type {
 
 } // namespace
 
-#define create_object(list, type_t)                                            \
+#define create_object(freelist, type_t)                                        \
     {                                                                          \
-        auto id = list.alloc();                                                \
-        NX_ASSERT(id != list.nil, "too many object");                          \
-        auto* obj = list.get(id);                                              \
+        auto id = freelist.alloc();                                            \
+        NX_ASSERT(id != freelist.nil, "too many object");                      \
+        auto* obj = freelist.get(id);                                          \
         obj->type = object_type::type_t;                                       \
         obj->id = id;                                                          \
+        list_init(&(obj->list));                                               \
         obj;                                                                   \
     }
 
-#define destroy_object(list, obj) list.free(obj->id);
+#define destroy_object(freelist, obj)                                          \
+    freelist.free(obj->id);                                                    \
+    list_del_init(&(obj->list));
 
 static freelist<vertex_buffer_t, 1024> vertex_buffer_freelist;
 static freelist<indice_buffer_t, 1024> indice_buffer_freelist;
 static freelist<program_t, 1024> program_freelist;
 static freelist<texture_t, 4096> texture_freelist;
 static freelist<font_t, 256> font_freelist;
+static NX_LIST_HEAD(auto_destroy_head);
 
 size_t vertex_sizeof(vertex_layout_t layout)
 {
@@ -84,13 +88,17 @@ size_t vertex_sizeof(vertex_layout_t layout)
     return size;
 }
 
-vertex_buffer_t* create_vertex_buffer(
-    vertex_layout_t layout, uint32_t vertices_count, void* data)
+vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
+    uint32_t vertices_count, void* data, bool auto_destroy)
 {
     auto* obj = (create_object(vertex_buffer_freelist, vertex_buffer));
 
     glGenBuffers(1, &(obj->name));
     obj->layout = layout;
+
+    if (auto_destroy) {
+        list_add(&(obj->list), &auto_destroy_head);
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, obj->name);
     size_t buffer_size = vertex_sizeof(layout) * vertices_count;
@@ -109,10 +117,23 @@ font_t* create_builtin_font(int font_size)
     return obj;
 }
 
-indice_buffer_t* create_indice_buffer(uint32_t indices_count, void* data)
+void auto_destroy_objects() { 
+    while(!list_empty(&auto_destroy_head)){
+        object_t *obj = NX_LIST_ENTRY(auto_destroy_head.next, object_t, list);
+        list_del(&(obj->list));
+        destroy(obj);
+    }
+}
+
+indice_buffer_t* create_indice_buffer(
+    uint32_t indices_count, void* data, bool auto_destroy)
 {
 
     auto* obj = (create_object(indice_buffer_freelist, indice_buffer));
+
+    if (auto_destroy) {
+        list_add(&(obj->list), &auto_destroy_head);
+    }
 
     glGenBuffers(1, &(obj->name));
 

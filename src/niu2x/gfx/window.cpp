@@ -35,6 +35,7 @@ void imgui_update(double dt);
 } // namespace
 
 static GLFWwindow* current_glfw_window = nullptr;
+static int window_width, window_height;
 
 void run(const window_config& c)
 {
@@ -79,6 +80,8 @@ void run(const window_config& c)
 
         imgui_update(dt);
 
+        printf(0, 0, "FPS: %.2f", (1 / dt));
+
         glfwSwapBuffers(glfw_window);
     }
 
@@ -94,7 +97,7 @@ void run(const window_config& c)
 
     glfw_cleanup();
 
-    printf("test_hashtab: used: %lu\n", global::mem.used());
+    NX_LOG_D("test_hashtab: used: %lu", global::mem.used());
 }
 
 void exit()
@@ -125,6 +128,9 @@ GLFWwindow* create_glfw_window(const window_config& c)
     auto glfw_window
         = glfwCreateWindow(c.width, c.height, c.title.c_str(), 0, nullptr);
     NX_ASSERT(glfw_window, "create glfw_window failed.");
+
+    window_width = c.width;
+    window_height = c.height;
 
     glfwMakeContextCurrent(glfw_window);
     glfwSwapInterval(1);
@@ -219,6 +225,9 @@ void framebuffer_size_callback(GLFWwindow* window, int w, int h)
         int viewport_x = (w - viewport_width) >> 1;
         int viewport_y = (h - viewport_height) >> 1;
         glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
+
+        window_width = viewport_width;
+        window_height = viewport_height;
     }
 }
 
@@ -231,5 +240,11 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 } // namespace
+
+void window_size(int* w, int* h)
+{
+    *w = window_width;
+    *h = window_height;
+}
 
 } // namespace nx::gfx

@@ -26,6 +26,16 @@ GLint program_uniform_location(struct program_t* obj, const char* name);
 void setup();
 void cleanup();
 
+extern font_t* default_font;
+extern program_t* font_program;
+
+extern vertex_buffer_t* sprite_vb;
+extern indice_buffer_t* sprite_ib;
+
+void window_size(int* w, int* h);
+
+void auto_destroy_objects();
+
 namespace font {
 
 void font_system_setup();

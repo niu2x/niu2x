@@ -10,6 +10,10 @@
 #define FONT_LOAD_FLAGS                                                        \
     (FT_LOAD_DEFAULT | FT_LOAD_NO_BITMAP | FT_LOAD_FORCE_AUTOHINT)
 
+namespace nx::gfx {
+program_t* font_program = nullptr;
+}
+
 namespace nx::gfx::font {
 
 static FT_Library ft_lib;
@@ -124,8 +128,6 @@ static void font_altas_generate_glyph(font_altas_t* self, uint32_t code)
     ci->xi = xi;
     ci->yi = yi;
 
-    NX_LOG_D(" xi %d yi %d idx %d", xi, yi, idx);
-
     std::vector<uint8_t> buffer;
     buffer.resize(ci->w * ci->h);
 
@@ -156,15 +158,50 @@ char_info_t* font_altas_char_info(font_altas_t* self, uint32_t code)
     return ci;
 }
 
+static const char* font_program_source[] = { R"RAW(
+#version 300 es
+
+layout(location = 0) in highp vec3 position;
+layout(location = 1) in highp vec3 uv;
+
+uniform mat4 mvp;
+out highp vec3 v_uv;
+
+void main()
+{
+  gl_Position =  vec4(position, 1.0) * mvp;
+  v_uv = uv;
+}
+
+)RAW",
+    R"RAW(
+#version 300 es
+
+uniform sampler2D tex0;
+in highp vec3 v_uv;
+
+out highp vec4 color;
+
+void main()
+{
+    highp float a = texture(tex0, v_uv.xy).r;
+    color = vec4(vec3(0, 1, 0), a);
+}
+
+)RAW" };
+
 void font_system_setup()
 {
     ft_library_setup();
     default_face
         = create_face(noto_scans_sc_regular, noto_scans_sc_regular_length);
+
+    font_program
+        = create_program(font_program_source[0], font_program_source[1]);
 }
 void font_system_cleanup()
 {
-
+    destroy(font_program);
     destroy_face(default_face);
     ft_library_cleanup();
 }

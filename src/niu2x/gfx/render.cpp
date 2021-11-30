@@ -41,6 +41,9 @@ static struct environment_t {
 static constexpr int cmd_builder_queue_capacity = 16;
 static struct cmd_t cmd_builder_queue[cmd_builder_queue_capacity];
 static int cmd_builder_queue_size = 0;
+static cmd_t* cmd_builder_top = cmd_builder_queue - 1;
+
+static environment_t environment_queue[cmd_builder_queue_capacity];
 
 static int next_cmd_idx = 0;
 
@@ -59,14 +62,38 @@ static struct renderlayer_t {
 
 } layers[renderlayers_count];
 
+static void push()
+{
+    NX_ASSERT(cmd_builder_queue_size < cmd_builder_queue_capacity, "");
+    ++cmd_builder_queue_size;
+    ++cmd_builder_top;
+    reset();
+
+    environment_queue[cmd_builder_queue_size - 1] = environment;
+}
+
+static void pop()
+{
+    NX_ASSERT(cmd_builder_queue_size >= 1, "");
+
+    environment = environment_queue[cmd_builder_queue_size - 1];
+
+    --cmd_builder_queue_size;
+    --cmd_builder_top;
+}
+
 void begin()
 {
-    next_cmd_idx = 0;
-    for (int i = 0; i < renderlayers_count; i++) {
-        layers[i].cmd_list = {
-            &(layers[i].cmd_list),
-            &(layers[i].cmd_list),
-        };
+    push();
+
+    if (cmd_builder_queue_size == 1) {
+        next_cmd_idx = 0;
+        for (int i = 0; i < renderlayers_count; i++) {
+            layers[i].cmd_list = {
+                &(layers[i].cmd_list),
+                &(layers[i].cmd_list),
+            };
+        }
     }
 }
 
@@ -80,36 +107,44 @@ static void update_environment()
 
 void end()
 {
-    update_environment();
+    if (cmd_builder_queue_size == 1) {
 
-    cmd_t* cmd;
-    for (int i = renderlayers_count - 1; i >= 0; i--) {
-        NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
-        {
-            cmd = NX_LIST_ENTRY(ptr, struct cmd_t, list);
-            switch (cmd->type) {
-                case cmdtype::clear: {
-                    handle_cmd_clear(cmd);
-                    break;
-                }
-                case cmdtype::draw_array: {
-                    handle_cmd_draw_array(cmd);
-                    break;
-                }
-                case cmdtype::draw_element: {
-                    handle_cmd_draw_element(cmd);
-                    break;
+        update_environment();
+
+        cmd_t* cmd;
+        for (int i = renderlayers_count - 1; i >= 0; i--) {
+            NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
+            {
+                cmd = NX_LIST_ENTRY(ptr, struct cmd_t, list);
+                switch (cmd->type) {
+                    case cmdtype::clear: {
+                        handle_cmd_clear(cmd);
+                        break;
+                    }
+                    case cmdtype::draw_array: {
+                        handle_cmd_draw_array(cmd);
+                        break;
+                    }
+                    case cmdtype::draw_element: {
+                        handle_cmd_draw_element(cmd);
+                        break;
+                    }
                 }
             }
         }
-    }
 
-    NX_CHECK_GL_ERROR();
+        NX_CHECK_GL_ERROR();
+    }
+    pop();
+
+    if (cmd_builder_queue_size == 0)
+        auto_destroy_objects();
 }
 
 void reset()
 {
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
+    ;
     memset(&cmd_builder, 0, sizeof(cmd_t));
 }
 
@@ -117,7 +152,7 @@ void clear(layer_t layer)
 {
     CHECK_CMD_COUNT();
 
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
     cmd_builder.type = cmdtype::clear;
 
     auto* cmd = &cmds[next_cmd_idx++];
@@ -129,7 +164,7 @@ void clear(layer_t layer)
 void draw_array(layer_t layer, uint32_t start, uint32_t count)
 {
     CHECK_CMD_COUNT();
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
     cmd_builder.type = cmdtype::draw_array;
     cmd_builder.start = start;
     cmd_builder.count = count;
@@ -145,23 +180,11 @@ void set_clear_color(color_t color)
         color.rgba.b / 255.0, color.rgba.a / 255.0);
 }
 
-void set_vertex_buffer(vertex_buffer_t* vbo)
-{
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
-    cmd_builder.vbo = vbo;
-}
+void set_vertex_buffer(vertex_buffer_t* vbo) { cmd_builder_top->vbo = vbo; }
 
-void set_indice_buffer(indice_buffer_t* ibo)
-{
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
-    cmd_builder.ibo = ibo;
-}
+void set_indice_buffer(indice_buffer_t* ibo) { cmd_builder_top->ibo = ibo; }
 
-void set_program(program_t* program)
-{
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
-    cmd_builder.program = program;
-}
+void set_program(program_t* program) { cmd_builder_top->program = program; }
 
 static void handle_cmd_clear(cmd_t* cmd)
 {
@@ -226,13 +249,14 @@ static void vertex_layout_active(vertex_layout_t layout)
 void draw_element(layer_t layer, uint32_t start, uint32_t count)
 {
     CHECK_CMD_COUNT();
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
     cmd_builder.type = cmdtype::draw_element;
     cmd_builder.start = start;
     cmd_builder.count = count;
     auto* cmd = &cmds[next_cmd_idx++];
     *cmd = cmd_builder;
     list_add_tail(&(cmd->list), &(layers[layer].cmd_list));
+    NX_CHECK_GL_ERROR();
 }
 
 static void handle_render_state(render_state_t rs)
@@ -326,7 +350,7 @@ static void program_active(cmd_t* cmd)
 }
 void set_blend_func(uint8_t src_func, uint8_t dst_func)
 {
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
     cmd_builder.bf_src = src_func;
     cmd_builder.bf_dst = dst_func;
 }
@@ -335,7 +359,7 @@ void set_texture(texture_id_t tex_id, texture_t* tex)
 {
     NX_ASSERT(tex_id < max_cmd_textures, "too large tex_id %d", tex_id);
 
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
     cmd_builder.textures[tex_id] = tex;
 }
 
@@ -383,13 +407,13 @@ static void handle_cmd_draw_element(cmd_t* cmd)
 
 void set_render_state(render_state_t rs)
 {
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
     cmd_builder.render_state = rs;
 }
 
 void set_model_transform(const mat4x4 m)
 {
-    auto& cmd_builder = cmd_builder_queue[cmd_builder_queue_size];
+    auto& cmd_builder = *cmd_builder_top;
     mat4x4_dup(cmd_builder.model, m);
 }
 

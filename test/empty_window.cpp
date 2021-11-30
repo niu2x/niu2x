@@ -16,8 +16,8 @@ static auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr_type::position,
 
 static gfx::program_t* program = nullptr;
 
-static gfx::render_state_t render_state = gfx::WRITE_RGBA | gfx::DEPTH_TEST
-    | gfx::WRITE_DEPTH | gfx::CULL_BACK | gfx::BLEND;
+static gfx::render_state_t render_state
+    = gfx::WRITE_RGBA | gfx::DEPTH_TEST | gfx::WRITE_DEPTH | gfx::BLEND;
 static gfx::texture_t* tex;
 
 static gfx::mat4x4 view, model0, model1, projection;
@@ -78,16 +78,17 @@ static void setup()
     gfx::mat4x4_identity(projection);
     gfx::mat4x4_identity(view);
 
-    gfx::mat4x4_translate(model0, -0.5, -0.5, -0.5);
+    // gfx::mat4x4_translate(model0, -0.5, -0.5, -0.5);
+    // gfx::mat4x4_scale(model1, model1, 0.0000001);
 
     // clang-format off
 
-    float eye[] = {16, 8, 8};
-    float center[] = {0.5, 0.5, 0.5};
-    float up[] = {0, 0, 1};
+    float eye[] = {0, 0, 1};
+    float center[] = {0, 0, 0};
+    float up[] = {0, 1, 0};
     gfx::mat4x4_look_at(view, eye, center, up);
 
-    gfx::mat4x4_perspective(projection, PI*0.06, 1, 0.05, 50);
+    gfx::mat4x4_perspective(projection, PI*0.6, 1, 0.05, 50);
     // gfx::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
 
     static float vertices[][10] = {
@@ -110,7 +111,7 @@ static void setup()
         7,3,0, 0,4,7,
     };
     // clang-format on
-    gfx::set_clear_color(gfx::rgba(255, 255, 255, 255));
+    gfx::set_clear_color(gfx::rgba(255, 0, 0, 255));
     vbo = gfx::create_vertex_buffer(vertex_layout, 8, vertices);
     ibo = gfx::create_indice_buffer(36, indices);
     program = gfx::create_program(vert_shader, frag_shader);
@@ -162,15 +163,14 @@ static void update(double dt)
     gfx::set_blend_func(gfx::blend::zero, gfx::blend::src_color);
     gfx::draw_element(0, 0, 36);
 
-    gfx::mat4x4 model1;
-    gfx::mat4x4_translate(model1, 1.0, 0, 0);
-    gfx::mat4x4_mul(model1, model0, model1);
-    gfx::set_model_transform(model1);
-    gfx::draw_element(0, 0, 36);
+    // gfx::mat4x4 model1;
+    // gfx::mat4x4_translate(model1, 1.0, 0, 0);
+    // gfx::mat4x4_mul(model1, model0, model1);
+    // gfx::set_model_transform(model1);
+    // gfx::draw_element(0, 0, 36);
     // gfx::mat4x4_rotate_X(model1, model1, 0.02);
     // gfx::set_model_transform(model1);
     // gfx::draw_element(0, 0, 6);
-
     gfx::end();
 }
 
