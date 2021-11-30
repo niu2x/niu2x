@@ -144,7 +144,6 @@ void end()
 void reset()
 {
     auto& cmd_builder = *cmd_builder_top;
-    ;
     memset(&cmd_builder, 0, sizeof(cmd_t));
 }
 

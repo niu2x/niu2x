@@ -117,16 +117,17 @@ struct NXAPI program_t : object_t {
 
 struct NXAPI font_char_info_t {
     texture_t* texture;
-    int uv_x;
-    int uv_y;
-    int uv_w;
-    int uv_h;
+    float uv_x;
+    float uv_y;
+    float uv_w;
+    float uv_h;
     int x, y, w, h;
     int advance;
 };
 
 NXAPI font_t* create_builtin_font(int font_size);
 NXAPI font_char_info_t font_char_info(font_t* self, uint32_t code);
+NXAPI int font_kerning(font_t* self, uint32_t left, uint32_t right);
 
 NXAPI vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
     uint32_t vertices_count, void* data = nullptr, bool auto_destroy = false);

@@ -36,6 +36,8 @@ void window_size(int* w, int* h);
 
 void auto_destroy_objects();
 
+#define FONT_ALTAS_TEXTURE_SIZE 1024
+
 namespace font {
 
 void font_system_setup();
@@ -67,7 +69,7 @@ struct char_info_t {
 void font_altas_setup(font_altas_t* self, int font_size);
 void font_altas_cleanup(font_altas_t* self);
 char_info_t* font_altas_char_info(font_altas_t* self, uint32_t code);
-
+int font_altas_kerning(font_altas_t* self, uint32_t left, uint32_t right);
 } // namespace font
 
 } // namespace nx::gfx

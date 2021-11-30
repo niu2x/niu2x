@@ -69,6 +69,8 @@ void run(const window_config& c)
 #define duration_cast(t)                                                       \
     std::chrono::duration_cast<std::chrono::microseconds>((t))
 
+    static double average_dt = 1 / 60.0;
+
     while (!glfwWindowShouldClose(glfw_window)) {
         now = std::chrono::steady_clock::now();
         dt = duration_cast(now - last_now).count() / 1000000.0;
@@ -80,7 +82,8 @@ void run(const window_config& c)
 
         imgui_update(dt);
 
-        printf(0, 0, "FPS: %.2f", (1 / dt));
+        average_dt = average_dt * 0.99 + dt * 0.01;
+        printf(0, 0, "FPS: %.2f", (1 / average_dt));
 
         glfwSwapBuffers(glfw_window);
     }

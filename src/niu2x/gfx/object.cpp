@@ -120,7 +120,6 @@ font_t* create_builtin_font(int font_size)
 void auto_destroy_objects() { 
     while(!list_empty(&auto_destroy_head)){
         object_t *obj = NX_LIST_ENTRY(auto_destroy_head.next, object_t, list);
-        list_del(&(obj->list));
         destroy(obj);
     }
 }
@@ -165,16 +164,22 @@ font_char_info_t font_char_info(font_t* self, uint32_t code)
 
     return {
         .texture = font_altas->pages[ci->page],
-        .uv_x = ci->xi * font_altas->cell_edge,
-        .uv_y = ci->yi * font_altas->cell_edge,
-        .uv_w = ci->w,
-        .uv_h = ci->h,
+        .uv_x = (float)ci->xi * font_altas->cell_edge / FONT_ALTAS_TEXTURE_SIZE,
+        .uv_y = (float)ci->yi * font_altas->cell_edge / FONT_ALTAS_TEXTURE_SIZE,
+        .uv_w = (float)ci->w / FONT_ALTAS_TEXTURE_SIZE,
+        .uv_h = (float)ci->h / FONT_ALTAS_TEXTURE_SIZE,
         .x = ci->x,
         .y = ci->y,
         .w = ci->w,
         .h = ci->h,
         .advance = ci->advance,
     };
+}
+
+int font_kerning(font_t* self, uint32_t left, uint32_t right)
+{
+    auto* font_altas = (font::font_altas_t*)(self->private_data);
+    return font::font_altas_kerning(font_altas, left, right);
 }
 
 static GLuint create_shader(GLenum shader_type, const char* source_code)

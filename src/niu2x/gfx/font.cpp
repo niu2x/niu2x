@@ -6,7 +6,6 @@
 #include "niu2x/gfx.h"
 #include "noto_scans_sc_regular.h"
 
-#define FONT_ALTAS_TEXTURE_SIZE 1024
 #define FONT_LOAD_FLAGS                                                        \
     (FT_LOAD_DEFAULT | FT_LOAD_NO_BITMAP | FT_LOAD_FORCE_AUTOHINT)
 
@@ -41,7 +40,7 @@ static void font_altas_setup(font_altas_t* self, FT_Face face, int font_size)
     FT_Set_Pixel_Sizes(self->face, self->font_size, self->font_size);
 
     auto& metrics = self->face->size->metrics;
-    self->cell_edge = (metrics.ascender - metrics.descender) >> 6;
+    self->cell_edge = ((metrics.ascender - metrics.descender) >> 6) + 2;
     self->cell_size = 0;
     self->cell_row = FONT_ALTAS_TEXTURE_SIZE / self->cell_edge;
     self->cell_col = FONT_ALTAS_TEXTURE_SIZE / self->cell_edge;
@@ -95,12 +94,8 @@ static void font_altas_ensure_capacity(font_altas_t* self)
 
 static void font_altas_generate_glyph(font_altas_t* self, uint32_t code)
 {
+    FT_Set_Pixel_Sizes(self->face, self->font_size, self->font_size);
     auto glyph_index = FT_Get_Char_Index(self->face, code);
-
-    FT_Fixed advance;
-    if (FT_Get_Advance(self->face, 0, FONT_LOAD_FLAGS, &advance)) {
-        return;
-    }
 
     if (FT_Load_Glyph(self->face, glyph_index, FONT_LOAD_FLAGS)) {
         return;
@@ -114,7 +109,7 @@ static void font_altas_generate_glyph(font_altas_t* self, uint32_t code)
     font_altas_ensure_capacity(self);
 
     auto* ci = NX_ALLOC(struct char_info_t, 1);
-    ci->advance = advance >> 16;
+    ci->advance = (slot->advance.x) >> 6;
 
     ci->w = slot->bitmap.width;
     ci->h = slot->bitmap.rows;
@@ -185,7 +180,7 @@ out highp vec4 color;
 void main()
 {
     highp float a = texture(tex0, v_uv.xy).r;
-    color = vec4(vec3(0, 1, 0), a);
+    color = vec4(vec3(1, 1, 1), a);
 }
 
 )RAW" };
@@ -206,6 +201,19 @@ void font_system_cleanup()
     ft_library_cleanup();
 }
 
+int font_altas_kerning(font_altas_t* self, uint32_t left, uint32_t right)
+{
+    FT_Set_Pixel_Sizes(self->face, self->font_size, self->font_size);
+
+    auto li = FT_Get_Char_Index(self->face, left);
+    auto ri = FT_Get_Char_Index(self->face, right);
+
+    FT_Vector pos;
+    FT_Get_Kerning(self->face, li, ri, 0, &pos);
+
+    return pos.x >> 6;
+}
+
 }; // namespace nx::gfx::font
 
 namespace nx::test {
@@ -213,7 +221,7 @@ namespace nx::test {
 void test_font_altas()
 {
     gfx::font::font_altas_t font;
-    gfx::font::font_altas_setup(&font, gfx::font::default_face, 18);
+    gfx::font::font_altas_setup(&font, gfx::font::default_face, 24);
 
     gfx::font::font_altas_cleanup(&font);
 }
