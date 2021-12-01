@@ -1,7 +1,6 @@
 #include "gfx.h"
 
 #include <niu2x/log.h>
-#include <niu2x/test.h>
 
 #include "niu2x/gfx.h"
 #include "noto_scans_sc_regular.h"

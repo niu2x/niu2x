@@ -1,6 +1,5 @@
 #include <niu2x/gfx.h>
 #include <niu2x/log.h>
-#include <niu2x/test.h>
 
 #include <math.h>
 
@@ -120,8 +119,6 @@ static void setup()
     gfx::set_view_transform(view);
 
     tex = gfx::create_texture_2d_from_file("../test/mu-wan-qing.jpeg");
-
-    nx::test::test_font_altas();
 }
 
 static void cleanup()
