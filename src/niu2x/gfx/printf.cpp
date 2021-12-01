@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <map>
+#include <locale>
+#include <codecvt>
 
 #include "gfx.h"
 
@@ -17,12 +19,16 @@ void printf(int x, int y, const char* fmt, ...)
     vsnprintf(buffer, 1024, fmt, args);
     va_end(args);
 
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
+    std::u32string u32sz = conv.from_bytes(buffer);
+
     std::map<texture_t*, std::vector<float>> vdmap;
 
     int pen_x = 0;
     int pen_y = 0;
 
-    char* ptr = buffer;
+    const char32_t* ptr = u32sz.c_str();
+    ;
 
     size_t max_vertex_count = 0;
 
@@ -105,7 +111,7 @@ void printf(int x, int y, const char* fmt, ...)
     mat4x4_ortho(projection, 0, window_width, 0, window_height, 0.1, 50.0);
     set_projection_transform(projection);
 
-    mat4x4_identity(model);
+    mat4x4_translate(model, x, y, 0);
 
     for (auto& item : vdmap) {
         set_model_transform(model);
@@ -118,7 +124,6 @@ void printf(int x, int y, const char* fmt, ...)
 
     end();
 
-    unused(x, y, ib, model, pen_x, pen_y);
 }
 
 } // namespace nx::gfx

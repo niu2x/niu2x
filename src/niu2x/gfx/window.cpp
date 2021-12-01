@@ -84,7 +84,6 @@ void run(const window_config& c)
 
         average_dt = average_dt * 0.99 + dt * 0.01;
         printf(0, 0, "FPS: %.2f", (1 / average_dt));
-
         glfwSwapBuffers(glfw_window);
     }
 
