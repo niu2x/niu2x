@@ -102,3 +102,7 @@ include(warning_as_error)
 warning_as_error_enable(niu2x)
 
 add_subdirectory(test)
+
+install(TARGETS niu2x DESTINATION lib)
+install(DIRECTORY include/niu2x DESTINATION include)
+install(DIRECTORY build/niu2x/ DESTINATION include/niu2x)
