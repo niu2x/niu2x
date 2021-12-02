@@ -83,6 +83,7 @@ target_link_libraries(niu2x PUBLIC
 	# ${runtime}
 	ZLIB::ZLIB
 	Boost::headers
+	# openssl v3.1.0. Must use full path, otherwise ld use openssl v1.1.1 in /usr/lib/XXXXX 
 	/usr/local/lib64/libcrypto.so
 	GLEW::GLEW
 	glfw
