@@ -235,7 +235,7 @@ static void vertex_layout_active(vertex_layout_t layout)
                 break;
             }
             case vertex_attr_type::uv: {
-                // vec4
+                // vec3
                 glVertexAttribPointer(
                     i, 3, GL_FLOAT, GL_FALSE, size, (void*)offset);
                 offset += 3 * sizeof(GLfloat);
@@ -337,7 +337,7 @@ static void program_active(cmd_t* cmd)
         glUniformMatrix4fv(m_location, 1, GL_TRUE, (const float*)(cmd->model));
     }
 
-    char texture_uniform_name[] = "tex0";
+    char texture_uniform_name[] = "TEX0";
     for (int i = 0; i < max_cmd_textures; i++) {
         if (cmd->textures[i]) {
             texture_uniform_name[3] = i + '0';
@@ -345,7 +345,6 @@ static void program_active(cmd_t* cmd)
                 = program_uniform_location(cmd->program, texture_uniform_name);
             if (location != -1) {
                 glUniform1i(location, i);
-
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, cmd->textures[i]->name);
             }

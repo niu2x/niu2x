@@ -11,9 +11,8 @@ namespace nx::gfx {
 void mesh_init_from_file(mesh_t* mesh, const char* file, int idx)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(file,
-        aiProcess_Triangulate | aiProcess_GenSmoothNormals
-            | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType);
+    const aiScene* scene = importer.ReadFile(
+        file, aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs);
     NX_ASSERT(nullptr != scene, importer.GetErrorString())
 
     NX_ASSERT((uint32_t)idx < scene->mNumMeshes, "");
@@ -21,18 +20,31 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx)
     NX_ASSERT(ai_mesh->mPrimitiveTypes == aiPrimitiveType_TRIANGLE, "");
 
     auto vertices_num = ai_mesh->mNumVertices;
-    auto vertex_layout = vertex_layout_build(
-        vertex_attr_type::position, vertex_attr_type::normal);
+    auto vertex_layout = vertex_layout_build(vertex_attr_type::position,
+        vertex_attr_type::normal, vertex_attr_type::uv);
 
     struct vertex_t {
         float x, y, z;
         float nx, ny, nz;
+        float uvx, uvy, uvz;
     };
 
-    vertex_t mid_point { 0, 0, 0, 0, 0, 0 };
+    vertex_t mid_point { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     std::vector<vertex_t> vertices;
     vertices.resize(vertices_num);
+
+    for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++) {
+        auto texcoords = ai_mesh->mTextureCoords[i];
+        if (texcoords) {
+            for (uint32_t i = 0; i < vertices_num; i++) {
+                vertices[i].uvx = texcoords[i].x;
+                vertices[i].uvy = texcoords[i].y;
+                vertices[i].uvz = texcoords[i].z;
+            }
+            break;
+        }
+    }
 
     for (uint32_t i = 0; i < vertices_num; i++) {
         vertices[i].x = ai_mesh->mVertices[i].x;

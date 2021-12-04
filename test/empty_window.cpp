@@ -28,20 +28,22 @@ static const char* vert_shader = R"RAW(
 
 layout(location = 0) in highp vec3 position;
 layout(location = 1) in highp vec3 normal;
+layout(location = 2) in highp vec4 uv;
 
 uniform mat4 MVP;
 uniform mat4 M;
 
 out highp vec3 v_normal;
 out highp vec3 v_world_pos;
+out highp vec4 v_uv;
 
 void main()
 {
   v_normal = (vec4(normal, 0.0) * transpose(inverse(M))).xyz;
-  v_normal = normalize(v_normal);
   gl_Position =  vec4(position, 1.0) * MVP;
 
   highp vec4 world_pos = vec4(position, 1.0) * M;
+  v_uv = uv;
   v_world_pos = world_pos.xyz / world_pos.w;
 }
 
@@ -50,30 +52,28 @@ void main()
 static const char* frag_shader = R"RAW(
 #version 300 es
 
-uniform sampler2D tex0;
+uniform sampler2D TEX0;
 
 in highp vec3 v_normal;
 in highp vec3 v_world_pos;
+in highp vec4 v_uv;
 
 out highp vec4 color;
-
 
 void main()
 {
     highp vec3 eye = vec3(1000.0, 0, 0);
     highp vec3 light = vec3(10000.0, 10000.0, 20000.0);
 
-    //color = texture(tex0, v_uv.xy + vec2(d, 0.0));
-    
-    highp vec3 ambient = vec3(0.4);
-
+    highp vec3 material = texture(TEX0, v_uv.xy).xyz;
+    highp vec3 ambient = vec3(0.7);
     highp vec3 l = normalize(light - v_world_pos);
     highp vec3 v = normalize(eye - v_world_pos);
 
-    highp vec3 diffuse = max(dot(v_normal, l), 0.0) * vec3(0.3, 0.5, 0.4);
+    highp vec3 diffuse = max(dot(v_normal, l), 0.0) * vec3(0.5);
     highp vec3 mirror = pow(max(dot(normalize(v+l), v_normal), 0.0), 32.0) * vec3(1.0);
 
-    color = vec4(diffuse + ambient + mirror, 1.0);
+    color = vec4(material * (diffuse + ambient ) + mirror, 1.0);
 }
 
 )RAW";
@@ -88,13 +88,14 @@ static void setup()
     // gfx::mat4x4_translate(model0, -0.5, -0.5, -0.5);
     // gfx::mat4x4_scale(model1, model1, 0.0000001);
     gfx::mat4x4 rotate;
+    gfx::mat4x4_scale_aniso(model0, model0, 1, 1, 1);
     gfx::mat4x4_rotate_X(rotate, 3.1514 / 2);
     gfx::mat4x4_mul(model0, model0, rotate);
 
     // clang-format off
 
-    float eye[] = {1000, 0, 500};
-    float center[] = {0, 0, 0};
+    float eye[] = {1000, 0, 100};
+    float center[] = {0, 0, 10};
     float up[] = {0, 0, 1};
     gfx::mat4x4_look_at(view, eye, center, up);
 
@@ -131,6 +132,7 @@ static void setup()
 
     tex = gfx::create_texture_2d_from_file("../test/mu-wan-qing.jpeg");
     mesh = gfx::create_mesh_from_file("../test/Aya.obj", 0);
+    mesh->texture = gfx::create_texture_2d_from_file("../test/Aya.jpg");
 }
 
 static void cleanup()
@@ -165,21 +167,13 @@ static void update(double dt)
     gfx::set_render_state(render_state);
     gfx::set_program(program);
 
-    gfx::set_texture(0, tex);
+    gfx::set_texture(0, mesh->texture);
     gfx::set_blend_func(gfx::blend::src_color, gfx::blend::one_minus_src_alpha);
     gfx::set_vertex_buffer(mesh->vb);
     gfx::set_indice_buffer(mesh->ib);
 
     gfx::draw_element(0, 0, mesh->ib->size);
 
-    // gfx::mat4x4 model1;
-    // gfx::mat4x4_translate(model1, 1.0, 0, 0);
-    // gfx::mat4x4_mul(model1, model0, model1);
-    // gfx::set_model_transform(model1);
-    // gfx::draw_element(0, 0, 36);
-    // gfx::mat4x4_rotate_X(model1, model1, 0.02);
-    // gfx::set_model_transform(model1);
-    // gfx::draw_element(0, 0, 6);
     gfx::end();
 }
 

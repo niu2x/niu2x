@@ -131,6 +131,7 @@ struct NXAPI font_char_info_t {
 struct mesh_t : object_t {
     vertex_buffer_t* vb;
     indice_buffer_t* ib;
+    texture_t* texture;
 };
 
 NXAPI font_t* create_builtin_font(int font_size);

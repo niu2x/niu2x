@@ -86,6 +86,7 @@ size_t vertex_sizeof(vertex_layout_t layout)
 mesh_t* create_mesh_from_file(const char* path, int idx)
 {
     auto* obj = (create_object(mesh_freelist, mesh));
+    obj->texture = 0;
     mesh_init_from_file(obj, path, idx);
     return obj;
 }
@@ -300,6 +301,8 @@ static void destroy_mesh(mesh_t* obj)
 {
     destroy(obj->vb);
     destroy(obj->ib);
+    if (obj->texture)
+        destroy(obj->texture);
     destroy_object(mesh_freelist, obj);
 }
 
