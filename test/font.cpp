@@ -14,8 +14,9 @@ namespace gfx = nx::gfx;
 static gfx::vertex_buffer_t* vbo;
 static gfx::indice_buffer_t* ibo;
 
-static auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr_type::position,
-    gfx::vertex_attr_type::color, gfx::vertex_attr_type::uv);
+static auto vertex_layout
+    = gfx::vertex_layout_build(gfx::vertex_attr_type::position,
+        gfx::vertex_attr_type::color, gfx::vertex_attr_type::uv);
 
 static gfx::program_t* program = nullptr;
 

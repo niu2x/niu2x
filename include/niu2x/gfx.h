@@ -69,7 +69,8 @@ enum class vertex_attr_type : uint8_t {
 };
 
 using vertex_layout_t = uint64_t;
-NXAPI vertex_layout_t vertex_layout(vertex_attr_type a0 = vertex_attr_type::nil,
+NXAPI vertex_layout_t vertex_layout_build(
+    vertex_attr_type a0 = vertex_attr_type::nil,
     vertex_attr_type a1 = vertex_attr_type::nil,
     vertex_attr_type a2 = vertex_attr_type::nil,
     vertex_attr_type a3 = vertex_attr_type::nil,
@@ -89,10 +90,12 @@ NXAPI vertex_layout_t vertex_layout(vertex_attr_type a0 = vertex_attr_type::nil,
 struct NXAPI vertex_buffer_t : object_t {
     GLuint name;
     vertex_layout_t layout;
+    uint32_t size;
 };
 
 struct NXAPI indice_buffer_t : object_t {
     GLuint name;
+    uint32_t size;
 };
 
 struct NXAPI limits {
@@ -125,6 +128,11 @@ struct NXAPI font_char_info_t {
     int advance;
 };
 
+struct mesh_t : object_t {
+    vertex_buffer_t* vb;
+    indice_buffer_t* ib;
+};
+
 NXAPI font_t* create_builtin_font(int font_size);
 NXAPI font_char_info_t font_char_info(font_t* self, uint32_t code);
 NXAPI int font_kerning(font_t* self, uint32_t left, uint32_t right);
@@ -144,6 +152,8 @@ NXAPI void texture_2d_update_region(
     texture_t* self, int x, int y, int w, int h, const void* data);
 
 NXAPI texture_t* create_texture_2d_from_file(const char* pathname);
+
+NXAPI mesh_t* create_mesh_from_file(const char* path, int idx = 0);
 
 NXAPI void destroy(object_t*);
 

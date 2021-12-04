@@ -318,18 +318,23 @@ static void handle_render_state(render_state_t rs)
 static void program_active(cmd_t* cmd)
 {
     glUseProgram(cmd->program->name);
-    auto mvp_location = program_uniform_location(cmd->program, "mvp");
+    auto mvp_location = program_uniform_location(cmd->program, "MVP");
     if (mvp_location != -1) {
         mat4x4 mvp;
         mat4x4_mul(mvp, cmd->model, environment.vp);
         glUniformMatrix4fv(mvp_location, 1, GL_TRUE, (const float*)(mvp));
     }
 
-    auto mv_location = program_uniform_location(cmd->program, "mv");
+    auto mv_location = program_uniform_location(cmd->program, "MV");
     if (mv_location != -1) {
         mat4x4 mv;
         mat4x4_mul(mv, cmd->model, environment.view);
         glUniformMatrix4fv(mv_location, 1, GL_TRUE, (const float*)(mv));
+    }
+
+    auto m_location = program_uniform_location(cmd->program, "M");
+    if (m_location != -1) {
+        glUniformMatrix4fv(m_location, 1, GL_TRUE, (const float*)(cmd->model));
     }
 
     char texture_uniform_name[] = "tex0";

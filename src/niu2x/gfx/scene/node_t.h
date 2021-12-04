@@ -14,6 +14,8 @@ public:
 private:
     id_t id_;
     static id_t next_id_;
+
+    node_t* parent_;
 };
 
 }; // namespace nx::gfx::scene

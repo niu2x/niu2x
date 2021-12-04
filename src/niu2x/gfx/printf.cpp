@@ -116,9 +116,10 @@ void printf(int x, int y, const char* fmt, ...)
     for (auto& item : vdmap) {
         set_model_transform(model);
         set_texture(0, item.first);
-        set_vertex_buffer(create_vertex_buffer(
-            vertex_layout(vertex_attr_type::position, vertex_attr_type::uv),
-            item.second.size() / 6, item.second.data(), true));
+        set_vertex_buffer(
+            create_vertex_buffer(vertex_layout_build(vertex_attr_type::position,
+                                     vertex_attr_type::uv),
+                item.second.size() / 6, item.second.data(), true));
         draw_element(0, 0, item.second.size() >> 2);
     }
 

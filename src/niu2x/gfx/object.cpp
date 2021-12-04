@@ -21,7 +21,7 @@ namespace nx::gfx {
 
 namespace {
 struct object_type {
-    enum { vertex_buffer, indice_buffer, program, texture, font };
+    enum { vertex_buffer, indice_buffer, program, texture, font, mesh };
 };
 
 } // namespace
@@ -41,11 +41,12 @@ struct object_type {
     freelist.free(obj->id);                                                    \
     list_del_init(&(obj->list));
 
-static freelist<vertex_buffer_t, 1024> vertex_buffer_freelist;
-static freelist<indice_buffer_t, 1024> indice_buffer_freelist;
+static freelist<vertex_buffer_t, 4096> vertex_buffer_freelist;
+static freelist<indice_buffer_t, 4096> indice_buffer_freelist;
 static freelist<program_t, 1024> program_freelist;
 static freelist<texture_t, 4096> texture_freelist;
 static freelist<font_t, 256> font_freelist;
+static freelist<mesh_t, 1024> mesh_freelist;
 static NX_LIST_HEAD(auto_destroy_head);
 
 size_t vertex_sizeof(vertex_layout_t layout)
@@ -82,11 +83,18 @@ size_t vertex_sizeof(vertex_layout_t layout)
     return size;
 }
 
+mesh_t* create_mesh_from_file(const char* path, int idx)
+{
+    auto* obj = (create_object(mesh_freelist, mesh));
+    mesh_init_from_file(obj, path, idx);
+    return obj;
+}
+
 vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
     uint32_t vertices_count, void* data, bool auto_destroy)
 {
     auto* obj = (create_object(vertex_buffer_freelist, vertex_buffer));
-
+    obj->size = vertices_count;
     glGenBuffers(1, &(obj->name));
     obj->layout = layout;
 
@@ -123,6 +131,7 @@ indice_buffer_t* create_indice_buffer(
 {
 
     auto* obj = (create_object(indice_buffer_freelist, indice_buffer));
+    obj->size = indices_count;
 
     if (auto_destroy) {
         list_add(&(obj->list), &auto_destroy_head);
@@ -287,6 +296,13 @@ static void destroy_program(program_t* obj)
     destroy_object(program_freelist, obj);
 }
 
+static void destroy_mesh(mesh_t* obj)
+{
+    destroy(obj->vb);
+    destroy(obj->ib);
+    destroy_object(mesh_freelist, obj);
+}
+
 void destroy(object_t* obj)
 {
 #define CASE(enum_t, obj_t, destroy_method)                                    \
@@ -301,12 +317,13 @@ void destroy(object_t* obj)
         CASE(program, program_t, destroy_program)
         CASE(texture, texture_t, destroy_texture)
         CASE(font, font_t, destroy_font)
+        CASE(mesh, mesh_t, destroy_mesh)
     }
 
 #undef CASE
 }
 
-vertex_layout_t vertex_layout(vertex_attr_type a0, vertex_attr_type a1,
+vertex_layout_t vertex_layout_build(vertex_attr_type a0, vertex_attr_type a1,
     vertex_attr_type a2, vertex_attr_type a3, vertex_attr_type a4,
     vertex_attr_type a5, vertex_attr_type a6, vertex_attr_type a7,
     vertex_attr_type a8, vertex_attr_type a9, vertex_attr_type a10,
