@@ -74,6 +74,8 @@ int font_altas_kerning(font_altas_t* self, uint32_t left, uint32_t right);
 
 void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags);
 
+extern double now_seconds;
+
 } // namespace nx::gfx
 
 #endif

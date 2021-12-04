@@ -34,6 +34,8 @@ void imgui_update(double dt);
 
 } // namespace
 
+double now_seconds = 0;
+
 static GLFWwindow* current_glfw_window = nullptr;
 static int window_width, window_height;
 
@@ -70,11 +72,13 @@ void run(const window_config& c)
     std::chrono::duration_cast<std::chrono::microseconds>((t))
 
     static double average_dt = 1 / 60.0;
-
+    static double scale = 1 / 1000000.0;
     while (!glfwWindowShouldClose(glfw_window)) {
         now = std::chrono::steady_clock::now();
-        dt = duration_cast(now - last_now).count() / 1000000.0;
+        dt = duration_cast(now - last_now).count() * scale;
         last_now = now;
+
+        now_seconds = duration_cast(now.time_since_epoch()).count() * scale;
 
         glfwPollEvents();
 

@@ -112,7 +112,7 @@ void end()
         update_environment();
 
         cmd_t* cmd;
-        for (int i = renderlayers_count - 1; i >= 0; i--) {
+        for (int i = 0; i < renderlayers_count; i++) {
             NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
             {
                 cmd = NX_LIST_ENTRY(ptr, struct cmd_t, list);
@@ -335,6 +335,17 @@ static void program_active(cmd_t* cmd)
     auto m_location = program_uniform_location(cmd->program, "M");
     if (m_location != -1) {
         glUniformMatrix4fv(m_location, 1, GL_TRUE, (const float*)(cmd->model));
+    }
+
+    auto v_location = program_uniform_location(cmd->program, "V");
+    if (v_location != -1) {
+        glUniformMatrix4fv(
+            v_location, 1, GL_TRUE, (const float*)(environment.view));
+    }
+
+    auto time_location = program_uniform_location(cmd->program, "TIME");
+    if (time_location != -1) {
+        glUniform1f(time_location, now_seconds);
     }
 
     char texture_uniform_name[] = "TEX0";

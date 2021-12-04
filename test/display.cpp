@@ -60,6 +60,9 @@ in highp vec4 v_uv;
 
 out highp vec4 color;
 
+uniform highp mat4 V;
+uniform highp float TIME;
+
 void main()
 {
     highp vec3 eye = vec3(100.0, 0, 0.0);
@@ -74,6 +77,11 @@ void main()
     highp vec3 mirror = pow(max(dot(normalize(v+l), v_normal), 0.0), 32.0) * vec3(1.0);
 
     color = vec4(material * (diffuse + ambient ) + mirror, 1.0);
+
+    highp float dist = abs(v_world_pos.z - sin(TIME)*70.0);
+    color.xyz *= (1.0+4.0*(1.0-smoothstep(0.0, 1.0, dist)));
+
+
 }
 
 )RAW";
@@ -96,7 +104,7 @@ static void setup()
 
     gfx::mat4x4_perspective(projection, PI * 0.6, 1, 0.05, 5000);
 
-    gfx::set_clear_color(gfx::rgba(32, 32, 32, 0));
+    gfx::set_clear_color(gfx::rgba(0, 0, 0, 0));
 
     program = gfx::create_program(vert_shader, frag_shader);
 
@@ -136,7 +144,7 @@ static void update(double dt)
     gfx::set_program(program);
 
     gfx::set_texture(0, mesh->texture);
-    gfx::set_blend_func(gfx::blend::src_color, gfx::blend::one_minus_src_alpha);
+    gfx::set_blend_func(gfx::blend::src_alpha, gfx::blend::one_minus_src_alpha);
     gfx::set_vertex_buffer(mesh->vb);
     gfx::set_indice_buffer(mesh->ib);
 
@@ -153,7 +161,6 @@ static void key_callback(int keycode, int action, int mods)
 
     if (keycode == gfx::KEY_S) {
         scale_mode = action != gfx::KEY_RELEASE;
-        NX_LOG_D("scale_mode %d", scale_mode);
     }
 }
 
@@ -163,7 +170,7 @@ static void mouse_pos_callback(double xpos, double ypos)
 {
     if (posx >= 0 && posy >= 0) {
         if (scale_mode) {
-            scale += (ypos - posy) / 100;
+            scale += (ypos - posy) / 10;
             scale = std::max(scale, 0.5);
             scale = std::min(scale, 100.0);
         }
