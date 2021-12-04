@@ -16,11 +16,12 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags)
     import_flags |= aiProcess_FlipUVs;
 
     const aiScene* scene = importer.ReadFile(file, import_flags);
-    NX_ASSERT(nullptr != scene, importer.GetErrorString())
+    NX_ASSERT(nullptr != scene, "%s", importer.GetErrorString());
 
     NX_ASSERT((uint32_t)idx < scene->mNumMeshes, "");
     auto* ai_mesh = scene->mMeshes[idx];
-    NX_ASSERT(ai_mesh->mPrimitiveTypes == aiPrimitiveType_TRIANGLE, "");
+    NX_ASSERT(ai_mesh->mPrimitiveTypes == aiPrimitiveType_TRIANGLE,
+        "not TRIANGLE mesh: %d", ai_mesh->mPrimitiveTypes);
 
     auto vertices_num = ai_mesh->mNumVertices;
     auto vertex_layout = vertex_layout_build(vertex_attr_type::position,

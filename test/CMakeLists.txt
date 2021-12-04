@@ -27,3 +27,6 @@ target_link_libraries(font PUBLIC niu2x)
 
 add_executable(test "test.cpp")
 target_link_libraries(test PUBLIC niu2x)
+
+add_executable(display "display.cpp")
+target_link_libraries(display PUBLIC niu2x)
