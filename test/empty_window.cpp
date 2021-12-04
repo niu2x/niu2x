@@ -131,7 +131,8 @@ static void setup()
     gfx::set_view_transform(view);
 
     tex = gfx::create_texture_2d_from_file("../test/mu-wan-qing.jpeg");
-    mesh = gfx::create_mesh_from_file("../test/Aya.obj", 0);
+    mesh = gfx::create_mesh_from_file(
+        "../test/Aya.obj", 0, gfx::MESH_AUTO_CENTER);
     mesh->texture = gfx::create_texture_2d_from_file("../test/Aya.jpg");
 }
 

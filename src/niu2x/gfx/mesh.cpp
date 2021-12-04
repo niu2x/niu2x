@@ -8,11 +8,14 @@
 
 namespace nx::gfx {
 
-void mesh_init_from_file(mesh_t* mesh, const char* file, int idx)
+void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(
-        file, aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs);
+
+    auto import_flags = aiProcessPreset_TargetRealtime_Quality;
+    import_flags |= aiProcess_FlipUVs;
+
+    const aiScene* scene = importer.ReadFile(file, import_flags);
     NX_ASSERT(nullptr != scene, importer.GetErrorString())
 
     NX_ASSERT((uint32_t)idx < scene->mNumMeshes, "");
@@ -28,8 +31,6 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx)
         float nx, ny, nz;
         float uvx, uvy, uvz;
     };
-
-    vertex_t mid_point { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     std::vector<vertex_t> vertices;
     vertices.resize(vertices_num);
@@ -54,34 +55,53 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx)
         vertices[i].nx = ai_mesh->mNormals[i].x;
         vertices[i].ny = ai_mesh->mNormals[i].y;
         vertices[i].nz = ai_mesh->mNormals[i].z;
-
-        mid_point.x += vertices[i].x;
-        mid_point.y += vertices[i].y;
-        mid_point.z += vertices[i].z;
     }
 
-    mid_point.x /= vertices_num;
-    mid_point.y /= vertices_num;
-    mid_point.z /= vertices_num;
+    if (flags & MESH_AUTO_CENTER) {
+        vertex_t mid_point { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    for (uint32_t i = 0; i < vertices_num; i++) {
-        vertices[i].x -= mid_point.x;
-        vertices[i].y -= mid_point.y;
-        vertices[i].z -= mid_point.z;
+        for (uint32_t i = 0; i < vertices_num; i++) {
+            mid_point.x += vertices[i].x;
+            mid_point.y += vertices[i].y;
+            mid_point.z += vertices[i].z;
+        }
+
+        mid_point.x /= vertices_num;
+        mid_point.y /= vertices_num;
+        mid_point.z /= vertices_num;
+
+        for (uint32_t i = 0; i < vertices_num; i++) {
+            vertices[i].x -= mid_point.x;
+            vertices[i].y -= mid_point.y;
+            vertices[i].z -= mid_point.z;
+        }
     }
 
     mesh->vb
         = create_vertex_buffer(vertex_layout, vertices_num, vertices.data());
-
     auto faces_num = ai_mesh->mNumFaces;
+
+    NX_LOG_D("mesh %s", file);
+    NX_LOG_D("mesh vertices_num %d", vertices_num);
+    NX_LOG_D("mesh faces_num %d", faces_num);
 
     std::vector<uint32_t> indices;
     indices.resize(faces_num * 3);
+
+    uint32_t max_indice = 0, min_indice = 999999;
 
     for (uint32_t i = 0; i < faces_num; i++) {
         indices[i * 3 + 0] = ai_mesh->mFaces[i].mIndices[0];
         indices[i * 3 + 1] = ai_mesh->mFaces[i].mIndices[1];
         indices[i * 3 + 2] = ai_mesh->mFaces[i].mIndices[2];
+
+        max_indice = std::max(max_indice, indices[i * 3 + 0]);
+        max_indice = std::max(max_indice, indices[i * 3 + 1]);
+        max_indice = std::max(max_indice, indices[i * 3 + 2]);
+
+        min_indice = std::min(min_indice, indices[i * 3 + 0]);
+        min_indice = std::min(min_indice, indices[i * 3 + 1]);
+        min_indice = std::min(min_indice, indices[i * 3 + 2]);
     }
 
     mesh->ib = create_indice_buffer(faces_num * 3, indices.data());

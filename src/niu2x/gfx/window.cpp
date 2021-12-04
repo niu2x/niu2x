@@ -99,7 +99,9 @@ void run(const window_config& c)
 
     glfw_cleanup();
 
-    NX_LOG_D("test_hashtab: used: %lu", global::mem.used());
+    if (global::mem.used()) {
+        NX_LOG_E("mem used: %lu", global::mem.used());
+    }
 }
 
 void exit()

@@ -83,11 +83,11 @@ size_t vertex_sizeof(vertex_layout_t layout)
     return size;
 }
 
-mesh_t* create_mesh_from_file(const char* path, int idx)
+mesh_t* create_mesh_from_file(const char* path, int idx, int flags)
 {
     auto* obj = (create_object(mesh_freelist, mesh));
     obj->texture = 0;
-    mesh_init_from_file(obj, path, idx);
+    mesh_init_from_file(obj, path, idx, flags);
     return obj;
 }
 

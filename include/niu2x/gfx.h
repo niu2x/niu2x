@@ -154,7 +154,12 @@ NXAPI void texture_2d_update_region(
 
 NXAPI texture_t* create_texture_2d_from_file(const char* pathname);
 
-NXAPI mesh_t* create_mesh_from_file(const char* path, int idx = 0);
+enum NXAPI mesh_load_flags {
+    MESH_AUTO_CENTER = 1 << 0,
+};
+
+NXAPI mesh_t* create_mesh_from_file(
+    const char* path, int idx = 0, int flags = 0);
 
 NXAPI void destroy(object_t*);
 

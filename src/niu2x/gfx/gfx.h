@@ -72,7 +72,7 @@ char_info_t* font_altas_char_info(font_altas_t* self, uint32_t code);
 int font_altas_kerning(font_altas_t* self, uint32_t left, uint32_t right);
 } // namespace font
 
-void mesh_init_from_file(mesh_t* mesh, const char* file, int idx);
+void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags);
 
 } // namespace nx::gfx
 
