@@ -80,6 +80,7 @@ extern double now_seconds;
 struct framebuffer_t : object_t {
     GLuint name;
     GLuint stencil_depth;
+    int width, height;
 };
 
 void render_setup();

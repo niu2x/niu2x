@@ -69,7 +69,8 @@ static void destroy_framebuffer(framebuffer_t* obj)
 framebuffer_t* create_framebuffer(int w, int h, texture_t* texture)
 {
     auto* obj = (create_object(framebuffer_freelist, framebuffer));
-
+    obj->width = texture->width;
+    obj->height = texture->height;
     glGenFramebuffers(1, &(obj->name));
     glBindFramebuffer(GL_FRAMEBUFFER, obj->name);
 
@@ -489,14 +490,14 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
     }
     NX_CHECK_GL_ERROR();
 
-    // glTexParameteri(
-    //     GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(
+        GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // GL_TEXTURE_WRAP_S
     // GL_TEXTURE_WRAP_T

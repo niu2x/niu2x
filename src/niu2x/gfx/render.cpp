@@ -27,9 +27,15 @@ static struct cmd_t {
     render_state_t render_state;
     uint32_t start;
     uint32_t count;
-    blend_t bf_src;
-    blend_t bf_dst;
+    blend bf_src;
+    blend bf_dst;
     int environment_idx;
+    comparator stencil_comparator;
+    uint8_t stencil_mask;
+    uint8_t stencil_ref;
+    stencil_op stencil_op_sfail;
+    stencil_op stencil_op_dpfail;
+    stencil_op stencil_op_dppass;
 } cmds[cmds_count];
 
 struct environment_t {
@@ -61,7 +67,7 @@ static int next_cmd_idx = 0;
 static void handle_cmd_clear(cmd_t*);
 static void handle_cmd_draw_array(cmd_t* cmd);
 static void handle_cmd_draw_element(cmd_t* cmd);
-static void handle_render_state(render_state_t rs);
+static void handle_render_state(cmd_t* cmd);
 
 static constexpr int renderlayers_count = 16;
 
@@ -139,6 +145,13 @@ void end()
 
                 glBindFramebuffer(GL_FRAMEBUFFER,
                     layers[i].framebuffer ? layers[i].framebuffer->name : 0);
+
+                if (layers[i].framebuffer) {
+                    glViewport(0, 0, layers[i].framebuffer->width,
+                        layers[i].framebuffer->height);
+                } else {
+                    glViewport(0, 0, 800, 600);
+                }
 
                 NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
                 {
@@ -232,7 +245,7 @@ void set_program(program_t* program)
 
 static void handle_cmd_clear(cmd_t* cmd)
 {
-    handle_render_state(cmd->render_state);
+    handle_render_state(cmd);
 #define BIT(name) GL_##name##_BUFFER_BIT
     static constexpr auto all = BIT(COLOR) | BIT(DEPTH) | BIT(STENCIL);
 #undef BIT
@@ -303,10 +316,57 @@ void draw_element(layer_t layer, uint32_t start, uint32_t count)
     NX_CHECK_GL_ERROR();
 }
 
-static void handle_render_state(render_state_t rs)
+static auto gl_comparator(comparator cmp)
 {
+    switch (cmp) {
+        case comparator::equal:
+            return GL_EQUAL;
+        case comparator::never:
+            return GL_NEVER;
+        case comparator::less:
+            return GL_LESS;
+        case comparator::less_equal:
+            return GL_LEQUAL;
+        case comparator::greater:
+            return GL_GREATER;
+        case comparator::greater_equal:
+            return GL_GEQUAL;
+        case comparator::not_equal:
+            return GL_NOTEQUAL;
+        case comparator::always:
+            return GL_ALWAYS;
+    }
+    return 0;
+}
+
+static auto gl_stencil_op(stencil_op op)
+{
+    switch (op) {
+        case stencil_op::keep:
+            return GL_KEEP;
+        case stencil_op::zero:
+            return GL_ZERO;
+        case stencil_op::replace:
+            return GL_REPLACE;
+        case stencil_op::incr:
+            return GL_INCR;
+        case stencil_op::incr_wrap:
+            return GL_INCR_WRAP;
+        case stencil_op::decr:
+            return GL_DECR;
+        case stencil_op::decr_wrap:
+            return GL_DECR_WRAP;
+        case stencil_op::invert:
+            return GL_INVERT;
+    }
+    return 0;
+}
+
+static void handle_render_state(cmd_t* cmd)
+{
+    auto rs = cmd->render_state;
     static render_state_t last_render_state = (render_state_t)0;
-    if (last_render_state != rs) {
+    if (last_render_state != rs || true) {
         last_render_state = rs;
 
         auto should_cull_front = (rs & CULL_FRONT);
@@ -340,7 +400,13 @@ static void handle_render_state(render_state_t rs)
         glColorMask(write_r, write_g, write_b, write_a);
 
         glDepthMask((rs & WRITE_DEPTH) ? GL_TRUE : GL_FALSE);
-        glStencilMask((rs & WRITE_STENCIL) ? GL_TRUE : GL_FALSE);
+        glStencilMask(cmd->stencil_mask);
+
+        glStencilFunc(gl_comparator(cmd->stencil_comparator), cmd->stencil_ref,
+            cmd->stencil_mask);
+        glStencilOp(gl_stencil_op(cmd->stencil_op_sfail),
+            gl_stencil_op(cmd->stencil_op_dpfail),
+            gl_stencil_op(cmd->stencil_op_dppass));
 
         if (rs & DEPTH_TEST) {
             glEnable(GL_DEPTH_TEST);
@@ -349,6 +415,7 @@ static void handle_render_state(render_state_t rs)
         }
         if (rs & STENCIL_TEST) {
             glEnable(GL_STENCIL_TEST);
+
         } else {
             glDisable(GL_STENCIL_TEST);
         }
@@ -411,7 +478,7 @@ static void program_active(cmd_t* cmd)
         }
     }
 }
-void set_blend_func(uint8_t src_func, uint8_t dst_func)
+void set_blend_func(blend src_func, blend dst_func)
 {
     auto& cmd_builder = current_builder->cmd;
     cmd_builder.bf_src = src_func;
@@ -442,13 +509,14 @@ static GLuint blend_func_map[] = {
 static void handle_blend_func(cmd_t* cmd)
 {
     if (cmd->render_state & BLEND) {
-        glBlendFunc(blend_func_map[cmd->bf_src], blend_func_map[cmd->bf_dst]);
+        glBlendFunc(blend_func_map[(uint8_t)(cmd->bf_src)],
+            blend_func_map[(uint8_t)(cmd->bf_dst)]);
     }
 }
 
 static void handle_cmd_draw_array(cmd_t* cmd)
 {
-    handle_render_state(cmd->render_state);
+    handle_render_state(cmd);
     handle_blend_func(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     vertex_layout_active(cmd->vbo->layout);
@@ -458,7 +526,7 @@ static void handle_cmd_draw_array(cmd_t* cmd)
 
 static void handle_cmd_draw_element(cmd_t* cmd)
 {
-    handle_render_state(cmd->render_state);
+    handle_render_state(cmd);
     handle_blend_func(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd->ibo->name);
@@ -504,6 +572,20 @@ void set_view(layer_t layer, texture_t* texture)
         render_layer.framebuffer
             = create_framebuffer(texture->width, texture->height, texture);
     }
+}
+
+void set_stencil_func(comparator cmp, uint8_t ref, uint8_t mask)
+{
+    current_builder->cmd.stencil_comparator = cmp;
+    current_builder->cmd.stencil_ref = ref;
+    current_builder->cmd.stencil_mask = mask;
+}
+
+void set_stencil_op(stencil_op sfail, stencil_op dpfail, stencil_op dppass)
+{
+    current_builder->cmd.stencil_op_sfail = sfail;
+    current_builder->cmd.stencil_op_dpfail = dpfail;
+    current_builder->cmd.stencil_op_dppass = dppass;
 }
 
 } // namespace nx::gfx

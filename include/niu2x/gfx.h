@@ -200,24 +200,39 @@ enum NXAPI render_state_constant {
     BLEND = 1 << 10,
 };
 
-using blend_t = uint8_t;
-struct NXAPI blend {
-    enum {
-        src_alpha,
-        one_minus_src_alpha,
-        one,
-        zero,
-        src_color,
-        one_minus_src_color,
-        dst_color,
-        one_minus_dst_color,
-        dst_alpha,
-        one_minus_dst_alpha,
-        // constant_color,
-        // one_minus_dst_constant_color,
-        // constant_alpha,
-        // one_minus_dst_constant_alpha,
-    };
+enum class NXAPI comparator {
+    equal,
+    never,
+    less,
+    less_equal,
+    greater,
+    greater_equal,
+    not_equal,
+    always,
+};
+
+enum class NXAPI blend : uint8_t {
+    src_alpha,
+    one_minus_src_alpha,
+    one,
+    zero,
+    src_color,
+    one_minus_src_color,
+    dst_color,
+    one_minus_dst_color,
+    dst_alpha,
+    one_minus_dst_alpha,
+};
+
+enum class NXAPI stencil_op : uint8_t {
+    keep,
+    zero,
+    replace,
+    incr,
+    incr_wrap,
+    decr,
+    decr_wrap,
+    invert,
 };
 
 using render_state_t = uint32_t;
@@ -238,11 +253,14 @@ NXAPI void set_indice_buffer(indice_buffer_t* vbo);
 NXAPI void set_program(program_t* program);
 NXAPI void set_render_state(render_state_t rs);
 NXAPI void set_texture(texture_id_t tex_id, texture_t* tex);
-NXAPI void set_blend_func(blend_t src_func, blend_t dst_func);
+NXAPI void set_blend_func(blend src_func, blend dst_func);
 NXAPI void set_model_transform(const mat4x4);
 NXAPI void set_view_transform(const mat4x4);
 NXAPI void set_projection_transform(const mat4x4);
 NXAPI void set_view(layer_t layer, texture_t* texture);
+NXAPI void set_stencil_func(comparator cmp, uint8_t ref, uint8_t mask);
+NXAPI void set_stencil_op(
+    stencil_op sfail, stencil_op dpfail, stencil_op dppass);
 
 NXAPI void reset();
 

@@ -5,6 +5,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <niu2x/api.h>
+
 namespace nx::math {
 
 #ifdef LINMATH_NO_INLINE
@@ -614,6 +616,8 @@ LINMATH_H_FUNC void mat4x4_arcball(
     float const angle = acos(vec3_mul_inner(a_, b_)) * s;
     mat4x4_rotate(R, c_[0], c_[1], c_[2], angle);
 }
+
+NXAPI extern mat4x4 identity_mat4x4;
 
 } // namespace nx::math
 
