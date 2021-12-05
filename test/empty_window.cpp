@@ -88,10 +88,8 @@ static void setup()
 
     // math::mat4x4_translate(model0, -0.5, -0.5, -0.5);
     // math::mat4x4_scale(model1, model1, 0.0000001);
-    gfx::mat4x4 rotate;
     math::mat4x4_scale_aniso(model0, 1, 1, 1);
-    math::mat4x4_rotate_X(rotate, 3.1514 / 2);
-    math::mat4x4_mul(model0, model0, rotate);
+    math::mat4x4_rotate_x(model0, 3.1514 / 2);
 
     // clang-format off
 
@@ -150,13 +148,7 @@ static void update(double dt)
 {
     // math::mat4x4_rotate_X(model0, model0, 0.01);
 
-    gfx::mat4x4 rotate;
-
-    // math::mat4x4_rotate_X(rotate, 0.01);
-    // math::mat4x4_mul(model0, model0, rotate);
-
-    math::mat4x4_rotate_Z(rotate, 0.015);
-    math::mat4x4_mul(model0, model0, rotate);
+    math::mat4x4_rotate_z(model0, 0.015);
 
     gfx::begin();
 

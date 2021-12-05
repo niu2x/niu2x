@@ -93,10 +93,8 @@ static void setup()
     math::mat4x4_identity(projection);
     math::mat4x4_identity(view);
 
-    gfx::mat4x4 rotate;
     math::mat4x4_scale_aniso(model, 1, 1, 1);
-    math::mat4x4_rotate_X(rotate, PI / 2);
-    math::mat4x4_mul(model, model, rotate);
+    math::mat4x4_rotate_x(model, PI / 2);
 
     float eye[] = { 100, 0, 0 };
     float center[] = { 0, 0, 10 };
@@ -131,15 +129,11 @@ static void cleanup()
 static void update(double dt)
 {
 
-    gfx::mat4x4 rotate;
-
-    math::mat4x4_rotate_Z(rotate, 0.015);
-    math::mat4x4_mul(model, model, rotate);
+    math::mat4x4_rotate_z(model, 0.015);
 
     gfx::mat4x4 this_model;
+    math::mat4x4_dup(this_model, model);
     math::mat4x4_scale_aniso(this_model, scale, scale, scale);
-
-    math::mat4x4_mul(this_model, model, this_model);
 
     gfx::begin();
 
@@ -156,9 +150,10 @@ static void update(double dt)
     gfx::set_vertex_buffer(mesh->vb);
     gfx::set_indice_buffer(mesh->ib);
 
-    gfx::draw_element(0, 0, mesh->ib->size);
+    gfx::clear(2);
+    gfx::draw_element(2, 0, mesh->ib->size);
 
-    gfx::draw_texture(1, tex);
+    // gfx::draw_texture(1, tex);
 
     gfx::end();
 }

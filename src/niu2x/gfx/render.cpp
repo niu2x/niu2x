@@ -122,7 +122,8 @@ static void update_environment(environment_t* env)
 {
     if (env->vp_dirty) {
         env->vp_dirty = false;
-        math::mat4x4_mul(env->vp, env->view, env->projection);
+        math::mat4x4_dup(env->vp, env->view);
+        math::mat4x4_mul(env->vp, env->projection);
     }
 }
 
@@ -367,14 +368,17 @@ static void program_active(cmd_t* cmd)
     auto mvp_location = program_uniform_location(cmd->program, "MVP");
     if (mvp_location != -1) {
         mat4x4 mvp;
-        math::mat4x4_mul(mvp, cmd->model, env.vp);
+        math::mat4x4_dup(mvp, cmd->model);
+        math::mat4x4_mul(mvp, env.vp);
         glUniformMatrix4fv(mvp_location, 1, GL_TRUE, (const float*)(mvp));
     }
 
     auto mv_location = program_uniform_location(cmd->program, "MV");
     if (mv_location != -1) {
         mat4x4 mv;
-        math::mat4x4_mul(mv, cmd->model, env.view);
+        math::mat4x4_dup(mv, cmd->model);
+        math::mat4x4_mul(mv, env.view);
+
         glUniformMatrix4fv(mv_location, 1, GL_TRUE, (const float*)(mv));
     }
 

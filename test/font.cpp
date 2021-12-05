@@ -84,9 +84,10 @@ static void setup()
     math::mat4x4_translate(model0, -0.5, -0.5, 0);
 
     gfx::mat4x4 tmp;
+    math::mat4x4_identity(tmp);
     math::mat4x4_scale_aniso(tmp, 101, 101, 101);
 
-    math::mat4x4_mul(model0, model0, tmp);
+    math::mat4x4_mul(model0, tmp);
 
     // clang-format off
 

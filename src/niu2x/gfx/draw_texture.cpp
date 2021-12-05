@@ -26,8 +26,9 @@ void draw_texture(layer_t layer, texture_t* texture)
     math::mat4x4_translate(model, 0.5, 0.5, 0);
 
     mat4x4 scale;
+    math::mat4x4_identity(scale);
     math::mat4x4_scale_aniso(scale, w, h, 0);
-    math::mat4x4_mul(model, model, scale);
+    math::mat4x4_mul(model, scale);
     set_model_transform(model);
 
     mat4x4 view;

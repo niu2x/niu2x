@@ -131,41 +131,33 @@ LINMATH_H_FUNC void mat4x4_col(vec4 r, mat4x4 const M, int i)
     for (k = 0; k < 4; ++k)
         r[k] = M[i][k];
 }
-LINMATH_H_FUNC void mat4x4_transpose(mat4x4 M, mat4x4 const N)
+LINMATH_H_FUNC void mat4x4_transpose(mat4x4 M)
 {
-    // Note: if M and N are the same, the user has to
-    // explicitly make a copy of M and set it to N.
     int i, j;
     for (j = 0; j < 4; ++j)
         for (i = 0; i < 4; ++i)
-            M[i][j] = N[j][i];
+            M[i][j] = M[j][i];
 }
-LINMATH_H_FUNC void mat4x4_add(mat4x4 M, mat4x4 const a, mat4x4 const b)
+LINMATH_H_FUNC void mat4x4_add(mat4x4 M, mat4x4 const b)
 {
     int i;
     for (i = 0; i < 4; ++i)
-        vec4_add(M[i], a[i], b[i]);
+        vec4_add(M[i], M[i], b[i]);
 }
-LINMATH_H_FUNC void mat4x4_sub(mat4x4 M, mat4x4 const a, mat4x4 const b)
+LINMATH_H_FUNC void mat4x4_sub(mat4x4 M, mat4x4 const b)
 {
     int i;
     for (i = 0; i < 4; ++i)
-        vec4_sub(M[i], a[i], b[i]);
+        vec4_sub(M[i], M[i], b[i]);
 }
-LINMATH_H_FUNC void mat4x4_scale(mat4x4 M, mat4x4 const a, float k)
+LINMATH_H_FUNC void mat4x4_scale(mat4x4 M, float k)
 {
     int i;
     for (i = 0; i < 4; ++i)
-        vec4_scale(M[i], a[i], k);
+        vec4_scale(M[i], M[i], k);
 }
-LINMATH_H_FUNC void mat4x4_scale_aniso(mat4x4 M, float x, float y, float z)
-{
-    mat4x4_identity(M);
-    M[0][0] = x;
-    M[1][1] = y;
-    M[2][2] = z;
-}
-LINMATH_H_FUNC void mat4x4_mul(mat4x4 M, mat4x4 const b, mat4x4 const a)
+
+LINMATH_H_FUNC void mat4x4_mul(mat4x4 M, mat4x4 const a)
 {
     mat4x4 temp;
     int k, r, c;
@@ -173,10 +165,22 @@ LINMATH_H_FUNC void mat4x4_mul(mat4x4 M, mat4x4 const b, mat4x4 const a)
         for (r = 0; r < 4; ++r) {
             temp[c][r] = 0.f;
             for (k = 0; k < 4; ++k)
-                temp[c][r] += a[k][r] * b[c][k];
+                temp[c][r] += a[k][r] * M[c][k];
         }
     mat4x4_dup(M, temp);
 }
+
+LINMATH_H_FUNC void mat4x4_scale_aniso(mat4x4 M, float x, float y, float z)
+{
+    mat4x4 scale;
+    mat4x4_identity(scale);
+    scale[0][0] = x;
+    scale[1][1] = y;
+    scale[2][2] = z;
+
+    mat4x4_mul(M, scale);
+}
+
 LINMATH_H_FUNC void mat4x4_mul_vec4(vec4 r, mat4x4 const M, vec4 const v)
 {
     int i, j;
@@ -188,11 +192,14 @@ LINMATH_H_FUNC void mat4x4_mul_vec4(vec4 r, mat4x4 const M, vec4 const v)
 }
 LINMATH_H_FUNC void mat4x4_translate(mat4x4 T, float x, float y, float z)
 {
-    mat4x4_identity(T);
-    T[3][0] = x;
-    T[3][1] = y;
-    T[3][2] = z;
+    mat4x4 transform;
+    mat4x4_identity(transform);
+    transform[3][0] = x;
+    transform[3][1] = y;
+    transform[3][2] = z;
+    mat4x4_mul(T, transform);
 }
+
 LINMATH_H_FUNC void mat4x4_translate_in_place(
     mat4x4 M, float x, float y, float z)
 {
@@ -204,6 +211,7 @@ LINMATH_H_FUNC void mat4x4_translate_in_place(
         M[3][i] += vec4_mul_inner(r, t);
     }
 }
+
 LINMATH_H_FUNC void mat4x4_from_vec3_mul_outer(
     mat4x4 M, vec3 const a, vec3 const b)
 {
@@ -226,16 +234,16 @@ LINMATH_H_FUNC void mat4x4_rotate(
 
         mat4x4 S = { { 0, u[2], -u[1], 0 }, { -u[2], 0, u[0], 0 },
             { u[1], -u[0], 0, 0 }, { 0, 0, 0, 0 } };
-        mat4x4_scale(S, S, s);
+        mat4x4_scale(S, s);
 
         mat4x4 C;
         mat4x4_identity(C);
-        mat4x4_sub(C, C, T);
+        mat4x4_sub(C, T);
 
-        mat4x4_scale(C, C, c);
+        mat4x4_scale(C, c);
 
-        mat4x4_add(T, T, C);
-        mat4x4_add(T, T, S);
+        mat4x4_add(T, C);
+        mat4x4_add(T, S);
 
         T[3][3] = 1.f;
         mat4x4_dup(R, T);
@@ -243,29 +251,30 @@ LINMATH_H_FUNC void mat4x4_rotate(
         mat4x4_identity(R);
     }
 }
-LINMATH_H_FUNC void mat4x4_rotate_X(mat4x4 Q, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_x(mat4x4 Q, float angle)
 {
+
     float s = sinf(angle);
     float c = cosf(angle);
     mat4x4 R = { { 1.f, 0.f, 0.f, 0.f }, { 0.f, c, s, 0.f },
         { 0.f, -s, c, 0.f }, { 0.f, 0.f, 0.f, 1.f } };
-    mat4x4_dup(Q, R);
+    mat4x4_mul(Q, R);
 }
-LINMATH_H_FUNC void mat4x4_rotate_Y(mat4x4 Q, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_y(mat4x4 Q, float angle)
 {
     float s = sinf(angle);
     float c = cosf(angle);
     mat4x4 R = { { c, 0.f, -s, 0.f }, { 0.f, 1.f, 0.f, 0.f },
         { s, 0.f, c, 0.f }, { 0.f, 0.f, 0.f, 1.f } };
-    mat4x4_dup(Q, R);
+    mat4x4_mul(Q, R);
 }
-LINMATH_H_FUNC void mat4x4_rotate_Z(mat4x4 Q, float angle)
+LINMATH_H_FUNC void mat4x4_rotate_z(mat4x4 Q, float angle)
 {
     float s = sinf(angle);
     float c = cosf(angle);
     mat4x4 R = { { c, s, 0.f, 0.f }, { -s, c, 0.f, 0.f },
         { 0.f, 0.f, 1.f, 0.f }, { 0.f, 0.f, 0.f, 1.f } };
-    mat4x4_dup(Q, R);
+    mat4x4_mul(Q, R);
 }
 LINMATH_H_FUNC void mat4x4_invert(mat4x4 T, mat4x4 const M)
 {
@@ -414,27 +423,31 @@ LINMATH_H_FUNC void mat4x4_look_at(
     vec3 t;
     vec3_mul_cross(t, s, f);
 
-    m[0][0] = s[0];
-    m[0][1] = t[0];
-    m[0][2] = -f[0];
-    m[0][3] = 0.f;
+    mat4x4 temp;
 
-    m[1][0] = s[1];
-    m[1][1] = t[1];
-    m[1][2] = -f[1];
-    m[1][3] = 0.f;
+    temp[0][0] = s[0];
+    temp[0][1] = t[0];
+    temp[0][2] = -f[0];
+    temp[0][3] = 0.f;
 
-    m[2][0] = s[2];
-    m[2][1] = t[2];
-    m[2][2] = -f[2];
-    m[2][3] = 0.f;
+    temp[1][0] = s[1];
+    temp[1][1] = t[1];
+    temp[1][2] = -f[1];
+    temp[1][3] = 0.f;
 
-    m[3][0] = 0.f;
-    m[3][1] = 0.f;
-    m[3][2] = 0.f;
-    m[3][3] = 1.f;
+    temp[2][0] = s[2];
+    temp[2][1] = t[2];
+    temp[2][2] = -f[2];
+    temp[2][3] = 0.f;
 
-    mat4x4_translate_in_place(m, -eye[0], -eye[1], -eye[2]);
+    temp[3][0] = 0.f;
+    temp[3][1] = 0.f;
+    temp[3][2] = 0.f;
+    temp[3][3] = 1.f;
+
+    mat4x4_identity(m);
+    mat4x4_translate(m, -eye[0], -eye[1], -eye[2]);
+    mat4x4_mul(m, temp);
 }
 
 typedef float quat[4];
