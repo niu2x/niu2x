@@ -228,6 +228,7 @@ NXAPI void set_clear_color(color_t color);
 NXAPI void clear(layer_t layer);
 NXAPI void draw_array(layer_t layer, uint32_t start, uint32_t count);
 NXAPI void draw_element(layer_t layer, uint32_t start, uint32_t count);
+NXAPI void draw_texture(layer_t layer, texture_t* texture);
 
 NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
 NXAPI void set_indice_buffer(indice_buffer_t* vbo);
@@ -238,6 +239,7 @@ NXAPI void set_blend_func(blend_t src_func, blend_t dst_func);
 NXAPI void set_model_transform(const mat4x4);
 NXAPI void set_view_transform(const mat4x4);
 NXAPI void set_projection_transform(const mat4x4);
+NXAPI void set_view(layer_t layer, texture_t* texture);
 
 NXAPI void reset();
 

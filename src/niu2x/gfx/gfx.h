@@ -31,6 +31,7 @@ extern program_t* font_program;
 
 extern vertex_buffer_t* sprite_vb;
 extern indice_buffer_t* sprite_ib;
+extern program_t* sprite_program;
 
 void window_size(int* w, int* h);
 
@@ -75,6 +76,16 @@ int font_altas_kerning(font_altas_t* self, uint32_t left, uint32_t right);
 void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags);
 
 extern double now_seconds;
+
+struct framebuffer_t : object_t {
+    GLuint name;
+    GLuint stencil_depth;
+};
+
+void render_setup();
+void render_cleanup();
+
+framebuffer_t* create_framebuffer(int w, int h, texture_t* texture);
 
 } // namespace nx::gfx
 

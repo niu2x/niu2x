@@ -29,21 +29,29 @@ static struct cmd_t {
     uint32_t count;
     blend_t bf_src;
     blend_t bf_dst;
+    int environment_idx;
 } cmds[cmds_count];
 
-static struct environment_t {
+struct environment_t {
     mat4x4 view;
     mat4x4 projection;
     mat4x4 vp;
     bool vp_dirty;
-} environment;
+};
+
+struct builder_t {
+    environment_t env;
+    cmd_t cmd;
+};
 
 static constexpr int cmd_builder_queue_capacity = 16;
-static struct cmd_t cmd_builder_queue[cmd_builder_queue_capacity];
-static int cmd_builder_queue_size = 0;
-static cmd_t* cmd_builder_top = cmd_builder_queue - 1;
+static builder_t builders[cmd_builder_queue_capacity];
+static builder_t* current_builder = &builders[0];
+static int builders_size = 1;
 
-static environment_t environment_queue[cmd_builder_queue_capacity];
+static constexpr int environments_capacity = 1024;
+static environment_t environments[environments_capacity];
+static int environments_size = 0;
 
 static int next_cmd_idx = 0;
 
@@ -59,34 +67,46 @@ static constexpr int renderlayers_count = 16;
 
 static struct renderlayer_t {
     list_head cmd_list;
-
+    framebuffer_t* framebuffer;
 } layers[renderlayers_count];
+
+void render_setup()
+{
+    for (auto& it : layers) {
+        it.framebuffer = nullptr;
+    }
+}
+
+void render_cleanup()
+{
+    for (auto& it : layers) {
+        if (it.framebuffer) {
+            destroy(it.framebuffer);
+            it.framebuffer = nullptr;
+        }
+    }
+}
 
 static void push()
 {
-    NX_ASSERT(cmd_builder_queue_size < cmd_builder_queue_capacity, "");
-    ++cmd_builder_queue_size;
-    ++cmd_builder_top;
+    NX_ASSERT(builders_size < cmd_builder_queue_capacity, "");
+    NX_ASSERT(environments_size < environments_capacity, "");
+    current_builder = &builders[builders_size++];
+    current_builder->env = (current_builder - 1)->env;
     reset();
-
-    environment_queue[cmd_builder_queue_size - 1] = environment;
+    current_builder->cmd.environment_idx = environments_size++;
 }
 
 static void pop()
 {
-    NX_ASSERT(cmd_builder_queue_size >= 1, "");
-
-    environment = environment_queue[cmd_builder_queue_size - 1];
-
-    --cmd_builder_queue_size;
-    --cmd_builder_top;
+    NX_ASSERT(builders_size >= 2, "");
+    environments[current_builder->cmd.environment_idx] = current_builder->env;
+    current_builder = &builders[--builders_size - 1];
 }
 
 void begin()
 {
-    push();
-
-    if (cmd_builder_queue_size == 1) {
+    if (builders_size == 1) {
         next_cmd_idx = 0;
         for (int i = 0; i < renderlayers_count; i++) {
             layers[i].cmd_list = {
@@ -95,67 +115,82 @@ void begin()
             };
         }
     }
+    push();
 }
 
-static void update_environment()
+static void update_environment(environment_t* env)
 {
-    if (environment.vp_dirty) {
-        environment.vp_dirty = false;
-        mat4x4_mul(environment.vp, environment.view, environment.projection);
+    if (env->vp_dirty) {
+        env->vp_dirty = false;
+        mat4x4_mul(env->vp, env->view, env->projection);
     }
 }
 
 void end()
 {
-    if (cmd_builder_queue_size == 1) {
+    pop();
 
-        update_environment();
+    if (builders_size == 1) {
+        {
+            environment_t* env = nullptr;
+            cmd_t* cmd;
+            for (int i = 0; i < renderlayers_count; i++) {
 
-        cmd_t* cmd;
-        for (int i = 0; i < renderlayers_count; i++) {
-            NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
-            {
-                cmd = NX_LIST_ENTRY(ptr, struct cmd_t, list);
-                switch (cmd->type) {
-                    case cmdtype::clear: {
-                        handle_cmd_clear(cmd);
-                        break;
+                glBindFramebuffer(GL_FRAMEBUFFER,
+                    layers[i].framebuffer ? layers[i].framebuffer->name : 0);
+
+                NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
+                {
+                    cmd = NX_LIST_ENTRY(ptr, struct cmd_t, list);
+
+                    auto* this_env = &(environments[cmd->environment_idx]);
+                    if (env != this_env) {
+                        env = this_env;
+                        update_environment(env);
                     }
-                    case cmdtype::draw_array: {
-                        handle_cmd_draw_array(cmd);
-                        break;
-                    }
-                    case cmdtype::draw_element: {
-                        handle_cmd_draw_element(cmd);
-                        break;
+
+                    switch (cmd->type) {
+                        case cmdtype::clear: {
+                            handle_cmd_clear(cmd);
+                            break;
+                        }
+                        case cmdtype::draw_array: {
+                            handle_cmd_draw_array(cmd);
+                            break;
+                        }
+                        case cmdtype::draw_element: {
+                            handle_cmd_draw_element(cmd);
+                            break;
+                        }
                     }
                 }
             }
+            NX_CHECK_GL_ERROR();
         }
 
-        NX_CHECK_GL_ERROR();
+        {
+            auto_destroy_objects();
+            environments_size = 0;
+        }
     }
-    pop();
-
-    if (cmd_builder_queue_size == 0)
-        auto_destroy_objects();
 }
 
 void reset()
 {
-    auto& cmd_builder = *cmd_builder_top;
-    memset(&cmd_builder, 0, sizeof(cmd_t));
+    auto& cmd = current_builder->cmd;
+    auto environment_idx = cmd.environment_idx;
+    memset(&(cmd), 0, sizeof(cmd_t));
+    cmd.environment_idx = environment_idx;
 }
 
 void clear(layer_t layer)
 {
     CHECK_CMD_COUNT();
 
-    auto& cmd_builder = *cmd_builder_top;
-    cmd_builder.type = cmdtype::clear;
+    current_builder->cmd.type = cmdtype::clear;
 
     auto* cmd = &cmds[next_cmd_idx++];
-    *cmd = cmd_builder;
+    *cmd = current_builder->cmd;
 
     list_add_tail(&(cmd->list), &(layers[layer].cmd_list));
 }
@@ -163,13 +198,13 @@ void clear(layer_t layer)
 void draw_array(layer_t layer, uint32_t start, uint32_t count)
 {
     CHECK_CMD_COUNT();
-    auto& cmd_builder = *cmd_builder_top;
-    cmd_builder.type = cmdtype::draw_array;
-    cmd_builder.start = start;
-    cmd_builder.count = count;
+    current_builder->cmd.type = cmdtype::draw_array;
+
+    current_builder->cmd.start = start;
+    current_builder->cmd.count = count;
 
     auto* cmd = &cmds[next_cmd_idx++];
-    *cmd = cmd_builder;
+    *cmd = current_builder->cmd;
     list_add_tail(&(cmd->list), &(layers[layer].cmd_list));
 }
 
@@ -179,11 +214,20 @@ void set_clear_color(color_t color)
         color.rgba.b / 255.0, color.rgba.a / 255.0);
 }
 
-void set_vertex_buffer(vertex_buffer_t* vbo) { cmd_builder_top->vbo = vbo; }
+void set_vertex_buffer(vertex_buffer_t* vbo)
+{
+    (current_builder->cmd).vbo = vbo;
+}
 
-void set_indice_buffer(indice_buffer_t* ibo) { cmd_builder_top->ibo = ibo; }
+void set_indice_buffer(indice_buffer_t* ibo)
+{
+    (current_builder->cmd).ibo = ibo;
+}
 
-void set_program(program_t* program) { cmd_builder_top->program = program; }
+void set_program(program_t* program)
+{
+    (current_builder->cmd).program = program;
+}
 
 static void handle_cmd_clear(cmd_t* cmd)
 {
@@ -248,12 +292,14 @@ static void vertex_layout_active(vertex_layout_t layout)
 void draw_element(layer_t layer, uint32_t start, uint32_t count)
 {
     CHECK_CMD_COUNT();
-    auto& cmd_builder = *cmd_builder_top;
-    cmd_builder.type = cmdtype::draw_element;
-    cmd_builder.start = start;
-    cmd_builder.count = count;
+    current_builder->cmd.type = cmdtype::draw_element;
+
+    NX_LOG_D("i %d", current_builder->cmd.environment_idx);
+
+    current_builder->cmd.start = start;
+    current_builder->cmd.count = count;
     auto* cmd = &cmds[next_cmd_idx++];
-    *cmd = cmd_builder;
+    *cmd = current_builder->cmd;
     list_add_tail(&(cmd->list), &(layers[layer].cmd_list));
     NX_CHECK_GL_ERROR();
 }
@@ -317,18 +363,20 @@ static void handle_render_state(render_state_t rs)
 
 static void program_active(cmd_t* cmd)
 {
+    auto& env = environments[cmd->environment_idx];
+    // NX_LOG_D("cmd->environment_idx %d %p", cmd->environment_idx, cmd);
     glUseProgram(cmd->program->name);
     auto mvp_location = program_uniform_location(cmd->program, "MVP");
     if (mvp_location != -1) {
         mat4x4 mvp;
-        mat4x4_mul(mvp, cmd->model, environment.vp);
+        mat4x4_mul(mvp, cmd->model, env.vp);
         glUniformMatrix4fv(mvp_location, 1, GL_TRUE, (const float*)(mvp));
     }
 
     auto mv_location = program_uniform_location(cmd->program, "MV");
     if (mv_location != -1) {
         mat4x4 mv;
-        mat4x4_mul(mv, cmd->model, environment.view);
+        mat4x4_mul(mv, cmd->model, env.view);
         glUniformMatrix4fv(mv_location, 1, GL_TRUE, (const float*)(mv));
     }
 
@@ -339,8 +387,7 @@ static void program_active(cmd_t* cmd)
 
     auto v_location = program_uniform_location(cmd->program, "V");
     if (v_location != -1) {
-        glUniformMatrix4fv(
-            v_location, 1, GL_TRUE, (const float*)(environment.view));
+        glUniformMatrix4fv(v_location, 1, GL_TRUE, (const float*)(env.view));
     }
 
     auto time_location = program_uniform_location(cmd->program, "TIME");
@@ -364,7 +411,7 @@ static void program_active(cmd_t* cmd)
 }
 void set_blend_func(uint8_t src_func, uint8_t dst_func)
 {
-    auto& cmd_builder = *cmd_builder_top;
+    auto& cmd_builder = current_builder->cmd;
     cmd_builder.bf_src = src_func;
     cmd_builder.bf_dst = dst_func;
 }
@@ -373,7 +420,7 @@ void set_texture(texture_id_t tex_id, texture_t* tex)
 {
     NX_ASSERT(tex_id < max_cmd_textures, "too large tex_id %d", tex_id);
 
-    auto& cmd_builder = *cmd_builder_top;
+    auto& cmd_builder = current_builder->cmd;
     cmd_builder.textures[tex_id] = tex;
 }
 
@@ -421,26 +468,40 @@ static void handle_cmd_draw_element(cmd_t* cmd)
 
 void set_render_state(render_state_t rs)
 {
-    auto& cmd_builder = *cmd_builder_top;
+    auto& cmd_builder = current_builder->cmd;
     cmd_builder.render_state = rs;
 }
 
 void set_model_transform(const mat4x4 m)
 {
-    auto& cmd_builder = *cmd_builder_top;
+    auto& cmd_builder = current_builder->cmd;
     mat4x4_dup(cmd_builder.model, m);
 }
 
 void set_view_transform(const mat4x4 m)
 {
-    mat4x4_dup(environment.view, m);
-    environment.vp_dirty = true;
+    mat4x4_dup(current_builder->env.view, m);
+    current_builder->env.vp_dirty = true;
 }
 
 void set_projection_transform(const mat4x4 m)
 {
-    mat4x4_dup(environment.projection, m);
-    environment.vp_dirty = true;
+    mat4x4_dup(current_builder->env.projection, m);
+    current_builder->env.vp_dirty = true;
+}
+
+void set_view(layer_t layer, texture_t* texture)
+{
+    auto& render_layer = layers[layer];
+    if (render_layer.framebuffer) {
+        destroy(render_layer.framebuffer);
+        render_layer.framebuffer = nullptr;
+    }
+
+    if (texture) {
+        render_layer.framebuffer
+            = create_framebuffer(texture->width, texture->height, texture);
+    }
 }
 
 } // namespace nx::gfx

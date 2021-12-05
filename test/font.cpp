@@ -83,8 +83,7 @@ static void setup()
     gfx::mat4x4_translate(model0, -0.5, -0.5, 0);
 
     gfx::mat4x4 tmp;
-    gfx::mat4x4_identity(tmp);
-    gfx::mat4x4_scale_aniso(tmp, tmp, 101, 101, 101);
+    gfx::mat4x4_scale_aniso(tmp, 101, 101, 101);
 
     gfx::mat4x4_mul(model0, model0, tmp);
 

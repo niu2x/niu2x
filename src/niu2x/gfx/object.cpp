@@ -20,8 +20,17 @@
 namespace nx::gfx {
 
 namespace {
+
 struct object_type {
-    enum { vertex_buffer, indice_buffer, program, texture, font, mesh };
+    enum {
+        vertex_buffer,
+        indice_buffer,
+        program,
+        texture,
+        font,
+        mesh,
+        framebuffer
+    };
 };
 
 } // namespace
@@ -45,9 +54,42 @@ static freelist<vertex_buffer_t, 4096> vertex_buffer_freelist;
 static freelist<indice_buffer_t, 4096> indice_buffer_freelist;
 static freelist<program_t, 1024> program_freelist;
 static freelist<texture_t, 4096> texture_freelist;
+static freelist<framebuffer_t, 256> framebuffer_freelist;
 static freelist<font_t, 256> font_freelist;
 static freelist<mesh_t, 1024> mesh_freelist;
 static NX_LIST_HEAD(auto_destroy_head);
+
+static void destroy_framebuffer(framebuffer_t* obj)
+{
+    glDeleteRenderbuffers(1, &(obj->stencil_depth));
+    glDeleteFramebuffers(1, &(obj->name));
+    destroy_object(framebuffer_freelist, obj);
+}
+
+framebuffer_t* create_framebuffer(int w, int h, texture_t* texture)
+{
+    auto* obj = (create_object(framebuffer_freelist, framebuffer));
+
+    glGenFramebuffers(1, &(obj->name));
+    glBindFramebuffer(GL_FRAMEBUFFER, obj->name);
+
+    glBindTexture(GL_TEXTURE_2D, texture->name);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->name, 0);
+
+    glGenRenderbuffers(1, &(obj->stencil_depth));
+    glBindRenderbuffer(GL_RENDERBUFFER, obj->stencil_depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+        GL_RENDERBUFFER, obj->stencil_depth);
+
+    NX_ASSERT(
+        glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
+        "ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    NX_CHECK_GL_ERROR();
+    return obj;
+}
 
 size_t vertex_sizeof(vertex_layout_t layout)
 {
@@ -90,6 +132,10 @@ mesh_t* create_mesh_from_file(const char* path, int idx, int flags)
     mesh_init_from_file(obj, path, idx, flags);
     return obj;
 }
+
+// void set_view(layer_t layer, texture_t * texture) {
+
+// }
 
 vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
     uint32_t vertices_count, void* data, bool auto_destroy)
@@ -321,6 +367,7 @@ void destroy(object_t* obj)
         CASE(texture, texture_t, destroy_texture)
         CASE(font, font_t, destroy_font)
         CASE(mesh, mesh_t, destroy_mesh)
+        CASE(framebuffer, framebuffer_t, destroy_framebuffer)
     }
 
 #undef CASE
@@ -442,12 +489,15 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
     }
     NX_CHECK_GL_ERROR();
 
-    //
-    glTexParameteri(
-        GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // glTexParameteri(
+    //     GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glGenerateMipmap(GL_TEXTURE_2D);
     // GL_TEXTURE_WRAP_S
     // GL_TEXTURE_WRAP_T
     // GL_TEXTURE_WRAP_R

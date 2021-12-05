@@ -158,12 +158,12 @@ static const char* font_program_source[] = { R"RAW(
 layout(location = 0) in highp vec3 position;
 layout(location = 1) in highp vec3 uv;
 
-uniform mat4 mvp;
+uniform mat4 MVP;
 out highp vec3 v_uv;
 
 void main()
 {
-  gl_Position =  vec4(position, 1.0) * mvp;
+  gl_Position =  vec4(position, 1.0) * MVP;
   v_uv = uv;
 }
 
@@ -171,14 +171,14 @@ void main()
     R"RAW(
 #version 300 es
 
-uniform sampler2D tex0;
+uniform sampler2D TEX0;
 in highp vec3 v_uv;
 
 out highp vec4 color;
 
 void main()
 {
-    highp float a = texture(tex0, v_uv.xy).r;
+    highp float a = texture(TEX0, v_uv.xy).r;
     color = vec4(vec3(1, 1, 1), a);
 }
 

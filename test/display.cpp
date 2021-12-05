@@ -93,7 +93,7 @@ static void setup()
     gfx::mat4x4_identity(view);
 
     gfx::mat4x4 rotate;
-    gfx::mat4x4_scale_aniso(model, model, 1, 1, 1);
+    gfx::mat4x4_scale_aniso(model, 1, 1, 1);
     gfx::mat4x4_rotate_X(rotate, PI / 2);
     gfx::mat4x4_mul(model, model, rotate);
 
@@ -114,10 +114,15 @@ static void setup()
     mesh = gfx::create_mesh_from_file(
         model_file.c_str(), 0, gfx::MESH_AUTO_CENTER);
     mesh->texture = gfx::create_texture_2d_from_file(texture_file.c_str());
+
+    // tex = gfx::create_texture_2d(64, 64, gfx::pixel_format::rgba8, nullptr);
+    tex = gfx::create_texture_2d_from_file("../test/mu-wan-qing.jpeg");
+    gfx::set_view(0, tex);
 }
 
 static void cleanup()
 {
+    gfx::destroy(tex);
     gfx::destroy(mesh);
     gfx::destroy(program);
 }
@@ -131,7 +136,9 @@ static void update(double dt)
     gfx::mat4x4_mul(model, model, rotate);
 
     gfx::mat4x4 this_model;
-    gfx::mat4x4_scale_aniso(this_model, model, scale, scale, scale);
+    gfx::mat4x4_scale_aniso(this_model, scale, scale, scale);
+
+    gfx::mat4x4_mul(this_model, model, this_model);
 
     gfx::begin();
 
@@ -149,6 +156,8 @@ static void update(double dt)
     gfx::set_indice_buffer(mesh->ib);
 
     gfx::draw_element(0, 0, mesh->ib->size);
+
+    gfx::draw_texture(1, tex);
 
     gfx::end();
 }
@@ -171,7 +180,7 @@ static void mouse_pos_callback(double xpos, double ypos)
     if (posx >= 0 && posy >= 0) {
         if (scale_mode) {
             scale += (ypos - posy) / 10;
-            scale = std::max(scale, 0.5);
+            scale = std::max(scale, 0.01);
             scale = std::min(scale, 100.0);
         }
     }

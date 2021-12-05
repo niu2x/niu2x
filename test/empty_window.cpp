@@ -88,7 +88,7 @@ static void setup()
     // gfx::mat4x4_translate(model0, -0.5, -0.5, -0.5);
     // gfx::mat4x4_scale(model1, model1, 0.0000001);
     gfx::mat4x4 rotate;
-    gfx::mat4x4_scale_aniso(model0, model0, 1, 1, 1);
+    gfx::mat4x4_scale_aniso(model0, 1, 1, 1);
     gfx::mat4x4_rotate_X(rotate, 3.1514 / 2);
     gfx::mat4x4_mul(model0, model0, rotate);
 
