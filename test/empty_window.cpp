@@ -6,6 +6,7 @@
 #define PI 3.1415926
 
 namespace gfx = nx::gfx;
+namespace math = nx::math;
 
 static gfx::vertex_buffer_t* vbo;
 static gfx::indice_buffer_t* ibo;
@@ -80,27 +81,27 @@ void main()
 
 static void setup()
 {
-    gfx::mat4x4_identity(model0);
-    gfx::mat4x4_identity(model1);
-    gfx::mat4x4_identity(projection);
-    gfx::mat4x4_identity(view);
+    math::mat4x4_identity(model0);
+    math::mat4x4_identity(model1);
+    math::mat4x4_identity(projection);
+    math::mat4x4_identity(view);
 
-    // gfx::mat4x4_translate(model0, -0.5, -0.5, -0.5);
-    // gfx::mat4x4_scale(model1, model1, 0.0000001);
+    // math::mat4x4_translate(model0, -0.5, -0.5, -0.5);
+    // math::mat4x4_scale(model1, model1, 0.0000001);
     gfx::mat4x4 rotate;
-    gfx::mat4x4_scale_aniso(model0, 1, 1, 1);
-    gfx::mat4x4_rotate_X(rotate, 3.1514 / 2);
-    gfx::mat4x4_mul(model0, model0, rotate);
+    math::mat4x4_scale_aniso(model0, 1, 1, 1);
+    math::mat4x4_rotate_X(rotate, 3.1514 / 2);
+    math::mat4x4_mul(model0, model0, rotate);
 
     // clang-format off
 
     float eye[] = {1000, 0, 100};
     float center[] = {0, 0, 10};
     float up[] = {0, 0, 1};
-    gfx::mat4x4_look_at(view, eye, center, up);
+    math::mat4x4_look_at(view, eye, center, up);
 
-    gfx::mat4x4_perspective(projection, PI*0.6, 1, 0.05, 5000);
-    // gfx::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
+    math::mat4x4_perspective(projection, PI*0.6, 1, 0.05, 5000);
+    // math::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
 
     static float vertices[][10] = {
         { 0, 0, 0, 1, 0, 1, 1 ,0,0,0,},
@@ -147,15 +148,15 @@ static void cleanup()
 
 static void update(double dt)
 {
-    // gfx::mat4x4_rotate_X(model0, model0, 0.01);
+    // math::mat4x4_rotate_X(model0, model0, 0.01);
 
     gfx::mat4x4 rotate;
 
-    // gfx::mat4x4_rotate_X(rotate, 0.01);
-    // gfx::mat4x4_mul(model0, model0, rotate);
+    // math::mat4x4_rotate_X(rotate, 0.01);
+    // math::mat4x4_mul(model0, model0, rotate);
 
-    gfx::mat4x4_rotate_Z(rotate, 0.015);
-    gfx::mat4x4_mul(model0, model0, rotate);
+    math::mat4x4_rotate_Z(rotate, 0.015);
+    math::mat4x4_mul(model0, model0, rotate);
 
     gfx::begin();
 

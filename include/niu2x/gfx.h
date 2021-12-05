@@ -15,6 +15,9 @@
 
 namespace nx::gfx {
 
+using mat4x4 = math::mat4x4;
+using vec3 = math::vec3;
+
 enum NXAPI window_option_constant {
     MSAA = 1 << 0,
 };

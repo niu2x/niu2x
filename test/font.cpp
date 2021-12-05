@@ -10,6 +10,7 @@
 #define PI 3.1415926
 
 namespace gfx = nx::gfx;
+namespace math = nx::math;
 
 static gfx::vertex_buffer_t* vbo;
 static gfx::indice_buffer_t* ibo;
@@ -76,18 +77,16 @@ void main()
 
 static void setup()
 {
-    gfx::mat4x4_identity(model0);
-    gfx::mat4x4_identity(projection);
-    gfx::mat4x4_identity(view);
+    math::mat4x4_identity(model0);
+    math::mat4x4_identity(projection);
+    math::mat4x4_identity(view);
 
-    gfx::mat4x4_translate(model0, -0.5, -0.5, 0);
+    math::mat4x4_translate(model0, -0.5, -0.5, 0);
 
     gfx::mat4x4 tmp;
-    gfx::mat4x4_scale_aniso(tmp, 101, 101, 101);
+    math::mat4x4_scale_aniso(tmp, 101, 101, 101);
 
-    gfx::mat4x4_mul(model0, model0, tmp);
-
-    gfx::mat4x4_dump(model0);
+    math::mat4x4_mul(model0, model0, tmp);
 
     // clang-format off
 
@@ -95,10 +94,10 @@ static void setup()
     float center[] = {0, 0, 0};
     float up[] = {0, 1, 0};
 
-    gfx::mat4x4_look_at(view, eye, center, up);
+    math::mat4x4_look_at(view, eye, center, up);
 
-    gfx::mat4x4_perspective(projection, PI*0.5, 1, 0.05, 1000);
-    // gfx::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
+    math::mat4x4_perspective(projection, PI*0.5, 1, 0.05, 1000);
+    // math::mat4x4_ortho(projection, -1, 1, -1, 1, 0, 14);
 
     static float vertices[][10] = {
         { 0, 0, 0, 1, 0, 1, 1 ,0,1,0,},

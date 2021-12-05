@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string.h>
 
-namespace nx::gfx {
+namespace nx::math {
 
 #ifdef LINMATH_NO_INLINE
     #define LINMATH_H_FUNC static
@@ -602,6 +602,6 @@ LINMATH_H_FUNC void mat4x4_arcball(
     mat4x4_rotate(R, c_[0], c_[1], c_[2], angle);
 }
 
-} // namespace nx::gfx
+} // namespace nx::math
 
 #endif

@@ -8,6 +8,7 @@
 #define PI 3.1415926
 
 namespace gfx = nx::gfx;
+namespace math = nx::math;
 
 static gfx::program_t* program = nullptr;
 
@@ -88,21 +89,21 @@ void main()
 
 static void setup()
 {
-    gfx::mat4x4_identity(model);
-    gfx::mat4x4_identity(projection);
-    gfx::mat4x4_identity(view);
+    math::mat4x4_identity(model);
+    math::mat4x4_identity(projection);
+    math::mat4x4_identity(view);
 
     gfx::mat4x4 rotate;
-    gfx::mat4x4_scale_aniso(model, 1, 1, 1);
-    gfx::mat4x4_rotate_X(rotate, PI / 2);
-    gfx::mat4x4_mul(model, model, rotate);
+    math::mat4x4_scale_aniso(model, 1, 1, 1);
+    math::mat4x4_rotate_X(rotate, PI / 2);
+    math::mat4x4_mul(model, model, rotate);
 
     float eye[] = { 100, 0, 0 };
     float center[] = { 0, 0, 10 };
     float up[] = { 0, 0, 1 };
-    gfx::mat4x4_look_at(view, eye, center, up);
+    math::mat4x4_look_at(view, eye, center, up);
 
-    gfx::mat4x4_perspective(projection, PI * 0.6, 1, 0.05, 5000);
+    math::mat4x4_perspective(projection, PI * 0.6, 1, 0.05, 5000);
 
     gfx::set_clear_color(gfx::rgba(0, 0, 0, 0));
 
@@ -132,13 +133,13 @@ static void update(double dt)
 
     gfx::mat4x4 rotate;
 
-    gfx::mat4x4_rotate_Z(rotate, 0.015);
-    gfx::mat4x4_mul(model, model, rotate);
+    math::mat4x4_rotate_Z(rotate, 0.015);
+    math::mat4x4_mul(model, model, rotate);
 
     gfx::mat4x4 this_model;
-    gfx::mat4x4_scale_aniso(this_model, scale, scale, scale);
+    math::mat4x4_scale_aniso(this_model, scale, scale, scale);
 
-    gfx::mat4x4_mul(this_model, model, this_model);
+    math::mat4x4_mul(this_model, model, this_model);
 
     gfx::begin();
 
