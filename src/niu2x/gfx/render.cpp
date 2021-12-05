@@ -294,8 +294,6 @@ void draw_element(layer_t layer, uint32_t start, uint32_t count)
     CHECK_CMD_COUNT();
     current_builder->cmd.type = cmdtype::draw_element;
 
-    NX_LOG_D("i %d", current_builder->cmd.environment_idx);
-
     current_builder->cmd.start = start;
     current_builder->cmd.count = count;
     auto* cmd = &cmds[next_cmd_idx++];
