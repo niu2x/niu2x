@@ -69,6 +69,7 @@ static void destroy_framebuffer(framebuffer_t* obj)
 framebuffer_t* create_framebuffer(int w, int h, texture_t* texture)
 {
     auto* obj = (create_object(framebuffer_freelist, framebuffer));
+    obj->texture = texture;
     obj->width = texture->width;
     obj->height = texture->height;
     glGenFramebuffers(1, &(obj->name));
@@ -88,6 +89,7 @@ framebuffer_t* create_framebuffer(int w, int h, texture_t* texture)
         glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
         "ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     NX_CHECK_GL_ERROR();
     return obj;
 }
@@ -461,6 +463,8 @@ void texture_2d_update_region(
 
     glGenerateMipmap(GL_TEXTURE_2D);
     NX_CHECK_GL_ERROR();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
@@ -499,13 +503,17 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // GL_TEXTURE_WRAP_S
-    // GL_TEXTURE_WRAP_T
-    // GL_TEXTURE_WRAP_R
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
     obj->width = w;
     obj->height = h;
     obj->pf = pf;
     NX_CHECK_GL_ERROR();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     return obj;
 }
 

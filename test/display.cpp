@@ -72,8 +72,8 @@ uniform highp float TIME;
 
 void main()
 {
-    highp vec3 eye = vec3(100.0, 0, 10.0);
-    highp vec3 light = vec3(-10000.0, 0, 20000.0);
+    highp vec3 eye = vec3(100.0, 0, 50.0);
+    highp vec3 light = vec3(-100.0, 0, 100.0);
 
     highp vec3 ambient = vec3(0.7);
     highp vec3 l = normalize(light - v_world_pos);
@@ -130,8 +130,8 @@ uniform highp float TIME;
 
 void main()
 {
-    highp vec3 eye = vec3(100.0, 0, 10.0);
-    highp vec3 light = vec3(-10000.0, 0, 20000.0);
+    highp vec3 eye = vec3(100.0, 0, 50.0);
+    highp vec3 light = vec3(-100.0, 0, 100.0);
 
     highp vec3 material = texture(TEX0, v_uv.xy).xyz;
 
@@ -163,7 +163,23 @@ out highp vec4 color;
 uniform highp mat4 V;
 uniform highp float TIME;
 
+highp mat4 ortho(highp float l, highp float r, highp float b, highp float t, highp float n, highp float f){
+    highp mat4 M;
+    M[0][0] = 2.0 / (r - l);
+    M[1][0] = M[2][0] = M[3][0] = 0.0;
 
+    M[1][1] = 2.0 / (t - b);
+    M[0][1] = M[2][1] = M[3][1] = 0.0;
+
+    M[2][2] = -2.0 / (f - n);
+    M[0][2] = M[1][2] = M[3][2] = 0.0;
+
+    M[0][3] = -(r + l) / (r - l);
+    M[1][3] = -(t + b) / (t - b);
+    M[2][3] = -(f + n) / (f - n);
+    M[3][3] = 1.0;
+    return M;
+}
 
 highp mat4 look_at(highp vec3 eye, highp vec3 center, highp vec3 up) {
 
@@ -204,26 +220,28 @@ highp mat4 look_at(highp vec3 eye, highp vec3 center, highp vec3 up) {
 
 void main()
 {
-    highp vec3 eye = vec3(100.0, 0, 10.0);
-    highp vec3 light = vec3(-10000.0, 0, 20000.0);
+    highp vec3 eye = vec3(100.0, 0, 50.0);
+    highp vec3 light = vec3(-100.0, 0, 100.0);
 
-    highp vec3 material = texture(TEX0, v_uv.xy).xyz;
 
-    highp vec3 ambient = vec3(0.7);
+    highp vec3 ambient = vec3(0.3);
     highp vec3 l = normalize(light - v_world_pos);
     highp vec3 v = normalize(eye - v_world_pos);
 
     highp vec3 diffuse = max(dot(v_normal, l), 0.0) * vec3(0.5);
     highp vec3 mirror = pow(max(dot(normalize(v+l), v_normal), 0.0), 32.0) * vec3(1.0);
 
-    color = vec4(material * (diffuse + ambient ) + mirror, 1.0);
+    color = vec4((diffuse + ambient ) + mirror, 1.0);
 
     highp mat4 vv = look_at(light, vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0));
-    highp vec4 pos_at_light  = vec4(v_world_pos, 1.0) * vv; 
+    highp mat4 vvvv = ortho(-256.0/2.0, 256.0/2.0, -256.0/2.0, 256.0/2.0, 0.0, 1000000.0);
+    highp vec4 pos_at_light  = vec4(v_world_pos, 1.0) * vv * vvvv; 
     pos_at_light.xyz /= pos_at_light.w;
 
-    highp vec4 shadow = texture(TEX1, vec2(0.5) + pos_at_light.xy/500.0);
-    color.a *= 1.0 - shadow.a;
+  //  highp vec4 shadow = textureGrad(TEX1, vec2(0.5) + pos_at_light.xy*0.5, vec2(0.0), vec2(0.0));
+    highp vec4 shadow = texture(TEX1, vec2(0.5) + pos_at_light.xy*0.5);
+    color.a = 1.0-shadow.a;
+
 
 }
 
@@ -239,7 +257,7 @@ static void setup()
     math::mat4x4_rotate_x(model, PI / 2);
     math::mat4x4_translate(model, 0, 0, 50);
 
-    float eye[] = { 100, 0, 20 };
+    float eye[] = { 100, 0, 50 };
     float center[] = { 0, 0, 0 };
     float up[] = { 0, 0, 1 };
     math::mat4x4_look_at(view, eye, center, up);
@@ -260,7 +278,7 @@ static void setup()
         model_file.c_str(), 0, gfx::MESH_AUTO_CENTER);
     mesh->texture = gfx::create_texture_2d_from_file(texture_file.c_str());
 
-    tex = gfx::create_texture_2d(256, 256, gfx::pixel_format::rgba8, 0);
+    tex = gfx::create_texture_2d(2048, 2048, gfx::pixel_format::rgba8, 0);
 
     float floor_vertices[][9] = {
         { -100000, -100000, -0, 0, 0, 1, 0, 0, 0 },
@@ -320,7 +338,7 @@ static void update(double dt)
     gfx::begin();
     {
         math::mat4x4 look_at_light;
-        math::vec3 eye = { -10000.0, 0, 20000.0 };
+        math::vec3 eye = { -100.0, 0, 100.0 };
         math::vec3 center = { 0, 0, 50 };
         math::vec3 up = { 0, 0, 1 };
         math::mat4x4_look_at(look_at_light, eye, center, up);
@@ -363,6 +381,8 @@ static void update(double dt)
     gfx::set_vertex_buffer(mesh->vb);
     gfx::set_indice_buffer(mesh->ib);
     gfx::draw_element(1, 0, mesh->ib->size);
+
+    // gfx::draw_texture(2, tex);
 
     gfx::end();
 }

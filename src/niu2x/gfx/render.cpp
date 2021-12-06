@@ -178,6 +178,14 @@ void end()
                         }
                     }
                 }
+
+                if (layers[i].framebuffer) {
+                    glBindTexture(
+                        GL_TEXTURE_2D, layers[i].framebuffer->texture->name);
+                    glGenerateMipmap(GL_TEXTURE_2D);
+                    glBindTexture(GL_TEXTURE_2D, 0);
+                    // NX_LOG_D("clear tex");
+                }
             }
             NX_CHECK_GL_ERROR();
         }
@@ -474,6 +482,7 @@ static void program_active(cmd_t* cmd)
                 glUniform1i(location, i);
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, cmd->textures[i]->name);
+                // NX_LOG_D("bind text %d %u", i, cmd->textures[i]->name);
             }
         }
     }

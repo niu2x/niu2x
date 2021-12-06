@@ -81,6 +81,7 @@ struct framebuffer_t : object_t {
     GLuint name;
     GLuint stencil_depth;
     int width, height;
+    texture_t* texture;
 };
 
 void render_setup();
