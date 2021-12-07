@@ -4,7 +4,7 @@
 - gfx (TODO)
 
 # Examples
-please goto test/*.cpp
+please goto test/\*.cpp
 
 ## log
 ````
