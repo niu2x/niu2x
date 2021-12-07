@@ -103,9 +103,6 @@ void printf(int x, int y, const char* fmt, ...)
     math::mat4x4_identity(view);
     math::mat4x4_identity(projection);
 
-    int window_width, window_height;
-    window_size(&window_width, &window_height);
-
     float eye[] = { 0, 0, 1 };
     float center[] = { 0, 0, 0 };
     float up[] = { 0, 1, 0 };
@@ -113,7 +110,7 @@ void printf(int x, int y, const char* fmt, ...)
     set_view_transform(view);
 
     math::mat4x4_ortho(
-        projection, 0, window_width, 0, window_height, 0.1, 50.0);
+        projection, 0, window_size[0], 0, window_size[1], 0.1, 50.0);
     set_projection_transform(projection);
 
     math::mat4x4_translate(model, x, y, 0);

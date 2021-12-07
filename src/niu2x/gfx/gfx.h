@@ -33,7 +33,7 @@ extern vertex_buffer_t* sprite_vb;
 extern indice_buffer_t* sprite_ib;
 extern program_t* sprite_program;
 
-void window_size(int* w, int* h);
+extern math::vec2 window_size;
 
 void auto_destroy_objects();
 

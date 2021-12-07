@@ -34,10 +34,12 @@ void imgui_update(double dt);
 
 } // namespace
 
+math::vec2 window_size;
+
 double now_seconds = 0;
 
 static GLFWwindow* current_glfw_window = nullptr;
-static int window_width, window_height;
+// static int window_width, window_height;
 
 void run(const window_config& c)
 {
@@ -137,8 +139,8 @@ GLFWwindow* create_glfw_window(const window_config& c)
         = glfwCreateWindow(c.width, c.height, c.title.c_str(), 0, nullptr);
     NX_ASSERT(glfw_window, "create glfw_window failed.");
 
-    window_width = c.width;
-    window_height = c.height;
+    window_size[0] = c.width;
+    window_size[1] = c.height;
 
     glfwMakeContextCurrent(glfw_window);
     glfwSwapInterval(1);
@@ -234,8 +236,8 @@ void framebuffer_size_callback(GLFWwindow* window, int w, int h)
         int viewport_y = (h - viewport_height) >> 1;
         glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
 
-        window_width = viewport_width;
-        window_height = viewport_height;
+        window_size[0] = viewport_width;
+        window_size[1] = viewport_height;
     }
 }
 
@@ -248,11 +250,5 @@ void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 } // namespace
-
-void window_size(int* w, int* h)
-{
-    *w = window_width;
-    *h = window_height;
-}
 
 } // namespace nx::gfx

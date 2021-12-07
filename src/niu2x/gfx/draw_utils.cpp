@@ -18,16 +18,13 @@ void draw_texture(layer_t layer, texture_t* texture)
     set_indice_buffer(sprite_ib);
     set_program(sprite_program);
 
-    int w, h;
-    window_size(&w, &h);
-
     mat4x4 model;
     math::mat4x4_identity(model);
     math::mat4x4_translate(model, 0.5, 0.5, 0);
 
     mat4x4 scale;
     math::mat4x4_identity(scale);
-    math::mat4x4_scale_aniso(scale, w, h, 0);
+    math::mat4x4_scale_aniso(scale, window_size[0], window_size[1], 0);
     math::mat4x4_mul(model, scale);
     set_model_transform(model);
 
@@ -39,7 +36,8 @@ void draw_texture(layer_t layer, texture_t* texture)
     set_view_transform(view);
 
     mat4x4 projection;
-    math::mat4x4_ortho(projection, 0, w, 0, h, 0.1, 244.0);
+    math::mat4x4_ortho(
+        projection, 0, window_size[0], 0, window_size[1], 0.1, 244.0);
     set_projection_transform(projection);
 
     draw_element(layer, 0, 6);
