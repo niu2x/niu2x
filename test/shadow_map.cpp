@@ -413,18 +413,18 @@ static void mouse_pos_callback(double xpos, double ypos)
 
 int main(int argc, char* argv[])
 {
-    cxxopts::Options options("display", "display 3d model");
+    // cxxopts::Options options("shadow_map", "display 3d model");
 
-    options.add_options()(
-        "m,model", "model file", cxxopts::value<std::string>())(
-        "t,texture", "texture", cxxopts::value<std::string>());
-    auto result = options.parse(argc, argv);
+    // options.add_options()(
+    //     "m,model", "model file", cxxopts::value<std::string>())(
+    //     "t,texture", "texture", cxxopts::value<std::string>());
+    // auto result = options.parse(argc, argv);
 
-    model_file = result["model"].as<std::string>();
-    texture_file = result["texture"].as<std::string>();
+    model_file = "../test/Aya.obj";
+    texture_file = "../test/Aya.jpg";
 
     gfx::window_config cfg;
-    cfg.title = "display";
+    cfg.title = "shadow map";
     cfg.options = gfx::MSAA;
     cfg.width = 800;
     cfg.height = 600;

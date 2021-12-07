@@ -17,26 +17,52 @@ enum class cmdtype {
 static constexpr int cmds_count = 4096;
 static constexpr int max_cmd_textures = 8;
 static struct cmd_t {
+    texture_t* textures[max_cmd_textures];
     mat4x4 model;
     list_head list;
-    texture_t* textures[max_cmd_textures];
-    vertex_buffer_t* vbo;
-    indice_buffer_t* ibo;
+    struct {
+        vertex_buffer_t* vbo;
+        indice_buffer_t* ibo;
+    };
     program_t* program;
     cmdtype type;
-    render_state_t render_state;
     uint32_t start;
     uint32_t count;
-    blend bf_src;
-    blend bf_dst;
+
+    union {
+        struct {
+            render_state_t render_state;
+
+            blend bf_src;
+            blend bf_dst;
+
+            comparator stencil_comparator;
+            uint8_t stencil_mask;
+            uint8_t stencil_ref;
+            stencil_op stencil_op_sfail;
+            stencil_op stencil_op_dpfail;
+            stencil_op stencil_op_dppass;
+        };
+
+        struct {
+            uint32_t reversed[3];
+        } render_state_md5;
+    };
+
     int environment_idx;
-    comparator stencil_comparator;
-    uint8_t stencil_mask;
-    uint8_t stencil_ref;
-    stencil_op stencil_op_sfail;
-    stencil_op stencil_op_dpfail;
-    stencil_op stencil_op_dppass;
 } cmds[cmds_count];
+
+// static uint64_t render_state_md5(cmd_t* cmd)
+// {
+// #define T(name) (uint64_t)(cmd->name)
+//         // return T(render_state) ^ T(bf_src) ^ T(bf_dst) ^
+//         // T(stencil_comparator)
+//         //     ^ T(stencil_mask) ^ T(stencil_ref) ^ T(stencil_op_sfail)
+//         //     ^ T(stencil_op_dpfail) ^ T(stencil_op_dppass);
+//     return T(render_state_region[0] ) ^ T(render_state_region[1])
+//         ^ T(render_state_region[2]);
+// #undef T
+// }
 
 struct environment_t {
     mat4x4 view;
@@ -100,7 +126,12 @@ static void pop()
 void begin()
 {
     if (builders_size == 1) {
+
+        auto_destroy_objects();
+
+        environments_size = 0;
         next_cmd_idx = 0;
+
         for (int i = 0; i < renderlayers_count; i++) {
             layers[i].cmd_list = {
                 &(layers[i].cmd_list),
@@ -121,67 +152,85 @@ static void update_environment(environment_t* env)
     }
 }
 
+static void draw_layer(renderlayer_t& layer)
+{
+    int env = -1;
+    cmd_t* cmd;
+
+    if (layer.view) {
+        glBindFramebuffer(
+            GL_DRAW_FRAMEBUFFER, texture_2d_framebuffer(layer.view)->name);
+        glViewport(0, 0, layer.view->width, layer.view->height);
+    } else {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glViewport(0, 0, window_size[0], window_size[1]);
+    }
+
+    NX_LIST_FOR_EACH(ptr, &(layer.cmd_list))
+    {
+        cmd = NX_LIST_ENTRY(ptr, struct cmd_t, list);
+
+        auto this_env = cmd->environment_idx;
+        if (env != this_env) {
+            env = this_env;
+            update_environment(&(environments[env]));
+        }
+
+        switch (cmd->type) {
+            case cmdtype::clear: {
+                handle_cmd_clear(cmd);
+                break;
+            }
+            case cmdtype::draw_array: {
+                handle_cmd_draw_array(cmd);
+                break;
+            }
+            case cmdtype::draw_element: {
+                handle_cmd_draw_element(cmd);
+                break;
+            }
+        }
+    }
+
+    if (layer.view) {
+        glBindTexture(GL_TEXTURE_2D, layer.view->name);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+}
+
+static void draw_all()
+{
+
+    for (int i = renderlayers_count - 1; i >= 0; --i) {
+
+        auto& layer = layers[i];
+        draw_layer(layer);
+    }
+    NX_CHECK_GL_ERROR();
+}
+
 void end()
 {
     pop();
 
     if (builders_size == 1) {
-        {
-            environment_t* env = nullptr;
-            cmd_t* cmd;
-            for (int i = renderlayers_count - 1; i >= 0; --i) {
-
-                auto& layer = layers[i];
-                if (layer.view) {
-                    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                        texture_2d_framebuffer(layer.view)->name);
-                    glViewport(0, 0, layer.view->width, layer.view->height);
-                } else {
-                    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-                    glViewport(0, 0, 800, 600);
-                }
-
-                NX_LIST_FOR_EACH(ptr, &(layers[i].cmd_list))
-                {
-                    cmd = NX_LIST_ENTRY(ptr, struct cmd_t, list);
-
-                    auto* this_env = &(environments[cmd->environment_idx]);
-                    if (env != this_env) {
-                        env = this_env;
-                        update_environment(env);
-                    }
-
-                    switch (cmd->type) {
-                        case cmdtype::clear: {
-                            handle_cmd_clear(cmd);
-                            break;
-                        }
-                        case cmdtype::draw_array: {
-                            handle_cmd_draw_array(cmd);
-                            break;
-                        }
-                        case cmdtype::draw_element: {
-                            handle_cmd_draw_element(cmd);
-                            break;
-                        }
-                    }
-                }
-
-                if (layer.view) {
-                    glBindTexture(GL_TEXTURE_2D, layer.view->name);
-                    glGenerateMipmap(GL_TEXTURE_2D);
-                    glBindTexture(GL_TEXTURE_2D, 0);
-                }
-            }
-            NX_CHECK_GL_ERROR();
-        }
-
-        {
-            auto_destroy_objects();
-            environments_size = 0;
-        }
+        draw_all();
     }
 }
+
+static GLuint blend_func_map[] = {
+    GL_SRC_ALPHA,
+    GL_ONE_MINUS_SRC_ALPHA,
+    GL_ONE,
+    GL_ZERO,
+    GL_SRC_COLOR,
+    GL_ONE_MINUS_SRC_COLOR,
+    GL_DST_COLOR,
+    GL_ONE_MINUS_DST_COLOR,
+    GL_DST_ALPHA,
+    GL_ONE_MINUS_DST_ALPHA,
+};
 
 void reset()
 {
@@ -310,59 +359,49 @@ void draw_element(layer_t layer, uint32_t start, uint32_t count)
     NX_CHECK_GL_ERROR();
 }
 
-static auto gl_comparator(comparator cmp)
+static GLuint gl_comparator_map[] = {
+    GL_EQUAL,
+    GL_NEVER,
+    GL_LESS,
+    GL_LEQUAL,
+    GL_GREATER,
+    GL_GEQUAL,
+    GL_NOTEQUAL,
+    GL_ALWAYS,
+};
+
+static GLuint gl_stencil_op_map[] = {
+    GL_KEEP,
+    GL_ZERO,
+    GL_REPLACE,
+    GL_INCR,
+    GL_INCR_WRAP,
+    GL_DECR,
+    GL_DECR_WRAP,
+    GL_INVERT,
+};
+
+static GLuint gl_comparator(comparator cmp)
 {
-    switch (cmp) {
-        case comparator::equal:
-            return GL_EQUAL;
-        case comparator::never:
-            return GL_NEVER;
-        case comparator::less:
-            return GL_LESS;
-        case comparator::less_equal:
-            return GL_LEQUAL;
-        case comparator::greater:
-            return GL_GREATER;
-        case comparator::greater_equal:
-            return GL_GEQUAL;
-        case comparator::not_equal:
-            return GL_NOTEQUAL;
-        case comparator::always:
-            return GL_ALWAYS;
-    }
-    return 0;
+    return gl_comparator_map[(uint8_t)cmp];
 }
 
 static auto gl_stencil_op(stencil_op op)
 {
-    switch (op) {
-        case stencil_op::keep:
-            return GL_KEEP;
-        case stencil_op::zero:
-            return GL_ZERO;
-        case stencil_op::replace:
-            return GL_REPLACE;
-        case stencil_op::incr:
-            return GL_INCR;
-        case stencil_op::incr_wrap:
-            return GL_INCR_WRAP;
-        case stencil_op::decr:
-            return GL_DECR;
-        case stencil_op::decr_wrap:
-            return GL_DECR_WRAP;
-        case stencil_op::invert:
-            return GL_INVERT;
-    }
-    return 0;
+    return gl_stencil_op_map[(uint8_t)op];
 }
 
 static void handle_render_state(cmd_t* cmd)
 {
-    auto rs = cmd->render_state;
-    static render_state_t last_render_state = (render_state_t)0;
-    if (last_render_state != rs || true) {
-        last_render_state = rs;
+    // uint64_t rs_md5 = render_state_md5(cmd);
 
+    // NX_LOG_D("rs_md5 %u", rs_md5);
+
+    static decltype(cmd->render_state_md5) last_rs_md5 { 0 };
+
+    if (memcmp(&last_rs_md5, &(cmd->render_state_md5), sizeof(last_rs_md5))) {
+        memcpy(&last_rs_md5, &(cmd->render_state_md5), sizeof(last_rs_md5));
+        auto rs = cmd->render_state;
         auto should_cull_front = (rs & CULL_FRONT);
         auto should_cull_back = (rs & CULL_BACK);
         if (should_cull_front || should_cull_back) {
@@ -394,10 +433,15 @@ static void handle_render_state(cmd_t* cmd)
         glColorMask(write_r, write_g, write_b, write_a);
 
         glDepthMask((rs & WRITE_DEPTH) ? GL_TRUE : GL_FALSE);
-        glStencilMask(cmd->stencil_mask);
+
+        if (rs & WRITE_STENCIL)
+            glStencilMask(cmd->stencil_mask);
+        else
+            glStencilMask(0);
 
         glStencilFunc(gl_comparator(cmd->stencil_comparator), cmd->stencil_ref,
             cmd->stencil_mask);
+
         glStencilOp(gl_stencil_op(cmd->stencil_op_sfail),
             gl_stencil_op(cmd->stencil_op_dpfail),
             gl_stencil_op(cmd->stencil_op_dppass));
@@ -414,9 +458,11 @@ static void handle_render_state(cmd_t* cmd)
             glDisable(GL_STENCIL_TEST);
         }
 
-        if (rs & BLEND)
+        if (rs & BLEND) {
             glEnable(GL_BLEND);
-        else
+            glBlendFunc(blend_func_map[(uint8_t)(cmd->bf_src)],
+                blend_func_map[(uint8_t)(cmd->bf_dst)]);
+        } else
             glDisable(GL_BLEND);
     }
 }
@@ -488,31 +534,9 @@ void set_texture(texture_id_t tex_id, texture_t* tex)
     cmd_builder.textures[tex_id] = tex;
 }
 
-static GLuint blend_func_map[] = {
-    GL_SRC_ALPHA,
-    GL_ONE_MINUS_SRC_ALPHA,
-    GL_ONE,
-    GL_ZERO,
-    GL_SRC_COLOR,
-    GL_ONE_MINUS_SRC_COLOR,
-    GL_DST_COLOR,
-    GL_ONE_MINUS_DST_COLOR,
-    GL_DST_ALPHA,
-    GL_ONE_MINUS_DST_ALPHA,
-};
-
-static void handle_blend_func(cmd_t* cmd)
-{
-    if (cmd->render_state & BLEND) {
-        glBlendFunc(blend_func_map[(uint8_t)(cmd->bf_src)],
-            blend_func_map[(uint8_t)(cmd->bf_dst)]);
-    }
-}
-
 static void handle_cmd_draw_array(cmd_t* cmd)
 {
     handle_render_state(cmd);
-    handle_blend_func(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     vertex_layout_active(cmd->vbo->layout);
     program_active(cmd);
@@ -522,7 +546,6 @@ static void handle_cmd_draw_array(cmd_t* cmd)
 static void handle_cmd_draw_element(cmd_t* cmd)
 {
     handle_render_state(cmd);
-    handle_blend_func(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd->ibo->name);
     vertex_layout_active(cmd->vbo->layout);
