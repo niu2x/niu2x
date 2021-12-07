@@ -122,7 +122,7 @@ struct NXAPI program_uniform_info_t {
 };
 
 struct NXAPI program_t : object_t {
-    struct program_uniform_info_t uniforms[limits::max_uniform];
+    program_uniform_info_t uniforms[limits::max_uniform];
     int uniforms_size;
     GLuint name;
 };
@@ -254,7 +254,9 @@ NXAPI void set_clear_color(color_t color);
 NXAPI void clear(layer_t layer);
 NXAPI void draw_array(layer_t layer, uint32_t start, uint32_t count);
 NXAPI void draw_element(layer_t layer, uint32_t start, uint32_t count);
+
 NXAPI void draw_texture(layer_t layer, texture_t* texture);
+NXAPI void draw_mesh(layer_t layer, mesh_t*);
 
 NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
 NXAPI void set_indice_buffer(indice_buffer_t* vbo);

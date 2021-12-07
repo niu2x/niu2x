@@ -326,7 +326,6 @@ static void update(double dt)
     gfx::set_render_state(render_state & (~gfx::DEPTH_TEST));
     gfx::set_program(ambient_program);
 
-    gfx::set_texture(0, mesh->texture);
     gfx::set_blend_func(gfx::blend::src_alpha, gfx::blend::one_minus_src_alpha);
 
     gfx::set_model_transform(math::identity_mat4x4);
@@ -354,9 +353,10 @@ static void update(double dt)
         gfx::set_render_state((render_state) & (~gfx::DEPTH_TEST));
         gfx::set_program(ambient_program);
         gfx::set_model_transform(this_model);
-        gfx::set_vertex_buffer(mesh->vb);
-        gfx::set_indice_buffer(mesh->ib);
-        gfx::draw_element(1, 0, mesh->ib->size);
+        // gfx::set_vertex_buffer(mesh->vb);
+        // gfx::set_indice_buffer(mesh->ib);
+        // gfx::draw_element(1, 0, mesh->ib->size);
+        gfx::draw_mesh(1, mesh);
     }
     gfx::end();
 
@@ -377,9 +377,7 @@ static void update(double dt)
     gfx::set_render_state((render_state));
     gfx::set_program(program000);
     gfx::set_model_transform(this_model);
-    gfx::set_vertex_buffer(mesh->vb);
-    gfx::set_indice_buffer(mesh->ib);
-    gfx::draw_element(0, 0, mesh->ib->size);
+    gfx::draw_mesh(0, mesh);
 
     // gfx::draw_texture(0, tex);
 

@@ -47,4 +47,12 @@ void draw_texture(layer_t layer, texture_t* texture)
     end();
 }
 
+void draw_mesh(layer_t layer, mesh_t* mesh)
+{
+    set_indice_buffer(mesh->ib);
+    set_vertex_buffer(mesh->vb);
+    set_texture(0, mesh->texture);
+    draw_element(layer, 0, mesh->ib->size);
+}
+
 } // namespace nx::gfx
