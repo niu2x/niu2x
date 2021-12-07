@@ -99,6 +99,10 @@ void printf(int x, int y, const char* fmt, ...)
 
     mat4x4 model, view, projection;
 
+    math::mat4x4_identity(model);
+    math::mat4x4_identity(view);
+    math::mat4x4_identity(projection);
+
     int window_width, window_height;
     window_size(&window_width, &window_height);
 
@@ -121,7 +125,7 @@ void printf(int x, int y, const char* fmt, ...)
             create_vertex_buffer(vertex_layout_build(vertex_attr_type::position,
                                      vertex_attr_type::uv),
                 item.second.size() / 6, item.second.data(), true));
-        draw_element(0, 0, item.second.size() >> 2);
+        draw_element(7, 0, item.second.size() >> 2);
     }
 
     end();

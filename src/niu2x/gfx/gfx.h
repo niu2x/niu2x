@@ -77,17 +77,17 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags);
 
 extern double now_seconds;
 
-struct framebuffer_t : object_t {
-    GLuint name;
-    GLuint stencil_depth;
-    int width, height;
-    texture_t* texture;
-};
+// struct framebuffer_t : object_t {
+//     GLuint name;
+//     GLuint stencil_depth;
+//     int width, height;
+//     texture_t* texture;
+// };
 
 void render_setup();
 void render_cleanup();
 
-framebuffer_t* create_framebuffer(int w, int h, texture_t* texture);
+framebuffer_t* create_framebuffer(texture_t* texture);
 
 } // namespace nx::gfx
 

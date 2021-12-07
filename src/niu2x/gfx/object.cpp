@@ -66,12 +66,10 @@ static void destroy_framebuffer(framebuffer_t* obj)
     destroy_object(framebuffer_freelist, obj);
 }
 
-framebuffer_t* create_framebuffer(int w, int h, texture_t* texture)
+framebuffer_t* create_framebuffer(texture_t* texture)
 {
     auto* obj = (create_object(framebuffer_freelist, framebuffer));
-    obj->texture = texture;
-    obj->width = texture->width;
-    obj->height = texture->height;
+
     glGenFramebuffers(1, &(obj->name));
     glBindFramebuffer(GL_FRAMEBUFFER, obj->name);
 
@@ -81,7 +79,8 @@ framebuffer_t* create_framebuffer(int w, int h, texture_t* texture)
 
     glGenRenderbuffers(1, &(obj->stencil_depth));
     glBindRenderbuffer(GL_RENDERBUFFER, obj->stencil_depth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+    glRenderbufferStorage(
+        GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, texture->width, texture->height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
         GL_RENDERBUFFER, obj->stencil_depth);
 
@@ -258,6 +257,11 @@ static void destroy_shader(GLuint name) { glDeleteShader(name); }
 
 static void destroy_texture(texture_t* obj)
 {
+    if (obj->fb) {
+        destroy(obj->fb);
+        obj->fb = nullptr;
+    }
+
     glDeleteTextures(1, &(obj->name));
     destroy_object(texture_freelist, obj);
 }
@@ -510,11 +514,19 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
     obj->width = w;
     obj->height = h;
     obj->pf = pf;
+    obj->fb = nullptr;
     NX_CHECK_GL_ERROR();
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
     return obj;
+}
+
+NXAPI framebuffer_t* texture_2d_framebuffer(texture_t* obj)
+{
+    if (obj->fb == nullptr)
+        obj->fb = create_framebuffer(obj);
+    return obj->fb;
 }
 
 } // namespace nx::gfx

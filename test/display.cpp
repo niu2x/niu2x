@@ -295,8 +295,6 @@ static void setup()
     uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };
 
     floor_ib = gfx::create_indice_buffer(6, floor_indices);
-
-    gfx::set_view(0, tex);
 }
 
 static void cleanup()
@@ -318,6 +316,7 @@ static void update(double dt)
     math::mat4x4_scale_aniso(this_model, scale, scale, scale);
 
     gfx::begin();
+    gfx::set_view(1, tex);
 
     gfx::reset();
     gfx::set_render_state(render_state);
@@ -333,7 +332,7 @@ static void update(double dt)
     gfx::set_model_transform(math::identity_mat4x4);
     gfx::set_vertex_buffer(floor_vb);
     gfx::set_indice_buffer(floor_ib);
-    gfx::draw_element(1, 0, 6);
+    gfx::draw_element(0, 0, 6);
 
     gfx::begin();
     {
@@ -357,7 +356,7 @@ static void update(double dt)
         gfx::set_model_transform(this_model);
         gfx::set_vertex_buffer(mesh->vb);
         gfx::set_indice_buffer(mesh->ib);
-        gfx::draw_element(0, 0, mesh->ib->size);
+        gfx::draw_element(1, 0, mesh->ib->size);
     }
     gfx::end();
 
@@ -371,7 +370,7 @@ static void update(double dt)
         gfx::set_model_transform(math::identity_mat4x4);
         gfx::set_vertex_buffer(floor_vb);
         gfx::set_indice_buffer(floor_ib);
-        gfx::draw_element(1, 0, 6);
+        gfx::draw_element(0, 0, 6);
     }
     gfx::end();
 
@@ -380,9 +379,9 @@ static void update(double dt)
     gfx::set_model_transform(this_model);
     gfx::set_vertex_buffer(mesh->vb);
     gfx::set_indice_buffer(mesh->ib);
-    gfx::draw_element(1, 0, mesh->ib->size);
+    gfx::draw_element(0, 0, mesh->ib->size);
 
-    // gfx::draw_texture(2, tex);
+    // gfx::draw_texture(0, tex);
 
     gfx::end();
 }

@@ -73,25 +73,12 @@ static constexpr int renderlayers_count = 16;
 
 static struct renderlayer_t {
     list_head cmd_list;
-    framebuffer_t* framebuffer;
+    texture_t* view;
 } layers[renderlayers_count];
 
-void render_setup()
-{
-    for (auto& it : layers) {
-        it.framebuffer = nullptr;
-    }
-}
+void render_setup() { }
 
-void render_cleanup()
-{
-    for (auto& it : layers) {
-        if (it.framebuffer) {
-            destroy(it.framebuffer);
-            it.framebuffer = nullptr;
-        }
-    }
-}
+void render_cleanup() { }
 
 static void push()
 {
@@ -119,6 +106,7 @@ void begin()
                 &(layers[i].cmd_list),
                 &(layers[i].cmd_list),
             };
+            layers[i].view = nullptr;
         }
     }
     push();
@@ -141,15 +129,15 @@ void end()
         {
             environment_t* env = nullptr;
             cmd_t* cmd;
-            for (int i = 0; i < renderlayers_count; i++) {
+            for (int i = renderlayers_count - 1; i >= 0; --i) {
 
-                glBindFramebuffer(GL_FRAMEBUFFER,
-                    layers[i].framebuffer ? layers[i].framebuffer->name : 0);
-
-                if (layers[i].framebuffer) {
-                    glViewport(0, 0, layers[i].framebuffer->width,
-                        layers[i].framebuffer->height);
+                auto& layer = layers[i];
+                if (layer.view) {
+                    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+                        texture_2d_framebuffer(layer.view)->name);
+                    glViewport(0, 0, layer.view->width, layer.view->height);
                 } else {
+                    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
                     glViewport(0, 0, 800, 600);
                 }
 
@@ -179,12 +167,10 @@ void end()
                     }
                 }
 
-                if (layers[i].framebuffer) {
-                    glBindTexture(
-                        GL_TEXTURE_2D, layers[i].framebuffer->texture->name);
+                if (layer.view) {
+                    glBindTexture(GL_TEXTURE_2D, layer.view->name);
                     glGenerateMipmap(GL_TEXTURE_2D);
                     glBindTexture(GL_TEXTURE_2D, 0);
-                    // NX_LOG_D("clear tex");
                 }
             }
             NX_CHECK_GL_ERROR();
@@ -572,15 +558,7 @@ void set_projection_transform(const mat4x4 m)
 void set_view(layer_t layer, texture_t* texture)
 {
     auto& render_layer = layers[layer];
-    if (render_layer.framebuffer) {
-        destroy(render_layer.framebuffer);
-        render_layer.framebuffer = nullptr;
-    }
-
-    if (texture) {
-        render_layer.framebuffer
-            = create_framebuffer(texture->width, texture->height, texture);
-    }
+    render_layer.view = texture;
 }
 
 void set_stencil_func(comparator cmp, uint8_t ref, uint8_t mask)

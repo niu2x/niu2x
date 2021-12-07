@@ -48,11 +48,17 @@ enum class NXAPI pixel_format {
     r8,
 };
 
+struct framebuffer_t : object_t {
+    GLuint name;
+    GLuint stencil_depth;
+};
+
 struct NXAPI texture_t : object_t {
     GLuint name;
     int width;
     int height;
     pixel_format pf;
+    framebuffer_t* fb;
 };
 
 struct NXAPI font_t : object_t {
@@ -156,6 +162,8 @@ NXAPI void texture_2d_update_region(
     texture_t* self, int x, int y, int w, int h, const void* data);
 
 NXAPI texture_t* create_texture_2d_from_file(const char* pathname);
+
+NXAPI framebuffer_t* texture_2d_framebuffer(texture_t* obj);
 
 enum NXAPI mesh_load_flags {
     MESH_AUTO_CENTER = 1 << 0,
