@@ -102,9 +102,19 @@ static struct renderlayer_t {
     texture_t* view;
 } layers[renderlayers_count];
 
-void render_setup() { }
+static GLuint vao;
 
-void render_cleanup() { }
+void render_setup()
+{
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+}
+
+void render_cleanup()
+{
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+}
 
 static void push()
 {
@@ -126,8 +136,6 @@ static void pop()
 void begin()
 {
     if (builders_size == 1) {
-
-        auto_destroy_objects();
 
         environments_size = 0;
         next_cmd_idx = 0;
@@ -161,6 +169,7 @@ static void draw_layer(renderlayer_t& layer)
         glBindFramebuffer(
             GL_DRAW_FRAMEBUFFER, texture_2d_framebuffer(layer.view)->name);
         glViewport(0, 0, layer.view->width, layer.view->height);
+
     } else {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glViewport(0, 0, window_size[0], window_size[1]);
@@ -201,12 +210,13 @@ static void draw_layer(renderlayer_t& layer)
 
 static void draw_all()
 {
-
+    glBindVertexArray(vao);
     for (int i = renderlayers_count - 1; i >= 0; --i) {
 
         auto& layer = layers[i];
         draw_layer(layer);
     }
+    glBindVertexArray(0);
     NX_CHECK_GL_ERROR();
 }
 
@@ -216,6 +226,7 @@ void end()
 
     if (builders_size == 1) {
         draw_all();
+        auto_destroy_objects();
     }
 }
 
@@ -303,7 +314,6 @@ static void vertex_layout_active(vertex_layout_t layout)
     size_t offset = 0;
     for (int i = 0; i < 16; i++, layout >>= 4) {
         auto attr = (vertex_attr_type)(layout & 0xF);
-
         if (attr != vertex_attr_type::nil) {
             glEnableVertexAttribArray(i);
         } else {
@@ -356,7 +366,6 @@ void draw_element(layer_t layer, uint32_t start, uint32_t count)
     auto* cmd = &cmds[next_cmd_idx++];
     *cmd = current_builder->cmd;
     list_add_tail(&(cmd->list), &(layers[layer].cmd_list));
-    NX_CHECK_GL_ERROR();
 }
 
 static GLuint gl_comparator_map[] = {
