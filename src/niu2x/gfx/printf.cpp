@@ -22,7 +22,7 @@ void printf(int x, int y, const char* fmt, ...)
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
     std::u32string u32sz = conv.from_bytes(buffer);
 
-    std::map<texture_t*, std::vector<float>> vdmap;
+    std::map<texture_t*, std::vector<float>> vertex_data_map;
 
     int pen_x = 0;
     int pen_y = 0;
@@ -35,39 +35,40 @@ void printf(int x, int y, const char* fmt, ...)
     while (*ptr) {
         auto ci = font_char_info(default_font, *ptr);
 
-        if (vdmap.find(ci.texture) == vdmap.end()) {
-            vdmap[ci.texture] = std::vector<float>();
+        if (vertex_data_map.find(ci.texture) == vertex_data_map.end()) {
+            vertex_data_map[ci.texture] = std::vector<float>();
         }
 
-        vdmap[ci.texture].emplace_back(pen_x + ci.x);
-        vdmap[ci.texture].emplace_back(pen_y + ci.y);
-        vdmap[ci.texture].emplace_back(0);
-        vdmap[ci.texture].emplace_back(ci.uv_x);
-        vdmap[ci.texture].emplace_back(ci.uv_y + ci.uv_h);
-        vdmap[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(pen_x + ci.x);
+        vertex_data_map[ci.texture].emplace_back(pen_y + ci.y);
+        vertex_data_map[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_x);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_y + ci.uv_h);
+        vertex_data_map[ci.texture].emplace_back(0);
 
-        vdmap[ci.texture].emplace_back(pen_x + ci.x + ci.w);
-        vdmap[ci.texture].emplace_back(pen_y + ci.y);
-        vdmap[ci.texture].emplace_back(0);
-        vdmap[ci.texture].emplace_back(ci.uv_x + ci.uv_w);
-        vdmap[ci.texture].emplace_back(ci.uv_y + ci.uv_h);
-        vdmap[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(pen_x + ci.x + ci.w);
+        vertex_data_map[ci.texture].emplace_back(pen_y + ci.y);
+        vertex_data_map[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_x + ci.uv_w);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_y + ci.uv_h);
+        vertex_data_map[ci.texture].emplace_back(0);
 
-        vdmap[ci.texture].emplace_back(pen_x + ci.x + ci.w);
-        vdmap[ci.texture].emplace_back(pen_y + ci.y + ci.h);
-        vdmap[ci.texture].emplace_back(0);
-        vdmap[ci.texture].emplace_back(ci.uv_x + ci.uv_w);
-        vdmap[ci.texture].emplace_back(ci.uv_y);
-        vdmap[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(pen_x + ci.x + ci.w);
+        vertex_data_map[ci.texture].emplace_back(pen_y + ci.y + ci.h);
+        vertex_data_map[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_x + ci.uv_w);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_y);
+        vertex_data_map[ci.texture].emplace_back(0);
 
-        vdmap[ci.texture].emplace_back(pen_x + ci.x);
-        vdmap[ci.texture].emplace_back(pen_y + ci.y + ci.h);
-        vdmap[ci.texture].emplace_back(0);
-        vdmap[ci.texture].emplace_back(ci.uv_x);
-        vdmap[ci.texture].emplace_back(ci.uv_y);
-        vdmap[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(pen_x + ci.x);
+        vertex_data_map[ci.texture].emplace_back(pen_y + ci.y + ci.h);
+        vertex_data_map[ci.texture].emplace_back(0);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_x);
+        vertex_data_map[ci.texture].emplace_back(ci.uv_y);
+        vertex_data_map[ci.texture].emplace_back(0);
 
-        max_vertex_count = std::max(max_vertex_count, vdmap[ci.texture].size());
+        max_vertex_count
+            = std::max(max_vertex_count, vertex_data_map[ci.texture].size());
 
         if (*(ptr + 1))
             pen_x += ci.advance + font_kerning(default_font, *ptr, *(ptr + 1));
@@ -115,13 +116,18 @@ void printf(int x, int y, const char* fmt, ...)
 
     math::mat4x4_translate(model, x, y, 0);
 
-    for (auto& item : vdmap) {
+    auto layout
+        = vertex_layout_build(vertex_attr_type::position, vertex_attr_type::uv);
+
+    for (auto& item : vertex_data_map) {
         set_model_transform(model);
         set_texture(0, item.first);
-        set_vertex_buffer(
-            create_vertex_buffer(vertex_layout_build(vertex_attr_type::position,
-                                     vertex_attr_type::uv),
-                item.second.size() / 6, item.second.data(), true));
+
+        auto vertex_count = item.second.size() / 6;
+        auto vertex_data = item.second.data();
+        auto vb = create_vertex_buffer(
+            layout, vertex_count, vertex_data, true);
+        set_vertex_buffer(vb);
         draw_element(7, 0, item.second.size() >> 2);
     }
 
