@@ -76,7 +76,7 @@ void font_altas_cleanup(font_altas_t* self)
 static void font_altas_increase_page(font_altas_t* self)
 {
     NX_ASSERT(self->size < font_altas_t::PAGES_CAPACITY, "too many page");
-    self->pages[self->size++] = create_texture_2d(FONT_ALTAS_TEXTURE_SIZE,
+    self->pages[self->size++] = texture_create(FONT_ALTAS_TEXTURE_SIZE,
         FONT_ALTAS_TEXTURE_SIZE, pixel_format::r8, nullptr);
     self->cell_size = 0;
 }
@@ -133,7 +133,7 @@ static void font_altas_generate_glyph(font_altas_t* self, uint32_t code)
         memcpy(write_ptr, read_ptr, ci->w);
     }
 
-    texture_2d_update_region(self->pages[self->size - 1], xi * self->cell_edge,
+    texture_update_region(self->pages[self->size - 1], xi * self->cell_edge,
         yi * self->cell_edge, ci->w, ci->h, buffer.data());
     ci->page = self->size - 1;
 
@@ -191,7 +191,7 @@ void font_system_setup()
         = create_face(noto_scans_sc_regular, noto_scans_sc_regular_length);
 
     font_program
-        = create_program(font_program_source[0], font_program_source[1]);
+        = program_create(font_program_source[0], font_program_source[1]);
 }
 void font_system_cleanup()
 {

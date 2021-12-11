@@ -266,19 +266,19 @@ static void setup()
 
     gfx::set_clear_color(gfx::rgba(0, 0, 0, 0));
 
-    program = gfx::create_program(vert_shader, frag_shader);
-    program000 = gfx::create_program(vert_shader, frag_shader000);
+    program = gfx::program_create(vert_shader, frag_shader);
+    program000 = gfx::program_create(vert_shader, frag_shader000);
     ambient_program
-        = gfx::create_program(ambient_vert_shader, ambient_frag_shader);
+        = gfx::program_create(ambient_vert_shader, ambient_frag_shader);
 
     gfx::set_projection_transform(projection);
     gfx::set_view_transform(view);
 
-    mesh = gfx::create_mesh_from_file(
+    mesh = gfx::mesh_create_from_file(
         model_file.c_str(), 0, gfx::MESH_AUTO_CENTER);
-    mesh->texture = gfx::create_texture_2d_from_file(texture_file.c_str());
+    mesh->texture = gfx::texture_create_from_file(texture_file.c_str());
 
-    tex = gfx::create_texture_2d(2048, 2048, gfx::pixel_format::rgba8, 0);
+    tex = gfx::texture_create(2048, 2048, gfx::pixel_format::rgba8, 0);
 
     float floor_vertices[][9] = {
         { -100000, -100000, -0, 0, 0, 1, 0, 0, 0 },
@@ -287,14 +287,14 @@ static void setup()
         { 100000, -100000, -0, 0, 0, 1, 0, 0, 0 },
     };
 
-    floor_vb = gfx::create_vertex_buffer(
+    floor_vb = gfx::vertex_buffer_create(
         gfx::vertex_layout_build(gfx::vertex_attr_type::position,
             gfx::vertex_attr_type::normal, gfx::vertex_attr_type::uv),
         4, floor_vertices);
 
     uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };
 
-    floor_ib = gfx::create_indice_buffer(6, floor_indices);
+    floor_ib = gfx::indice_buffer_create(6, floor_indices);
 }
 
 static void cleanup()

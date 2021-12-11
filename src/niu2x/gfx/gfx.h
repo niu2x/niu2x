@@ -87,7 +87,7 @@ extern double now_seconds;
 void render_setup();
 void render_cleanup();
 
-framebuffer_t* create_framebuffer(texture_t* texture);
+framebuffer_t* framebuffer_create(texture_t* texture);
 
 } // namespace nx::gfx
 

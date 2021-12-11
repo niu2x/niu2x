@@ -147,29 +147,29 @@ NXAPI font_t* create_builtin_font(int font_size);
 NXAPI font_char_info_t font_char_info(font_t* self, uint32_t code);
 NXAPI int font_kerning(font_t* self, uint32_t left, uint32_t right);
 
-NXAPI vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
+NXAPI vertex_buffer_t* vertex_buffer_create(vertex_layout_t layout,
     uint32_t vertices_count, void* data = nullptr, bool auto_destroy = false);
 
-NXAPI indice_buffer_t* create_indice_buffer(
+NXAPI indice_buffer_t* indice_buffer_create(
     uint32_t indices_count, void* data = nullptr, bool auto_destroy = false);
 
-NXAPI program_t* create_program(const char* vert, const char* frag);
+NXAPI program_t* program_create(const char* vert, const char* frag);
 
-NXAPI texture_t* create_texture_2d(
+NXAPI texture_t* texture_create(
     int w, int h, pixel_format pf, const void* data);
 
-NXAPI void texture_2d_update_region(
+NXAPI void texture_update_region(
     texture_t* self, int x, int y, int w, int h, const void* data);
 
-NXAPI texture_t* create_texture_2d_from_file(const char* pathname);
+NXAPI texture_t* texture_create_from_file(const char* pathname);
 
-NXAPI framebuffer_t* texture_2d_framebuffer(texture_t* obj);
+NXAPI framebuffer_t* texture_framebuffer(texture_t* obj);
 
 enum NXAPI mesh_load_flags {
     MESH_AUTO_CENTER = 1 << 0,
 };
 
-NXAPI mesh_t* create_mesh_from_file(
+NXAPI mesh_t* mesh_create_from_file(
     const char* path, int idx = 0, int flags = 0);
 
 NXAPI void destroy(object_t*);

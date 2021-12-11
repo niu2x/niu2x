@@ -79,7 +79,7 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags)
     }
 
     mesh->vb
-        = create_vertex_buffer(vertex_layout, vertices_num, vertices.data());
+        = vertex_buffer_create(vertex_layout, vertices_num, vertices.data());
     auto faces_num = ai_mesh->mNumFaces;
 
     NX_LOG_D("mesh %s", file);
@@ -105,7 +105,7 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags)
         min_indice = std::min(min_indice, indices[i * 3 + 2]);
     }
 
-    mesh->ib = create_indice_buffer(faces_num * 3, indices.data());
+    mesh->ib = indice_buffer_create(faces_num * 3, indices.data());
 }
 
 } // namespace nx::gfx

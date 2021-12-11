@@ -167,7 +167,7 @@ static void draw_layer(renderlayer_t& layer)
 
     if (layer.view) {
         glBindFramebuffer(
-            GL_DRAW_FRAMEBUFFER, texture_2d_framebuffer(layer.view)->name);
+            GL_DRAW_FRAMEBUFFER, texture_framebuffer(layer.view)->name);
         glViewport(0, 0, layer.view->width, layer.view->height);
 
     } else {

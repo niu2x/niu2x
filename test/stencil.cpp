@@ -126,12 +126,12 @@ static void shadow_transform(math::mat4x4 k)
 
 static void setup()
 {
-    mesh = gfx::create_mesh_from_file(
+    mesh = gfx::mesh_create_from_file(
         "../test/Aya.obj", 0, gfx::MESH_AUTO_CENTER);
-    mesh->texture = gfx::create_texture_2d_from_file("../test/Aya.jpg");
+    mesh->texture = gfx::texture_create_from_file("../test/Aya.jpg");
 
-    program_ambient = gfx::create_program(ambient_vert, ambient_frag);
-    program_bdsf = gfx::create_program(bdsf_vert, bdsf_frag);
+    program_ambient = gfx::program_create(ambient_vert, ambient_frag);
+    program_bdsf = gfx::program_create(bdsf_vert, bdsf_frag);
 
     gfx::set_clear_color(gfx::rgba(0, 0, 0, 0));
 
@@ -170,21 +170,21 @@ static void setup()
         { 200, -200, -0, 0, 0, 1, 1, 0, 0 },
     };
 
-    floor_vb = gfx::create_vertex_buffer(
+    floor_vb = gfx::vertex_buffer_create(
         gfx::vertex_layout_build(gfx::vertex_attr_type::position,
             gfx::vertex_attr_type::normal, gfx::vertex_attr_type::uv),
         4, floor_vertices);
 
     uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };
 
-    floor_ib = gfx::create_indice_buffer(6, floor_indices);
+    floor_ib = gfx::indice_buffer_create(6, floor_indices);
 
     math::mat4x4_identity(floor_model);
 
     math::mat4x4_dup(shadow_model, model);
     shadow_transform(shadow_model);
 
-    floor_tex = gfx::create_texture_2d_from_file("../test/floor-stone.jpg");
+    floor_tex = gfx::texture_create_from_file("../test/floor-stone.jpg");
 }
 static void cleanup()
 {

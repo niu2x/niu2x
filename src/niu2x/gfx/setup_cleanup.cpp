@@ -58,7 +58,7 @@ void setup()
         { 0.5, 0.5, 0, 1, 0, 0 },
         { -0.5, 0.5, 0, 0, 0, 0 },
     };
-    sprite_vb = create_vertex_buffer(sprite_vl, 4, vertices_data);
+    sprite_vb = vertex_buffer_create(sprite_vl, 4, vertices_data);
 
     uint32_t indice_data[] = {
         0,
@@ -68,10 +68,10 @@ void setup()
         2,
         3,
     };
-    sprite_ib = create_indice_buffer(6, indice_data);
+    sprite_ib = indice_buffer_create(6, indice_data);
 
     sprite_program
-        = create_program(sprite_program_source[0], sprite_program_source[1]);
+        = program_create(sprite_program_source[0], sprite_program_source[1]);
 
     render_setup();
 }

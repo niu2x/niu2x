@@ -35,7 +35,7 @@ struct object_type {
 
 } // namespace
 
-#define create_object(freelist, type_t)                                        \
+#define object_create(freelist, type_t)                                        \
     {                                                                          \
         auto id = freelist.alloc();                                            \
         NX_ASSERT(id != freelist.nil, "too many object");                      \
@@ -46,7 +46,7 @@ struct object_type {
         obj;                                                                   \
     }
 
-#define destroy_object(freelist, obj)                                          \
+#define object_destroy(freelist, obj)                                          \
     freelist.free(obj->id);                                                    \
     list_del_init(&(obj->list));
 
@@ -59,16 +59,16 @@ static freelist<font_t, 256> font_freelist;
 static freelist<mesh_t, 1024> mesh_freelist;
 static NX_LIST_HEAD(auto_destroy_head);
 
-static void destroy_framebuffer(framebuffer_t* obj)
+static void framebuffer_destroy(framebuffer_t* obj)
 {
     glDeleteRenderbuffers(1, &(obj->stencil_depth));
     glDeleteFramebuffers(1, &(obj->name));
-    destroy_object(framebuffer_freelist, obj);
+    object_destroy(framebuffer_freelist, obj);
 }
 
-framebuffer_t* create_framebuffer(texture_t* texture)
+framebuffer_t* framebuffer_create(texture_t* texture)
 {
-    auto* obj = (create_object(framebuffer_freelist, framebuffer));
+    auto* obj = (object_create(framebuffer_freelist, framebuffer));
 
     glGenFramebuffers(1, &(obj->name));
     glBindFramebuffer(GL_FRAMEBUFFER, obj->name);
@@ -127,9 +127,9 @@ size_t vertex_sizeof(vertex_layout_t layout)
     return size;
 }
 
-mesh_t* create_mesh_from_file(const char* path, int idx, int flags)
+mesh_t* mesh_create_from_file(const char* path, int idx, int flags)
 {
-    auto* obj = (create_object(mesh_freelist, mesh));
+    auto* obj = (object_create(mesh_freelist, mesh));
     obj->texture = 0;
     mesh_init_from_file(obj, path, idx, flags);
     return obj;
@@ -139,10 +139,10 @@ mesh_t* create_mesh_from_file(const char* path, int idx, int flags)
 
 // }
 
-vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
+vertex_buffer_t* vertex_buffer_create(vertex_layout_t layout,
     uint32_t vertices_count, void* data, bool auto_destroy)
 {
-    auto* obj = (create_object(vertex_buffer_freelist, vertex_buffer));
+    auto* obj = (object_create(vertex_buffer_freelist, vertex_buffer));
     obj->size = vertices_count;
     glGenBuffers(1, &(obj->name));
     obj->layout = layout;
@@ -161,7 +161,7 @@ vertex_buffer_t* create_vertex_buffer(vertex_layout_t layout,
 
 font_t* create_builtin_font(int font_size)
 {
-    auto* obj = (create_object(font_freelist, font));
+    auto* obj = (object_create(font_freelist, font));
     obj->private_data = NX_ALLOC(struct font::font_altas_t, 1);
     font::font_altas_setup((font::font_altas_t*)(obj->private_data), font_size);
 
@@ -175,11 +175,11 @@ void auto_destroy_objects() {
     }
 }
 
-indice_buffer_t* create_indice_buffer(
+indice_buffer_t* indice_buffer_create(
     uint32_t indices_count, void* data, bool auto_destroy)
 {
 
-    auto* obj = (create_object(indice_buffer_freelist, indice_buffer));
+    auto* obj = (object_create(indice_buffer_freelist, indice_buffer));
     obj->size = indices_count;
 
     if (auto_destroy) {
@@ -196,16 +196,16 @@ indice_buffer_t* create_indice_buffer(
     return obj;
 }
 
-static void destroy_indice_buffer(indice_buffer_t* obj)
+static void indice_buffer_destroy(indice_buffer_t* obj)
 {
     glDeleteBuffers(1, &(obj->name));
-    destroy_object(indice_buffer_freelist, obj);
+    object_destroy(indice_buffer_freelist, obj);
 }
 
-static void destroy_vertex_buffer(vertex_buffer_t* obj)
+static void vertex_buffer_destroy(vertex_buffer_t* obj)
 {
     glDeleteBuffers(1, &(obj->name));
-    destroy_object(vertex_buffer_freelist, obj);
+    object_destroy(vertex_buffer_freelist, obj);
 }
 
 font_char_info_t font_char_info(font_t* self, uint32_t code)
@@ -234,7 +234,7 @@ int font_kerning(font_t* self, uint32_t left, uint32_t right)
     return font::font_altas_kerning(font_altas, left, right);
 }
 
-static GLuint create_shader(GLenum shader_type, const char* source_code)
+static GLuint shader_create(GLenum shader_type, const char* source_code)
 {
     auto name = glCreateShader(shader_type);
     glShaderSource(name, 1, &source_code, nullptr);
@@ -253,9 +253,9 @@ static GLuint create_shader(GLenum shader_type, const char* source_code)
     NX_CHECK_GL_ERROR();
     return name;
 }
-static void destroy_shader(GLuint name) { glDeleteShader(name); }
+static void shader_destroy(GLuint name) { glDeleteShader(name); }
 
-static void destroy_texture(texture_t* obj)
+static void texture_destroy(texture_t* obj)
 {
     if (obj->fb) {
         destroy(obj->fb);
@@ -263,17 +263,17 @@ static void destroy_texture(texture_t* obj)
     }
 
     glDeleteTextures(1, &(obj->name));
-    destroy_object(texture_freelist, obj);
+    object_destroy(texture_freelist, obj);
 }
 
-static void destroy_font(font_t* obj)
+static void font_destroy(font_t* obj)
 {
     font::font_altas_cleanup((font::font_altas_t*)(obj->private_data));
     NX_FREE(obj->private_data);
-    destroy_object(font_freelist, obj);
+    object_destroy(font_freelist, obj);
 }
 
-static GLuint create_program(GLuint vert, GLuint frag)
+static GLuint program_create(GLuint vert, GLuint frag)
 {
     auto name = glCreateProgram();
     glAttachShader(name, vert);
@@ -295,24 +295,24 @@ static GLuint create_program(GLuint vert, GLuint frag)
     NX_CHECK_GL_ERROR();
     return name;
 }
-static void destroy_program(GLuint name) { glDeleteProgram(name); }
+static void program_destroy(GLuint name) { glDeleteProgram(name); }
 
-program_t* create_program(const char* vert, const char* frag)
+program_t* program_create(const char* vert, const char* frag)
 {
 
-    auto vert_name = create_shader(GL_VERTEX_SHADER, vert);
+    auto vert_name = shader_create(GL_VERTEX_SHADER, vert);
     NX_ASSERT(vert_name != 0, "vert compile fail");
 
-    auto frag_name = create_shader(GL_FRAGMENT_SHADER, frag);
+    auto frag_name = shader_create(GL_FRAGMENT_SHADER, frag);
     NX_ASSERT(frag_name != 0, "frag compile fail");
 
-    auto progame_name = create_program(vert_name, frag_name);
+    auto progame_name = program_create(vert_name, frag_name);
     NX_ASSERT(progame_name != 0, "program link fail");
 
-    destroy_shader(vert_name);
-    destroy_shader(frag_name);
+    shader_destroy(vert_name);
+    shader_destroy(frag_name);
 
-    auto* obj = (create_object(program_freelist, program));
+    auto* obj = (object_create(program_freelist, program));
     obj->name = progame_name;
 
     GLint uniforms_size;
@@ -343,20 +343,20 @@ GLint program_uniform_location(struct program_t* obj, const char* name)
     return -1;
 }
 
-static void destroy_program(program_t* obj)
+static void program_destroy(program_t* obj)
 {
 
-    destroy_program(obj->name);
-    destroy_object(program_freelist, obj);
+    program_destroy(obj->name);
+    object_destroy(program_freelist, obj);
 }
 
-static void destroy_mesh(mesh_t* obj)
+static void mesh_destroy(mesh_t* obj)
 {
     destroy(obj->vb);
     destroy(obj->ib);
     if (obj->texture)
         destroy(obj->texture);
-    destroy_object(mesh_freelist, obj);
+    object_destroy(mesh_freelist, obj);
 }
 
 void destroy(object_t* obj)
@@ -368,13 +368,13 @@ void destroy(object_t* obj)
     }
 
     switch (obj->type) {
-        CASE(vertex_buffer, vertex_buffer_t, destroy_vertex_buffer)
-        CASE(indice_buffer, indice_buffer_t, destroy_indice_buffer)
-        CASE(program, program_t, destroy_program)
-        CASE(texture, texture_t, destroy_texture)
-        CASE(font, font_t, destroy_font)
-        CASE(mesh, mesh_t, destroy_mesh)
-        CASE(framebuffer, framebuffer_t, destroy_framebuffer)
+        CASE(vertex_buffer, vertex_buffer_t, vertex_buffer_destroy)
+        CASE(indice_buffer, indice_buffer_t, indice_buffer_destroy)
+        CASE(program, program_t, program_destroy)
+        CASE(texture, texture_t, texture_destroy)
+        CASE(font, font_t, font_destroy)
+        CASE(mesh, mesh_t, mesh_destroy)
+        CASE(framebuffer, framebuffer_t, framebuffer_destroy)
     }
 
 #undef CASE
@@ -405,7 +405,7 @@ vertex_layout_t vertex_layout_build(vertex_attr_type a0, vertex_attr_type a1,
         | (((vertex_layout_t)(a15)&0xF) << (4 * 15));
 }
 
-texture_t* create_texture_2d_from_file(const char* pathname)
+texture_t* texture_create_from_file(const char* pathname)
 {
     auto file = fs::read_file(pathname);
     int w, h;
@@ -432,13 +432,13 @@ texture_t* create_texture_2d_from_file(const char* pathname)
         }
     }
 
-    auto obj = create_texture_2d(w, h, pf, image);
+    auto obj = texture_create(w, h, pf, image);
     stbi_image_free(image);
 
     return obj;
 }
 
-void texture_2d_update_region(
+void texture_update_region(
     texture_t* obj, int x, int y, int w, int h, const void* data)
 {
 
@@ -471,9 +471,9 @@ void texture_2d_update_region(
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
+texture_t* texture_create(int w, int h, pixel_format pf, const void* data)
 {
-    auto* obj = (create_object(texture_freelist, texture));
+    auto* obj = (object_create(texture_freelist, texture));
     glGenTextures(1, &(obj->name));
     glBindTexture(GL_TEXTURE_2D, obj->name);
     switch (pf) {
@@ -522,10 +522,10 @@ texture_t* create_texture_2d(int w, int h, pixel_format pf, const void* data)
     return obj;
 }
 
-NXAPI framebuffer_t* texture_2d_framebuffer(texture_t* obj)
+NXAPI framebuffer_t* texture_framebuffer(texture_t* obj)
 {
     if (obj->fb == nullptr)
-        obj->fb = create_framebuffer(obj);
+        obj->fb = framebuffer_create(obj);
     return obj->fb;
 }
 

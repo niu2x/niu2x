@@ -112,10 +112,10 @@ static void setup()
     };
     // clang-format on
     gfx::set_clear_color(gfx::rgba(0, 0, 0, 255));
-    vbo = gfx::create_vertex_buffer(vertex_layout, 4, vertices);
-    ibo = gfx::create_indice_buffer(6, indices);
+    vbo = gfx::vertex_buffer_create(vertex_layout, 4, vertices);
+    ibo = gfx::indice_buffer_create(6, indices);
 
-    program = gfx::create_program(vert_shader, frag_shader);
+    program = gfx::program_create(vert_shader, frag_shader);
 
     gfx::set_projection_transform(projection);
     gfx::set_view_transform(view);
