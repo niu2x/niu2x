@@ -28,7 +28,6 @@ void printf(int x, int y, const char* fmt, ...)
     int pen_y = 0;
 
     const char32_t* ptr = u32sz.c_str();
-    ;
 
     size_t max_vertex_count = 0;
 
