@@ -97,27 +97,27 @@ size_t vertex_sizeof(vertex_layout_t layout)
 {
     size_t size = 0;
     for (int i = 0; i < 16; i++, layout >>= 4) {
-        auto attr = (vertex_attr_type)(layout & 0xF);
+        auto attr = (vertex_attr)(layout & 0xF);
         switch (attr) {
-            case vertex_attr_type::nil: {
+            case vertex_attr::nil: {
                 break;
             }
-            case vertex_attr_type::position: {
+            case vertex_attr::position: {
                 // vec3
                 size += 3 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr_type::color: {
+            case vertex_attr::color: {
                 // vec4
                 size += 4 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr_type::normal: {
+            case vertex_attr::normal: {
                 // vec3
                 size += 3 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr_type::uv: {
+            case vertex_attr::uv: {
                 // vec3
                 size += 3 * sizeof(GLfloat);
                 break;
@@ -380,12 +380,11 @@ void destroy(object_t* obj)
 #undef CASE
 }
 
-vertex_layout_t vertex_layout_build(vertex_attr_type a0, vertex_attr_type a1,
-    vertex_attr_type a2, vertex_attr_type a3, vertex_attr_type a4,
-    vertex_attr_type a5, vertex_attr_type a6, vertex_attr_type a7,
-    vertex_attr_type a8, vertex_attr_type a9, vertex_attr_type a10,
-    vertex_attr_type a11, vertex_attr_type a12, vertex_attr_type a13,
-    vertex_attr_type a14, vertex_attr_type a15)
+vertex_layout_t vertex_layout(vertex_attr a0, vertex_attr a1, vertex_attr a2,
+    vertex_attr a3, vertex_attr a4, vertex_attr a5, vertex_attr a6,
+    vertex_attr a7, vertex_attr a8, vertex_attr a9, vertex_attr a10,
+    vertex_attr a11, vertex_attr a12, vertex_attr a13, vertex_attr a14,
+    vertex_attr a15)
 {
     return (((vertex_layout_t)(a0)&0xF) << (4 * 0))
         | (((vertex_layout_t)(a1)&0xF) << (4 * 1))

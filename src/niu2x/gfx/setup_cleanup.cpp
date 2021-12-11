@@ -50,8 +50,7 @@ void setup()
 
     default_font = create_builtin_font(24);
 
-    auto sprite_vl
-        = vertex_layout_build(vertex_attr_type::position, vertex_attr_type::uv);
+    auto sprite_vl = vertex_layout(vertex_attr::position, vertex_attr::uv);
     float vertices_data[4][6] = {
         { -0.5, -0.5, 0, 0, 1, 0 },
         { 0.5, -0.5, 0, 1, 1, 0 },

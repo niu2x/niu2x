@@ -116,8 +116,7 @@ void printf(int x, int y, const char* fmt, ...)
 
     math::mat4x4_translate(model, x, y, 0);
 
-    auto layout
-        = vertex_layout_build(vertex_attr_type::position, vertex_attr_type::uv);
+    auto layout = vertex_layout(vertex_attr::position, vertex_attr::uv);
 
     for (auto& item : vertex_data_map) {
         set_model_transform(model);

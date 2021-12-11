@@ -24,8 +24,8 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags)
         "not TRIANGLE mesh: %d", ai_mesh->mPrimitiveTypes);
 
     auto vertices_num = ai_mesh->mNumVertices;
-    auto vertex_layout = vertex_layout_build(vertex_attr_type::position,
-        vertex_attr_type::normal, vertex_attr_type::uv);
+    auto vertex_layout = gfx::vertex_layout(
+        vertex_attr::position, vertex_attr::normal, vertex_attr::uv);
 
     struct vertex_t {
         float x, y, z;

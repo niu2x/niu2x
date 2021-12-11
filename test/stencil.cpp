@@ -171,8 +171,8 @@ static void setup()
     };
 
     floor_vb = gfx::vertex_buffer_create(
-        gfx::vertex_layout_build(gfx::vertex_attr_type::position,
-            gfx::vertex_attr_type::normal, gfx::vertex_attr_type::uv),
+        gfx::vertex_layout(gfx::vertex_attr::position, gfx::vertex_attr::normal,
+            gfx::vertex_attr::uv),
         4, floor_vertices);
 
     uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };

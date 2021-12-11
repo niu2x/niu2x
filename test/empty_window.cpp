@@ -3,8 +3,6 @@
 
 #include <math.h>
 
-#define PI 3.1415926
-
 namespace gfx = nx::gfx;
 namespace math = nx::math;
 

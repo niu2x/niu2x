@@ -9,6 +9,8 @@
 
 namespace nx::math {
 
+constexpr double pi = 3.1415926;
+
 #ifdef LINMATH_NO_INLINE
     #define LINMATH_H_FUNC static
 #else
