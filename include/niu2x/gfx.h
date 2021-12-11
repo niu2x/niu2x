@@ -135,7 +135,8 @@ struct mesh_t : object_t {
     texture_t* texture;
 };
 
-NXAPI font_t* create_builtin_font(int font_size);
+// NXAPI font_t* create_builtin_font(int font_size);
+NXAPI font_t* font_create(int font_size);
 NXAPI font_char_info_t font_char_info(font_t* self, uint32_t code);
 NXAPI int font_kerning(font_t* self, uint32_t left, uint32_t right);
 
@@ -146,6 +147,7 @@ NXAPI indice_buffer_t* indice_buffer_create(
     uint32_t indices_count, void* data = nullptr, bool auto_destroy = false);
 
 NXAPI program_t* program_create(const char* vert, const char* frag);
+NXAPI program_t* program_create(const char* vert_frag[]);
 
 NXAPI texture_t* texture_create(
     int w, int h, pixel_format pf, const void* data);

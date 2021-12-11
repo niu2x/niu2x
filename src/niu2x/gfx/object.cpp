@@ -159,7 +159,7 @@ vertex_buffer_t* vertex_buffer_create(vertex_layout_t layout,
     return obj;
 }
 
-font_t* create_builtin_font(int font_size)
+font_t* font_create(int font_size)
 {
     auto* obj = (object_create(font_freelist, font));
     obj->private_data = NX_ALLOC(struct font::font_altas_t, 1);

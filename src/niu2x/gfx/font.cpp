@@ -190,8 +190,7 @@ void font_system_setup()
     default_face
         = create_face(noto_scans_sc_regular, noto_scans_sc_regular_length);
 
-    font_program
-        = program_create(font_program_source[0], font_program_source[1]);
+    font_program = program_create(font_program_source);
 }
 void font_system_cleanup()
 {

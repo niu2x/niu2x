@@ -48,7 +48,7 @@ void setup()
 
     font::font_system_setup();
 
-    default_font = create_builtin_font(24);
+    default_font = font_create(24);
 
     auto sprite_vl = vertex_layout(vertex_attr::position, vertex_attr::uv);
     float vertices_data[4][6] = {
@@ -69,8 +69,7 @@ void setup()
     };
     sprite_ib = indice_buffer_create(6, indice_data);
 
-    sprite_program
-        = program_create(sprite_program_source[0], sprite_program_source[1]);
+    sprite_program = program_create(sprite_program_source);
 
     render_setup();
 }
