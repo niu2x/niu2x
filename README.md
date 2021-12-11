@@ -16,12 +16,15 @@ NX_LOG_F(format, ...);
 ````
 ## pipe
 - pipe style
+
+#### read stdin -> compress -> write to stdout.
 ````
-//read stdin -> compress -> write to stdout.
 nx::pipe::filter::zlib zlib;
 nx::pipe::source(std::cin) | zlib | nx::pipe::sink(std::cout);
+````
 
-//read stdin -> remove all '\n' -> unbase64 -> write to stdout
+#### read stdin -> remove all '\n' -> unbase64 -> write to stdout
+````
 nx::pipe::filter::unbase64 unbase64;
 nx::pipe::filter::cut cut('\n');
 nx::pipe::source(std::cin) | cut | unbase64 | nx::pipe::sink(std::cout);

@@ -76,13 +76,13 @@ void main()
 
     vec3 material = texture(TEX0, v_uv.xy).rgb;
     vec3 normal = normalize(v_normal);
-    vec3 l = normalize(vec3(-1.0, 1.0, 1.0));
+    vec3 l = normalize(vec3(1.0, 1.0, 1.0));
     vec3 v = normalize(eye - v_world_pos.xyz/v_world_pos.w);
 
-    vec3 spec = vec3(1.0) * pow(max(0.0, dot(normalize((v+l)*0.5), normal)), 16.0);
+    vec3 spec = vec3(0.2) * pow(max(0.0, dot(normalize((v+l)*0.5), normal)), 16.0);
 
-    float diffuse = max(dot(normal, l), 0.0);
-    color = vec4( material*(0.1 + diffuse) + spec, 1.0);
+    float diffuse = max(dot(normal, l), 0.0)*0.5;
+    color = vec4( material*(0.3 + diffuse) + spec, 1.0);
 
 }
 
@@ -103,7 +103,7 @@ static void shadow_transform(math::mat4x4 k)
     math::mat4x4 mul;
     mul[0][0] = 1;
     mul[1][0] = 0;
-    mul[2][0] = 0.6;
+    mul[2][0] = -0.6;
     mul[3][0] = 0;
 
     mul[0][1] = 0;

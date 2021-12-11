@@ -125,8 +125,7 @@ void printf(int x, int y, const char* fmt, ...)
 
         auto vertex_count = item.second.size() / 6;
         auto vertex_data = item.second.data();
-        auto vb = create_vertex_buffer(
-            layout, vertex_count, vertex_data, true);
+        auto vb = create_vertex_buffer(layout, vertex_count, vertex_data, true);
         set_vertex_buffer(vb);
         draw_element(7, 0, item.second.size() >> 2);
     }
