@@ -621,6 +621,21 @@ LINMATH_H_FUNC void mat4x4_arcball(
 
 NXAPI extern mat4x4 identity_mat4x4;
 
+union vec2_t {
+    struct {
+        vec2 array;
+    };
+    struct {
+        float width, height;
+    };
+
+    vec2_t(float w, float h)
+    {
+        width = w;
+        height = h;
+    }
+};
+
 } // namespace nx::math
 
 #endif
