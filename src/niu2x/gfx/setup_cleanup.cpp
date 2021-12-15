@@ -34,7 +34,6 @@ out highp vec4 color;
 void main()
 {
     color = texture(TEX0, v_uv.xy);
-    color.rg += v_uv.xy;
 }
 
 )RAW" };

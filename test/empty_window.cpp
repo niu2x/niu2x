@@ -14,6 +14,9 @@ public:
         gfx::begin();
         gfx::set_render_state(gfx::WRITE_RGBA);
         gfx::clear(0);
+
+        gfx::draw_texture(0, tex);
+
         gfx::end();
     }
 
@@ -23,6 +26,16 @@ public:
     {
         return nx::math::vec2_t { 512, 512 };
     }
+
+    virtual void setup() override
+    {
+        tex = gfx::texture_create_from_file("../test/floor-stone.jpg");
+    }
+
+    virtual void cleanup() override { gfx::destroy(tex); }
+
+private:
+    gfx::texture_t* tex;
 };
 
 NX_GFH_ENTRY(my_app_t);
