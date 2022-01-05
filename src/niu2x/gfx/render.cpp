@@ -575,6 +575,12 @@ void set_model_transform(const mat4x4 m)
     math::mat4x4_dup(cmd_builder.model, m);
 }
 
+void model_transform(mat4x4 output)
+{
+    auto& cmd_builder = current_builder->cmd;
+    math::mat4x4_dup(output, cmd_builder.model);
+}
+
 void set_view_transform(const mat4x4 m)
 {
     math::mat4x4_dup(current_builder->env.view, m);

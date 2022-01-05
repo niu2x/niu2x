@@ -29,7 +29,8 @@ struct object_type {
         texture,
         font,
         mesh,
-        framebuffer
+        framebuffer,
+        mesh_group,
     };
 };
 
@@ -57,6 +58,7 @@ static freelist<texture_t, 4096> texture_freelist;
 static freelist<framebuffer_t, 256> framebuffer_freelist;
 static freelist<font_t, 256> font_freelist;
 static freelist<mesh_t, 1024> mesh_freelist;
+static freelist<mesh_group_t, 1024> mesh_group_freelist;
 static NX_LIST_HEAD(auto_destroy_head);
 
 static void framebuffer_destroy(framebuffer_t* obj)
@@ -125,6 +127,14 @@ size_t vertex_sizeof(vertex_layout_t layout)
         }
     }
     return size;
+}
+
+mesh_group_t* mesh_group_create_from_file(const char* path, int flags)
+{
+    auto* obj = (object_create(mesh_group_freelist, mesh_group));
+    obj->texture = 0;
+    mesh_group_init_from_file(obj, path, flags);
+    return obj;
 }
 
 mesh_t* mesh_create_from_file(const char* path, int idx, int flags)
@@ -354,13 +364,44 @@ static void mesh_destroy(mesh_t* obj)
 {
     destroy(obj->vb);
     destroy(obj->ib);
-    if (obj->texture)
-        destroy(obj->texture);
+    object_destroy(mesh_freelist, obj);
+}
+
+static void mesh_group_destroy_node(mesh_group_t::node_t* node)
+{
+    for (uint32_t i = 0; i < node->children_size; i++) {
+        mesh_group_destroy_node(&(node->children[i]));
+    }
+    NX_FREE(node->children);
+    NX_FREE(node->meshes);
+}
+
+mesh_t* mesh_create()
+{
+    auto* obj = (object_create(mesh_freelist, mesh));
+    obj->texture = 0;
+    obj->ib = nullptr;
+    obj->vb = nullptr;
+    return obj;
+}
+
+static void mesh_group_destroy(mesh_group_t* obj)
+{
+    for (mesh_t** ptr = obj->meshes; *ptr; ptr++) {
+        destroy(*ptr);
+    }
+    NX_FREE(obj->meshes);
+    // NX_FREE();
+
+    mesh_group_destroy_node(&(obj->root));
     object_destroy(mesh_freelist, obj);
 }
 
 void destroy(object_t* obj)
 {
+    if (!obj)
+        return;
+
 #define CASE(enum_t, obj_t, destroy_method)                                    \
     case object_type::enum_t: {                                                \
         destroy_method(reinterpret_cast<obj_t*>(obj));                         \
@@ -375,6 +416,7 @@ void destroy(object_t* obj)
         CASE(font, font_t, font_destroy)
         CASE(mesh, mesh_t, mesh_destroy)
         CASE(framebuffer, framebuffer_t, framebuffer_destroy)
+        CASE(mesh_group, mesh_group_t, mesh_group_destroy)
     }
 
 #undef CASE

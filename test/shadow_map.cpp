@@ -28,6 +28,7 @@ static gfx::indice_buffer_t* floor_ib;
 
 static gfx::mat4x4 view, model, projection;
 static gfx::mesh_t* mesh = nullptr;
+static gfx::mesh_group_t* mesh_group = nullptr;
 
 static const char* vert_shader = R"RAW(
 #version 300 es
@@ -278,6 +279,9 @@ static void setup()
         model_file.c_str(), 0, gfx::MESH_AUTO_CENTER);
     mesh->texture = gfx::texture_create_from_file(texture_file.c_str());
 
+    mesh_group = gfx::mesh_group_create_from_file(
+        model_file.c_str(), gfx::MESH_AUTO_CENTER);
+
     tex = gfx::texture_create(2048, 2048, gfx::pixel_format::rgba8, 0);
 
     float floor_vertices[][9] = {
@@ -304,6 +308,7 @@ static void cleanup()
     gfx::destroy(floor_vb);
     gfx::destroy(tex);
     gfx::destroy(mesh);
+    gfx::destroy(mesh_group);
     gfx::destroy(program);
 }
 

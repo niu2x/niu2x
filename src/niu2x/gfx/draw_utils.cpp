@@ -53,4 +53,34 @@ void draw_mesh(layer_t layer, mesh_t* mesh)
     draw_element(layer, 0, mesh->ib->size);
 }
 
+static void draw_mesh_group_node(layer_t layer, mesh_group_t* mesh_group,
+    mesh_group_t::node_t* node, const mat4x4& transform)
+{
+    mat4x4 model;
+    math::mat4x4_dup(model, node->transform);
+    math::mat4x4_mul(model, transform);
+
+    set_model_transform(model);
+    for (uint32_t i = 0; i < node->meshes_size; i++) {
+        auto* mesh = mesh_group->meshes[node->meshes[i]];
+        mesh->texture = mesh_group->texture;
+        draw_mesh(layer, mesh);
+    }
+
+    for (uint32_t i = 0; i < node->children_size; i++)
+        draw_mesh_group_node(layer, mesh_group, &(node->children[i]), model);
+}
+
+void draw_mesh_group(layer_t layer, mesh_group_t* mesh_group)
+{
+    math::mat4x4 model;
+    model_transform(model);
+
+    draw_mesh_group_node(layer, mesh_group, &(mesh_group->root), model);
+    // set_indice_buffer(mesh->ib);
+    // set_vertex_buffer(mesh->vb);
+    // set_texture(0, mesh->texture);
+    // draw_element(layer, 0, mesh->ib->size);
+}
+
 } // namespace nx::gfx

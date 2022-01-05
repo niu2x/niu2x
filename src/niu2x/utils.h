@@ -45,4 +45,7 @@ constexpr inline int stoi(const char* str, int value)
 
 #define NX_OFFSET_OF(mt, field) (ptrdiff_t)(&(((mt*)nullptr)->field))
 
+// #define NX_ALLOC_ARRAY(type, num) (type*) malloc(sizeof(type) * (num))
+// #define NX_ALLOC_FREE(type, num) (type*) malloc(sizeof(type) * (num))
+
 #endif

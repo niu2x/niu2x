@@ -129,9 +129,22 @@ struct NXAPI font_char_info_t {
     int advance;
 };
 
-struct mesh_t : object_t {
+struct NXAPI mesh_t : object_t {
     vertex_buffer_t* vb;
     indice_buffer_t* ib;
+    texture_t* texture;
+};
+
+struct NXAPI mesh_group_t : object_t {
+    struct node_t {
+        uint32_t* meshes;
+        uint32_t meshes_size;
+        node_t* children;
+        uint32_t children_size;
+        mat4x4 transform;
+    };
+    mesh_t** meshes;
+    node_t root;
     texture_t* texture;
 };
 
@@ -165,6 +178,10 @@ enum NXAPI mesh_load_flags {
 
 NXAPI mesh_t* mesh_create_from_file(
     const char* path, int idx = 0, int flags = 0);
+
+NXAPI mesh_t* mesh_create();
+
+NXAPI mesh_group_t* mesh_group_create_from_file(const char* path, int flags);
 
 NXAPI void destroy(object_t*);
 
@@ -251,6 +268,7 @@ NXAPI void draw_element(layer_t layer, uint32_t start, uint32_t count);
 
 NXAPI void draw_texture(layer_t layer, texture_t* texture);
 NXAPI void draw_mesh(layer_t layer, mesh_t*);
+NXAPI void draw_mesh_group(layer_t layer, mesh_group_t*);
 
 NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
 NXAPI void set_indice_buffer(indice_buffer_t* vbo);
@@ -265,6 +283,8 @@ NXAPI void set_view(layer_t layer, texture_t* texture);
 NXAPI void set_stencil_func(comparator cmp, uint8_t ref, uint8_t mask);
 NXAPI void set_stencil_op(
     stencil_op sfail, stencil_op dpfail, stencil_op dppass);
+
+NXAPI void model_transform(mat4x4 output);
 
 NXAPI void reset();
 

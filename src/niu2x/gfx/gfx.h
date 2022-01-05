@@ -74,6 +74,7 @@ int font_altas_kerning(font_altas_t* self, uint32_t left, uint32_t right);
 } // namespace font
 
 void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags);
+void mesh_group_init_from_file(mesh_group_t* mesh, const char* file, int flags);
 
 extern double now_seconds;
 
