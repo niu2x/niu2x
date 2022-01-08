@@ -18,7 +18,7 @@ namespace nx::gfx {
 using mat4x4 = math::mat4x4;
 using vec3 = math::vec3;
 
-enum NXAPI window_option_constant_t {
+enum NXAPI window_option_constant {
     MSAA = 1 << 0,
 };
 
@@ -100,7 +100,7 @@ struct NXAPI indice_buffer_t : object_t {
 };
 
 struct NXAPI limits {
-    enum {
+    enum  {
         max_uniform_name = 32,
         max_uniform = 32,
     };
