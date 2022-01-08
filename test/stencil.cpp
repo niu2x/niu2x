@@ -1,4 +1,5 @@
 #include <niu2x/gfx.h>
+#include <niu2x/gfh.h>
 
 namespace gfx = nx::gfx;
 namespace math = nx::math;
@@ -124,140 +125,133 @@ static void shadow_transform(math::mat4x4 k)
     math::mat4x4_mul(k, mul);
 }
 
-static void setup()
-{
-    mesh = gfx::mesh_create_from_file(
-        "../test/Aya.obj", 0, gfx::MESH_AUTO_CENTER);
-    mesh->texture = gfx::texture_create_from_file("../test/Aya.jpg");
+class my_app_t : public nx::gfh::app_t {
+public:
+    my_app_t() { }
+    virtual ~my_app_t() { }
 
-    program_ambient = gfx::program_create(ambient_vert, ambient_frag);
-    program_bdsf = gfx::program_create(bdsf_vert, bdsf_frag);
+    virtual void setup()
+    {
+        mesh = gfx::mesh_create_from_file(
+            "../test/cottage_fbx.fbx", 0, gfx::MESH_AUTO_CENTER);
+        mesh->texture = gfx::texture_create_from_file("../test/Aya.jpg");
 
-    gfx::set_clear_color(gfx::rgba(0, 0, 0, 0));
+        program_ambient = gfx::program_create(ambient_vert, ambient_frag);
+        program_bdsf = gfx::program_create(bdsf_vert, bdsf_frag);
 
-    math::mat4x4_identity(model);
-    math::mat4x4_identity(view);
-    math::mat4x4_identity(projection);
+        gfx::set_clear_color(gfx::rgba(0, 0, 0, 0));
 
-    math::mat4x4_scale_aniso(model, 0.1, 0.1, 0.1);
-    math::mat4x4_rotate_x(model, 3.1415 / 2);
-    math::mat4x4_translate(model, 0, 0, 68);
+        math::mat4x4_identity(model);
+        math::mat4x4_identity(view);
+        math::mat4x4_identity(projection);
 
-    math::vec3 eye { 100, 100, 51 };
-    math::vec3 center { 0, 0, 0 };
-    math::vec3 up { 0, 0, 1 };
-    math::mat4x4_look_at(view, eye, center, up);
+        math::mat4x4_scale_aniso(model, 0.1, 0.1, 0.1);
+        math::mat4x4_rotate_x(model, 3.1415 / 2);
+        math::mat4x4_translate(model, 0, 0, 68);
 
-    math::mat4x4_perspective(projection, 3.14 * 0.6, 1.0, 0.1, 10000.0);
+        math::vec3 eye { 100, 100, 51 };
+        math::vec3 center { 0, 0, 0 };
+        math::vec3 up { 0, 0, 1 };
+        math::mat4x4_look_at(view, eye, center, up);
 
-    gfx::set_view_transform(view);
-    gfx::set_projection_transform(projection);
+        math::mat4x4_perspective(projection, 3.14 * 0.6, 1.0, 0.1, 10000.0);
 
-    float floor_vertices[][9] = {
-        {
-            -200,
-            -200,
-            -0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-        },
-        { -200, 200, -0, 0, 0, 1, 0, 1, 0 },
-        { 200, 200, -0, 0, 0, 1, 1, 1, 0 },
-        { 200, -200, -0, 0, 0, 1, 1, 0, 0 },
-    };
+        gfx::set_view_transform(view);
+        gfx::set_projection_transform(projection);
 
-    auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr::position,
-        gfx::vertex_attr::normal, gfx::vertex_attr::uv);
-    floor_vb = gfx::vertex_buffer_create(vertex_layout, 4, floor_vertices);
+        float floor_vertices[][9] = {
+            {
+                -200,
+                -200,
+                -0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+            },
+            { -200, 200, -0, 0, 0, 1, 0, 1, 0 },
+            { 200, 200, -0, 0, 0, 1, 1, 1, 0 },
+            { 200, -200, -0, 0, 0, 1, 1, 0, 0 },
+        };
 
-    uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };
+        auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr::position,
+            gfx::vertex_attr::normal, gfx::vertex_attr::uv);
+        floor_vb = gfx::vertex_buffer_create(vertex_layout, 4, floor_vertices);
 
-    floor_ib = gfx::indice_buffer_create(6, floor_indices);
+        uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };
 
-    math::mat4x4_identity(floor_model);
+        floor_ib = gfx::indice_buffer_create(6, floor_indices);
 
-    math::mat4x4_dup(shadow_model, model);
-    shadow_transform(shadow_model);
+        math::mat4x4_identity(floor_model);
 
-    floor_tex = gfx::texture_create_from_file("../test/floor-stone.jpg");
-}
-static void cleanup()
-{
-    destroy(floor_tex);
-    destroy(program_bdsf);
-    destroy(floor_vb);
-    destroy(floor_ib);
-    destroy(program_ambient);
-    destroy(mesh);
-    destroy(mesh->texture);
-}
-static void update(double dt)
-{
-    math::mat4x4_rotate_z(model, 0.01);
-    math::mat4x4_dup(shadow_model, model);
-    shadow_transform(shadow_model);
+        math::mat4x4_dup(shadow_model, model);
+        shadow_transform(shadow_model);
 
-    gfx::begin();
-    gfx::set_render_state(
-        gfx::WRITE_DEPTH | gfx::WRITE_STENCIL | gfx::WRITE_RGBA);
-    gfx::set_stencil_func(gfx::comparator::always, 1, 0xFF);
+        floor_tex = gfx::texture_create_from_file("../test/floor-stone.jpg");
+    }
 
-    gfx::clear(0);
+    virtual void cleanup()
+    {
+        destroy(floor_tex);
+        destroy(program_bdsf);
+        destroy(floor_vb);
+        destroy(floor_ib);
+        destroy(program_ambient);
+        destroy(mesh);
+        destroy(mesh->texture);
+    }
+    virtual void update(double dt)
+    {
+        (void)dt;
+        math::mat4x4_rotate_z(model, 0.01);
+        math::mat4x4_dup(shadow_model, model);
+        shadow_transform(shadow_model);
 
-    gfx::set_render_state(gfx::WRITE_STENCIL | gfx::STENCIL_TEST);
+        gfx::begin();
+        gfx::set_render_state(
+            gfx::WRITE_DEPTH | gfx::WRITE_STENCIL | gfx::WRITE_RGBA);
+        gfx::set_stencil_func(gfx::comparator::always, 1, 0xFF);
 
-    gfx::set_stencil_op(
-        gfx::stencil_op::keep, gfx::stencil_op::keep, gfx::stencil_op::replace);
-    gfx::clear(0);
+        gfx::clear(0);
 
-    gfx::set_program(program_ambient);
-    gfx::set_model_transform(shadow_model);
-    gfx::draw_mesh(0, mesh);
+        gfx::set_render_state(gfx::WRITE_STENCIL | gfx::STENCIL_TEST);
 
-    gfx::set_stencil_op(
-        gfx::stencil_op::keep, gfx::stencil_op::keep, gfx::stencil_op::keep);
-    gfx::set_render_state(gfx::WRITE_RGBA);
+        gfx::set_stencil_op(gfx::stencil_op::keep, gfx::stencil_op::keep,
+            gfx::stencil_op::replace);
+        gfx::clear(0);
 
-    gfx::set_model_transform(floor_model);
-    gfx::set_vertex_buffer(floor_vb);
-    gfx::set_indice_buffer(floor_ib);
-    gfx::draw_element(0, 0, 6);
+        gfx::set_program(program_ambient);
+        gfx::set_model_transform(shadow_model);
+        gfx::draw_mesh(0, mesh);
 
-    gfx::set_render_state(gfx::WRITE_RGBA | gfx::WRITE_DEPTH | gfx::DEPTH_TEST
-        | gfx::STENCIL_TEST);
-    gfx::set_stencil_func(gfx::comparator::not_equal, 1, 0xFF);
-    gfx::set_program(program_bdsf);
-    gfx::set_model_transform(floor_model);
-    gfx::set_vertex_buffer(floor_vb);
-    gfx::set_indice_buffer(floor_ib);
-    gfx::set_texture(0, floor_tex);
-    gfx::draw_element(0, 0, 6);
+        gfx::set_stencil_op(gfx::stencil_op::keep, gfx::stencil_op::keep,
+            gfx::stencil_op::keep);
+        gfx::set_render_state(gfx::WRITE_RGBA);
 
-    gfx::set_render_state(gfx::WRITE_RGBA | gfx::WRITE_DEPTH | gfx::DEPTH_TEST);
-    gfx::set_model_transform(model);
-    gfx::draw_mesh(0, mesh);
+        gfx::set_model_transform(floor_model);
+        gfx::set_vertex_buffer(floor_vb);
+        gfx::set_indice_buffer(floor_ib);
+        gfx::draw_element(0, 0, 6);
 
-    gfx::end();
-}
+        gfx::set_render_state(gfx::WRITE_RGBA | gfx::WRITE_DEPTH
+            | gfx::DEPTH_TEST | gfx::STENCIL_TEST);
+        gfx::set_stencil_func(gfx::comparator::not_equal, 1, 0xFF);
+        gfx::set_program(program_bdsf);
+        gfx::set_model_transform(floor_model);
+        gfx::set_vertex_buffer(floor_vb);
+        gfx::set_indice_buffer(floor_ib);
+        gfx::set_texture(0, floor_tex);
+        gfx::draw_element(0, 0, 6);
 
-int main()
-{
+        gfx::set_render_state(
+            gfx::WRITE_RGBA | gfx::WRITE_DEPTH | gfx::DEPTH_TEST);
+        gfx::set_model_transform(model);
+        gfx::draw_mesh(0, mesh);
 
-    gfx::window_config cfg;
-    cfg.title = "stencil";
-    cfg.options = gfx::MSAA;
-    cfg.width = 800;
-    cfg.height = 600;
-    cfg.setup = setup;
-    cfg.cleanup = cleanup;
-    cfg.update = update;
-    cfg.key_callback = nullptr;
-    cfg.mouse_pos_callback = nullptr;
+        gfx::end();
+    }
+};
 
-    gfx::run(cfg);
-    return 0;
-}
+NX_GFH_ENTRY(my_app_t);

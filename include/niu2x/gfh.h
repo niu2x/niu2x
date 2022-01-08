@@ -43,7 +43,7 @@ public:
     {                                                                          \
         clazz my_app;                                                          \
         app = &my_app;                                                         \
-        nx::gfx::window_config config {                                        \
+        nx::gfx::window_config_t config {                                      \
             .title = app->title(),                                             \
             .width = (int)(app->window_size().width),                          \
             .height = (int)(app->window_size().height),                        \

@@ -18,7 +18,7 @@ namespace {
 void glfw_setup();
 void glfw_cleanup();
 
-GLFWwindow* create_glfw_window(const window_config& c);
+GLFWwindow* create_glfw_window(const window_config_t& c);
 void destroy_glfw_window(GLFWwindow* window);
 
 void glfw_error_callback(int error, const char* description);
@@ -41,7 +41,7 @@ double now_seconds = 0;
 static GLFWwindow* current_glfw_window = nullptr;
 // static int window_width, window_height;
 
-void run(const window_config& c)
+void run(const window_config_t& c)
 {
     NX_ASSERT(current_glfw_window == nullptr, "already had a glfw_window.");
 
@@ -127,7 +127,7 @@ void glfw_setup()
 
 void glfw_cleanup() { glfwTerminate(); }
 
-GLFWwindow* create_glfw_window(const window_config& c)
+GLFWwindow* create_glfw_window(const window_config_t& c)
 {
     if (c.options & MSAA)
         glfwWindowHint(GLFW_SAMPLES, 8);
@@ -154,11 +154,11 @@ void destroy_glfw_window(GLFWwindow* glfw_window)
     glfwDestroyWindow(glfw_window);
 }
 
-const window_config* get_window_option(GLFWwindow* window)
+const window_config_t* get_window_option(GLFWwindow* window)
 {
     void* ud = glfwGetWindowUserPointer(window);
     if (ud) {
-        const window_config* c = reinterpret_cast<const window_config*>(ud);
+        const window_config_t* c = reinterpret_cast<const window_config_t*>(ud);
         return c;
     } else
         return nullptr;

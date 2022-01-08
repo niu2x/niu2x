@@ -22,7 +22,7 @@ enum NXAPI window_option_constant {
     MSAA = 1 << 0,
 };
 
-struct NXAPI window_config {
+struct NXAPI window_config_t {
     std::string title;
     int width, height;
     uint64_t options;
@@ -33,7 +33,7 @@ struct NXAPI window_config {
     void (*mouse_pos_callback)(double xpos, double ypos);
 };
 
-NXAPI void run(const window_config& c);
+NXAPI void run(const window_config_t& c);
 NXAPI void exit();
 
 struct NXAPI object_t {

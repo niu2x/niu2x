@@ -429,7 +429,7 @@ int main(int argc, char* argv[])
     model_file = "../test/Aya.obj";
     texture_file = "../test/Aya.jpg";
 
-    gfx::window_config cfg;
+    gfx::window_config_t cfg;
     cfg.title = "shadow map";
     cfg.options = gfx::MSAA;
     cfg.width = 800;
