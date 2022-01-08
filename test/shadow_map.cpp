@@ -308,6 +308,7 @@ static void cleanup()
     gfx::destroy(floor_vb);
     gfx::destroy(tex);
     gfx::destroy(mesh);
+    gfx::destroy(mesh->texture);
     gfx::destroy(mesh_group);
     gfx::destroy(program);
 }

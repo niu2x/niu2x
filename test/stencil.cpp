@@ -193,6 +193,7 @@ static void cleanup()
     destroy(floor_ib);
     destroy(program_ambient);
     destroy(mesh);
+    destroy(mesh->texture);
 }
 static void update(double dt)
 {
