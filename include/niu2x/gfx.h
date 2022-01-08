@@ -18,7 +18,7 @@ namespace nx::gfx {
 using mat4x4 = math::mat4x4;
 using vec3 = math::vec3;
 
-enum NXAPI window_option_constant {
+enum NXAPI window_option_constant_t {
     MSAA = 1 << 0,
 };
 
@@ -42,7 +42,7 @@ struct NXAPI object_t {
     list_head list;
 };
 
-enum class NXAPI pixel_format {
+enum class NXAPI pixel_format_t {
     rgba8,
     rgb8,
     r8,
@@ -57,7 +57,7 @@ struct NXAPI texture_t : object_t {
     GLuint name;
     int width;
     int height;
-    pixel_format pf;
+    pixel_format_t pf;
     framebuffer_t* fb;
 };
 
@@ -65,7 +65,7 @@ struct NXAPI font_t : object_t {
     void* private_data;
 };
 
-enum class vertex_attr : uint8_t {
+enum class vertex_attr_t : uint8_t {
     nil = 0,
     // vec3
     position,
@@ -78,15 +78,15 @@ enum class vertex_attr : uint8_t {
 };
 
 using vertex_layout_t = uint64_t;
-NXAPI vertex_layout_t vertex_layout(vertex_attr a0 = vertex_attr::nil,
-    vertex_attr a1 = vertex_attr::nil, vertex_attr a2 = vertex_attr::nil,
-    vertex_attr a3 = vertex_attr::nil, vertex_attr a4 = vertex_attr::nil,
-    vertex_attr a5 = vertex_attr::nil, vertex_attr a6 = vertex_attr::nil,
-    vertex_attr a7 = vertex_attr::nil, vertex_attr a8 = vertex_attr::nil,
-    vertex_attr a9 = vertex_attr::nil, vertex_attr a10 = vertex_attr::nil,
-    vertex_attr a11 = vertex_attr::nil, vertex_attr a12 = vertex_attr::nil,
-    vertex_attr a13 = vertex_attr::nil, vertex_attr a14 = vertex_attr::nil,
-    vertex_attr a15 = vertex_attr::nil);
+NXAPI vertex_layout_t vertex_layout(vertex_attr_t a0 = vertex_attr_t::nil,
+    vertex_attr_t a1 = vertex_attr_t::nil, vertex_attr_t a2 = vertex_attr_t::nil,
+    vertex_attr_t a3 = vertex_attr_t::nil, vertex_attr_t a4 = vertex_attr_t::nil,
+    vertex_attr_t a5 = vertex_attr_t::nil, vertex_attr_t a6 = vertex_attr_t::nil,
+    vertex_attr_t a7 = vertex_attr_t::nil, vertex_attr_t a8 = vertex_attr_t::nil,
+    vertex_attr_t a9 = vertex_attr_t::nil, vertex_attr_t a10 = vertex_attr_t::nil,
+    vertex_attr_t a11 = vertex_attr_t::nil, vertex_attr_t a12 = vertex_attr_t::nil,
+    vertex_attr_t a13 = vertex_attr_t::nil, vertex_attr_t a14 = vertex_attr_t::nil,
+    vertex_attr_t a15 = vertex_attr_t::nil);
 
 struct NXAPI vertex_buffer_t : object_t {
     GLuint name;
@@ -163,7 +163,7 @@ NXAPI program_t* program_create(const char* vert, const char* frag);
 NXAPI program_t* program_create(const char* vert_frag[]);
 
 NXAPI texture_t* texture_create(
-    int w, int h, pixel_format pf, const void* data);
+    int w, int h, pixel_format_t pf, const void* data);
 
 NXAPI void texture_update_region(
     texture_t* self, int x, int y, int w, int h, const void* data);

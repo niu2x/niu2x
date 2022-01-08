@@ -99,27 +99,27 @@ size_t vertex_sizeof(vertex_layout_t layout)
 {
     size_t size = 0;
     for (int i = 0; i < 16; i++, layout >>= 4) {
-        auto attr = (vertex_attr)(layout & 0xF);
+        auto attr = (vertex_attr_t)(layout & 0xF);
         switch (attr) {
-            case vertex_attr::nil: {
+            case vertex_attr_t::nil: {
                 break;
             }
-            case vertex_attr::position: {
+            case vertex_attr_t::position: {
                 // vec3
                 size += 3 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr::color: {
+            case vertex_attr_t::color: {
                 // vec4
                 size += 4 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr::normal: {
+            case vertex_attr_t::normal: {
                 // vec3
                 size += 3 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr::uv: {
+            case vertex_attr_t::uv: {
                 // vec3
                 size += 3 * sizeof(GLfloat);
                 break;
@@ -422,11 +422,11 @@ void destroy(object_t* obj)
 #undef CASE
 }
 
-vertex_layout_t vertex_layout(vertex_attr a0, vertex_attr a1, vertex_attr a2,
-    vertex_attr a3, vertex_attr a4, vertex_attr a5, vertex_attr a6,
-    vertex_attr a7, vertex_attr a8, vertex_attr a9, vertex_attr a10,
-    vertex_attr a11, vertex_attr a12, vertex_attr a13, vertex_attr a14,
-    vertex_attr a15)
+vertex_layout_t vertex_layout(vertex_attr_t a0, vertex_attr_t a1, vertex_attr_t a2,
+    vertex_attr_t a3, vertex_attr_t a4, vertex_attr_t a5, vertex_attr_t a6,
+    vertex_attr_t a7, vertex_attr_t a8, vertex_attr_t a9, vertex_attr_t a10,
+    vertex_attr_t a11, vertex_attr_t a12, vertex_attr_t a13, vertex_attr_t a14,
+    vertex_attr_t a15)
 {
     return (((vertex_layout_t)(a0)&0xF) << (4 * 0))
         | (((vertex_layout_t)(a1)&0xF) << (4 * 1))
@@ -453,18 +453,18 @@ texture_t* texture_create_from_file(const char* pathname)
     int channels;
     auto* image
         = stbi_load_from_memory(file.data(), file.size(), &w, &h, &channels, 0);
-    pixel_format pf;
+    pixel_format_t pf;
     switch (channels) {
         case 1: {
-            pf = pixel_format::r8;
+            pf = pixel_format_t::r8;
             break;
         }
         case 3: {
-            pf = pixel_format::rgb8;
+            pf = pixel_format_t::rgb8;
             break;
         }
         case 4: {
-            pf = pixel_format::rgba8;
+            pf = pixel_format_t::rgba8;
             break;
         }
         default: {
@@ -485,17 +485,17 @@ void texture_update_region(
 
     glBindTexture(GL_TEXTURE_2D, obj->name);
     switch (obj->pf) {
-        case pixel_format::rgba8: {
+        case pixel_format_t::rgba8: {
             glTexSubImage2D(
                 GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
             break;
         }
-        case pixel_format::rgb8: {
+        case pixel_format_t::rgb8: {
             glTexSubImage2D(
                 GL_TEXTURE_2D, 0, x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
             break;
         }
-        case pixel_format::r8: {
+        case pixel_format_t::r8: {
             glTexSubImage2D(
                 GL_TEXTURE_2D, 0, x, y, w, h, GL_RED, GL_UNSIGNED_BYTE, data);
             break;
@@ -512,23 +512,23 @@ void texture_update_region(
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-texture_t* texture_create(int w, int h, pixel_format pf, const void* data)
+texture_t* texture_create(int w, int h, pixel_format_t pf, const void* data)
 {
     auto* obj = (object_create(texture_freelist, texture));
     glGenTextures(1, &(obj->name));
     glBindTexture(GL_TEXTURE_2D, obj->name);
     switch (pf) {
-        case pixel_format::rgba8: {
+        case pixel_format_t::rgba8: {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA,
                 GL_UNSIGNED_BYTE, data);
             break;
         }
-        case pixel_format::rgb8: {
+        case pixel_format_t::rgb8: {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB,
                 GL_UNSIGNED_BYTE, data);
             break;
         }
-        case pixel_format::r8: {
+        case pixel_format_t::r8: {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED,
                 GL_UNSIGNED_BYTE, data);
             break;

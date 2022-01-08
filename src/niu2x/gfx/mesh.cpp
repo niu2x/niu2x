@@ -16,7 +16,7 @@ static void mesh_init(mesh_t* mesh, const aiMesh* ai_mesh)
 
     auto vertices_num = ai_mesh->mNumVertices;
     auto vertex_layout = gfx::vertex_layout(
-        vertex_attr::position, vertex_attr::normal, vertex_attr::uv);
+        vertex_attr_t::position, vertex_attr_t::normal, vertex_attr_t::uv);
 
     struct vertex_t {
         float x, y, z;

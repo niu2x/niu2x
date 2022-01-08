@@ -313,39 +313,39 @@ static void vertex_layout_active(vertex_layout_t layout)
 
     size_t offset = 0;
     for (int i = 0; i < 16; i++, layout >>= 4) {
-        auto attr = (vertex_attr)(layout & 0xF);
-        if (attr != vertex_attr::nil) {
+        auto attr = (vertex_attr_t)(layout & 0xF);
+        if (attr != vertex_attr_t::nil) {
             glEnableVertexAttribArray(i);
         } else {
             glDisableVertexAttribArray(i);
         }
 
         switch (attr) {
-            case vertex_attr::nil: {
+            case vertex_attr_t::nil: {
                 break;
             }
-            case vertex_attr::position: {
+            case vertex_attr_t::position: {
                 // vec3
                 glVertexAttribPointer(
                     i, 3, GL_FLOAT, GL_FALSE, size, (void*)offset);
                 offset += 3 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr::color: {
+            case vertex_attr_t::color: {
                 // vec4
                 glVertexAttribPointer(
                     i, 4, GL_FLOAT, GL_FALSE, size, (void*)offset);
                 offset += 4 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr::normal: {
+            case vertex_attr_t::normal: {
                 // vec3
                 glVertexAttribPointer(
                     i, 3, GL_FLOAT, GL_FALSE, size, (void*)offset);
                 offset += 3 * sizeof(GLfloat);
                 break;
             }
-            case vertex_attr::uv: {
+            case vertex_attr_t::uv: {
                 // vec3
                 glVertexAttribPointer(
                     i, 3, GL_FLOAT, GL_FALSE, size, (void*)offset);

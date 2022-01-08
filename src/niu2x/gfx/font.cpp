@@ -77,7 +77,7 @@ static void font_altas_increase_page(font_altas_t* self)
 {
     NX_ASSERT(self->size < font_altas_t::PAGES_CAPACITY, "too many page");
     self->pages[self->size++] = texture_create(FONT_ALTAS_TEXTURE_SIZE,
-        FONT_ALTAS_TEXTURE_SIZE, pixel_format::r8, nullptr);
+        FONT_ALTAS_TEXTURE_SIZE, pixel_format_t::r8, nullptr);
     self->cell_size = 0;
 }
 
