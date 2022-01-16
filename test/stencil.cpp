@@ -133,8 +133,8 @@ public:
     virtual void setup()
     {
         mesh = gfx::mesh_create_from_file(
-            "../test/Aya.obj", 0, gfx::MESH_AUTO_CENTER);
-        mesh->texture = gfx::texture_create_from_file("../test/Aya.jpg");
+            "../resource/Aya.obj", 0, gfx::MESH_AUTO_CENTER);
+        mesh->texture = gfx::texture_create_from_file("../resource/Aya.jpg");
 
         program_ambient = gfx::program_create(ambient_vert, ambient_frag);
         program_bdsf = gfx::program_create(bdsf_vert, bdsf_frag);
@@ -189,7 +189,7 @@ public:
         math::mat4x4_dup(shadow_model, model);
         shadow_transform(shadow_model);
 
-        floor_tex = gfx::texture_create_from_file("../test/floor-stone.jpg");
+        floor_tex = gfx::texture_create_from_file("../resource/floor-stone.jpg");
     }
 
     virtual void cleanup()

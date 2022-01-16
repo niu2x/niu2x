@@ -29,7 +29,7 @@ public:
 
     virtual void setup() override
     {
-        tex = gfx::texture_create_from_file("../test/floor-stone.jpg");
+        tex = gfx::texture_create_from_file("../resource/floor-stone.jpg");
     }
 
     virtual void cleanup() override { gfx::destroy(tex); }

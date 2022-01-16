@@ -49,9 +49,9 @@ struct stream_write_req {
     tcp_write_callback callback;
 };
 
-NX_LIST_HEAD(idles);
-NX_LIST_HEAD(tcps);
-NX_LIST_HEAD(tcp_connects);
+NX_LIST(idles);
+NX_LIST(tcps);
+NX_LIST(tcp_connects);
 
 #define DEF_FIND_FUNC(elem)                                                    \
     static elem##_item* find_##elem##_item(rid elem##_id, list_head* head)     \

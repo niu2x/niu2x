@@ -426,8 +426,8 @@ int main(int argc, char* argv[])
     //     "t,texture", "texture", cxxopts::value<std::string>());
     // auto result = options.parse(argc, argv);
 
-    model_file = "../test/Aya.obj";
-    texture_file = "../test/Aya.jpg";
+    model_file = "../resource/Aya.obj";
+    texture_file = "../resource/Aya.jpg";
 
     gfx::window_config_t cfg;
     cfg.title = "shadow map";
