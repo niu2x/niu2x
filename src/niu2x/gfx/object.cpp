@@ -391,8 +391,7 @@ static void mesh_group_destroy(mesh_group_t* obj)
         destroy(*ptr);
     }
     NX_FREE(obj->meshes);
-    // NX_FREE();
-
+    
     mesh_group_destroy_node(&(obj->root));
     object_destroy(mesh_freelist, obj);
 }

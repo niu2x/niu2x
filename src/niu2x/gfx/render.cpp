@@ -411,8 +411,6 @@ static void handle_render_state(cmd_t* cmd)
     if (memcmp(&last_rs_md5, &(cmd->render_state_md5), sizeof(last_rs_md5))) {
         memcpy(&last_rs_md5, &(cmd->render_state_md5), sizeof(last_rs_md5));
 
-        NX_LOG_D("update render state %d");
-
         auto rs = cmd->render_state;
         auto should_cull_front = (rs & CULL_FRONT);
         auto should_cull_back = (rs & CULL_BACK);

@@ -133,7 +133,7 @@ public:
     virtual void setup()
     {
         mesh = gfx::mesh_create_from_file(
-            "../test/cottage_fbx.fbx", 0, gfx::MESH_AUTO_CENTER);
+            "../test/Aya.obj", 0, gfx::MESH_AUTO_CENTER);
         mesh->texture = gfx::texture_create_from_file("../test/Aya.jpg");
 
         program_ambient = gfx::program_create(ambient_vert, ambient_frag);
