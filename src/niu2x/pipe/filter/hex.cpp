@@ -26,7 +26,7 @@ static uint8_t unhex_digit(uint8_t digit)
 
 } // namespace
 
-bool hex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool hex_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     uint8_t chr;
@@ -38,12 +38,12 @@ bool hex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return true;
 }
 
-unhex::unhex()
+unhex_t::unhex_t()
 : size_(0)
 {
 }
 
-bool unhex::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool unhex_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     while (!rbuf.empty() && !wbuf.full()) {

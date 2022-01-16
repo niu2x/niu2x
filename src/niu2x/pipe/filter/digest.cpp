@@ -17,7 +17,7 @@
 
 namespace nx::pipe::filter {
 
-digest::digest(const char* p_algorithm_anme)
+digest_t::digest_t(const char* p_algorithm_anme)
 {
     auto* algorithm = EVP_get_digestbyname(p_algorithm_anme);
     OPENSSL_CHECK(algorithm != nullptr, "invalid digest algorithm");
@@ -29,13 +29,13 @@ digest::digest(const char* p_algorithm_anme)
     EVP_DigestInit_ex2(ctx, algorithm, nullptr);
 }
 
-digest::~digest()
+digest_t::~digest_t()
 {
     auto* ctx = reinterpret_cast<EVP_MD_CTX*>(digest_ctx_);
     EVP_MD_CTX_free(ctx);
 }
 
-bool digest::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool digest_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     auto* ctx = reinterpret_cast<EVP_MD_CTX*>(digest_ctx_);
 

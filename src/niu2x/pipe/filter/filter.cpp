@@ -4,16 +4,16 @@
 
 namespace nx::pipe::filter {
 
-filter::filter()
+filter_t::filter_t()
 : upstream_(nullptr)
 , upstream_eof_(false)
 , transform_eof_(false)
 {
 }
 
-filter::~filter() { }
+filter_t::~filter_t() { }
 
-int filter::read(void* data, size_t bytes)
+int filter_t::read(void* data, size_t bytes)
 {
     if (transform_eof_ && wbuf_.empty())
         return -eof;
@@ -30,17 +30,17 @@ int filter::read(void* data, size_t bytes)
     return write_to_downstream(data, bytes);
 }
 
-void filter::set_upstream(source p_upstream)
+void filter_t::set_upstream(source_t p_upstream)
 {
     upstream_ = std::move(p_upstream);
 }
 
-void filter::set_upstream(proxy_t p_upstream)
+void filter_t::set_upstream(proxy_t p_upstream)
 {
     upstream_ = std::move(p_upstream);
 }
 
-void filter::read_from_upstream()
+void filter_t::read_from_upstream()
 {
     while (!rbuf_.full() && !upstream_eof_) {
         auto slots = rbuf_.continuous_slots();
@@ -67,7 +67,7 @@ void filter::read_from_upstream()
     }
 }
 
-int filter::write_to_downstream(void* p_data, size_t bytes)
+int filter_t::write_to_downstream(void* p_data, size_t bytes)
 {
     auto* data = reinterpret_cast<uint8_t*>(p_data);
 
@@ -91,7 +91,8 @@ int filter::write_to_downstream(void* p_data, size_t bytes)
     return bytes;
 }
 
-filter::proxy_t operator|(filter::proxy_t p_source, filter::proxy_t p_filter)
+filter_t::proxy_t operator|(
+    filter_t::proxy_t p_source, filter_t::proxy_t p_filter)
 {
     p_filter.set_upstream(p_source);
     return p_filter;

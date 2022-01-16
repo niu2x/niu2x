@@ -4,14 +4,14 @@
 
 namespace nx::pipe {
 
-source::source(std::istream& stream)
+source_t::source_t(std::istream& stream)
 : delegate_(&stream)
 {
 }
 
-source::~source() { }
+source_t::~source_t() { }
 
-int source::read(void* data, size_t bytes)
+int source_t::read(void* data, size_t bytes)
 {
     return std::visit(
         [data, bytes](auto&& arg) {

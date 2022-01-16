@@ -8,7 +8,7 @@ extern "C" {
 
 namespace nx::pipe::filter {
 
-bool base64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool base64_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     size_t inlen;
     do {
@@ -33,7 +33,7 @@ bool base64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return true;
 }
 
-bool unbase64::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool unbase64_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     size_t inlen;

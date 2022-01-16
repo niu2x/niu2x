@@ -4,10 +4,10 @@
 
 int main(int argc, char* argv[])
 {
-    nx::pipe::filter::decrypt decrypt(
+    nx::pipe::filter::decrypt_t decrypt(
         argv[1], (const uint8_t*)argv[2], (const uint8_t*)argv[3]);
 
-    nx::pipe::source(std::cin) | decrypt | nx::pipe::sink(std::cout);
+    nx::pipe::source_t(std::cin) | decrypt | nx::pipe::sink_t(std::cout);
 
     return 0;
 }

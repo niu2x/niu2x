@@ -4,10 +4,10 @@
 
 int main()
 {
-    nx::pipe::filter::unbase64 unbase64;
-    nx::pipe::filter::cut cut('\n');
+    nx::pipe::filter::unbase64_t unbase64;
+    nx::pipe::filter::cut_t cut('\n');
 
-    nx::pipe::source(std::cin) | cut | unbase64 | nx::pipe::sink(std::cout);
+    nx::pipe::source_t(std::cin) | cut | unbase64 | nx::pipe::sink_t(std::cout);
 
     return 0;
 }

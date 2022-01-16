@@ -19,32 +19,32 @@ void unzlib_cleanup(z_stream* strm);
 
 } // namespace
 
-zlib::zlib(int level)
+zlib_t::zlib_t(int level)
 {
     zlib_ctx_ = NX_ALLOC(z_stream, 1);
     NX_ASSERT(zlib_ctx_, "out of memory");
     zlib_setup(reinterpret_cast<z_stream*>(zlib_ctx_), level);
 }
-zlib::~zlib()
+zlib_t::~zlib_t()
 {
     zlib_cleanup(reinterpret_cast<z_stream*>(zlib_ctx_));
     NX_FREE(zlib_ctx_);
 }
 
-unzlib::unzlib()
+unzlib_t::unzlib_t()
 {
     zlib_ctx_ = NX_ALLOC(z_stream, 1);
     NX_ASSERT(zlib_ctx_, "out of memory");
     unzlib_setup(reinterpret_cast<z_stream*>(zlib_ctx_));
 }
 
-unzlib::~unzlib()
+unzlib_t::~unzlib_t()
 {
     unzlib_cleanup(reinterpret_cast<z_stream*>(zlib_ctx_));
     NX_FREE(zlib_ctx_);
 }
 
-bool zlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool zlib_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     auto* strm_ = reinterpret_cast<z_stream*>(zlib_ctx_);
 
@@ -67,7 +67,7 @@ bool zlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
     return ret == Z_STREAM_END;
 }
 
-bool unzlib::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool unzlib_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     auto* strm_ = reinterpret_cast<z_stream*>(zlib_ctx_);
 

@@ -17,7 +17,7 @@
 
 namespace nx::pipe::filter {
 
-cipher::cipher(const char* p_algorithm_name, int mode, const uint8_t key[],
+cipher_t::cipher_t(const char* p_algorithm_name, int mode, const uint8_t key[],
     const uint8_t iv[])
 {
     auto* algorithm = EVP_get_cipherbyname(p_algorithm_name);
@@ -30,13 +30,13 @@ cipher::cipher(const char* p_algorithm_name, int mode, const uint8_t key[],
     EVP_CipherInit_ex2(ctx, algorithm, key, iv, mode, nullptr);
 }
 
-cipher::~cipher()
+cipher_t::~cipher_t()
 {
     auto* ctx = reinterpret_cast<EVP_CIPHER_CTX*>(cipher_ctx_);
     EVP_CIPHER_CTX_free(ctx);
 }
 
-bool cipher::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool cipher_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     auto* ctx = reinterpret_cast<EVP_CIPHER_CTX*>(cipher_ctx_);
 

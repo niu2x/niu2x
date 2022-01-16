@@ -4,12 +4,12 @@
 
 namespace nx::pipe::filter {
 
-cut::cut(uint8_t chr)
+cut_t::cut_t(uint8_t chr)
 : chr_(chr)
 {
 }
 
-bool cut::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool cut_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     uint8_t c;

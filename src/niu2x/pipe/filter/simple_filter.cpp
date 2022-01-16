@@ -4,7 +4,7 @@
 
 namespace nx::pipe::filter {
 
-bool simple_filter::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
+bool simple_filter_t::transform(ringbuf& rbuf, ringbuf& wbuf, bool upstream_eof)
 {
     (void)upstream_eof;
     uint8_t chr;

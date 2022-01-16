@@ -4,9 +4,9 @@
 
 int main(int argc, char* argv[])
 {
-    nx::pipe::filter::hex hex;
-    nx::pipe::filter::digest digest(argv[1]);
-    nx::pipe::source(std::cin) | digest | hex | nx::pipe::sink(std::cout);
+    nx::pipe::filter::hex_t hex;
+    nx::pipe::filter::digest_t digest(argv[1]);
+    nx::pipe::source_t(std::cin) | digest | hex | nx::pipe::sink_t(std::cout);
     std::cout << std::endl;
     return 0;
 }

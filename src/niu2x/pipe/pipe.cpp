@@ -6,7 +6,7 @@
 
 namespace nx::pipe {
 
-bool operator|(source p_source, sink p_sink)
+bool operator|(source_t p_source, sink_t p_sink)
 {
     ringbuf<unsigned char> buf;
 
@@ -44,7 +44,7 @@ bool operator|(source p_source, sink p_sink)
     return true;
 }
 
-bool operator|(filter_proxy p_source, sink p_sink)
+bool operator|(filter_proxy_t p_source, sink_t p_sink)
 {
     ringbuf<unsigned char> buf;
     bool source_eof = false;
@@ -81,7 +81,7 @@ bool operator|(filter_proxy p_source, sink p_sink)
     return true;
 }
 
-filter_proxy operator|(source p_source, filter_proxy p_filter)
+filter_proxy_t operator|(source_t p_source, filter_proxy_t p_filter)
 {
     p_filter.set_upstream(p_source);
     return p_filter;

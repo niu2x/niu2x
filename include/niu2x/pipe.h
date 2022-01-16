@@ -21,15 +21,15 @@ enum NXAPI status {
     fail,
 };
 
-class NXAPI source {
+class NXAPI source_t {
 public:
-    source(std::istream& stream);
-    ~source();
+    source_t(std::istream& stream);
+    ~source_t();
 
-    source(const source&) = default;
-    source(source&&) = default;
-    source& operator=(const source&) = default;
-    source& operator=(source&&) = default;
+    source_t(const source_t&) = default;
+    source_t(source_t&&) = default;
+    source_t& operator=(const source_t&) = default;
+    source_t& operator=(source_t&&) = default;
 
     int read(void* data, size_t bytes);
 
@@ -37,13 +37,13 @@ private:
     std::variant<std::istream*> delegate_;
 };
 
-class NXAPI sink {
+class NXAPI sink_t {
 public:
-    sink(std::ostream& stream);
-    ~sink();
+    sink_t(std::ostream& stream);
+    ~sink_t();
 
-    sink(const sink&) = default;
-    sink& operator=(const sink&) = default;
+    sink_t(const sink_t&) = default;
+    sink_t& operator=(const sink_t&) = default;
 
     int write(const void* data, size_t bytes);
 
@@ -55,11 +55,11 @@ namespace filter {
 
 using ringbuf = nx::ringbuf<uint8_t, 4096>;
 
-class NXAPI filter : private boost::noncopyable {
+class NXAPI filter_t : private boost::noncopyable {
 public:
     class proxy_t {
     public:
-        proxy_t(filter* p_filter)
+        proxy_t(filter_t* p_filter)
         : delegate_(p_filter)
         {
         }
@@ -71,7 +71,7 @@ public:
             return delegate_->read(data, bytes);
         }
 
-        void set_upstream(source p_upstream)
+        void set_upstream(source_t p_upstream)
         {
             delegate_->set_upstream(p_upstream);
         }
@@ -81,15 +81,15 @@ public:
         }
 
     private:
-        filter* delegate_;
+        filter_t* delegate_;
     };
 
-    filter();
-    virtual ~filter();
+    filter_t();
+    virtual ~filter_t();
 
     int read(void* data, size_t bytes);
 
-    void set_upstream(source p_upstream);
+    void set_upstream(source_t p_upstream);
     void set_upstream(proxy_t p_upstream);
 
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof) = 0;
@@ -102,38 +102,38 @@ private:
     void read_from_upstream();
     int write_to_downstream(void* data, size_t bytes);
 
-    std::variant<source, proxy_t, std::nullptr_t> upstream_;
+    std::variant<source_t, proxy_t, std::nullptr_t> upstream_;
     ringbuf rbuf_;
     ringbuf wbuf_;
     bool upstream_eof_;
     bool transform_eof_;
 };
 
-class NXAPI simple_filter : public filter {
+class NXAPI simple_filter_t : public filter_t {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
     virtual uint8_t transform(uint8_t chr) = 0;
 };
 
-class NXAPI lower : public simple_filter {
+class NXAPI lower_t : public simple_filter_t {
 public:
     virtual uint8_t transform(uint8_t chr) { return tolower(chr); }
 };
 
-class NXAPI upper : public simple_filter {
+class NXAPI upper_t : public simple_filter_t {
 public:
     virtual uint8_t transform(uint8_t chr) { return toupper(chr); }
 };
 
-class NXAPI hex : public filter {
+class NXAPI hex_t : public filter_t {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class NXAPI unhex : public filter {
+class NXAPI unhex_t : public filter_t {
 public:
-    unhex();
-    virtual ~unhex() { }
+    unhex_t();
+    virtual ~unhex_t() { }
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
@@ -141,32 +141,32 @@ private:
     uint8_t size_;
 };
 
-class NXAPI base64 : public filter {
+class NXAPI base64_t : public filter_t {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class NXAPI unbase64 : public filter {
+class NXAPI unbase64_t : public filter_t {
 public:
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 };
 
-class NXAPI cut : public filter {
+class NXAPI cut_t : public filter_t {
 public:
-    cut(uint8_t chr);
-    virtual ~cut() { }
+    cut_t(uint8_t chr);
+    virtual ~cut_t() { }
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     uint8_t chr_;
 };
 
-class NXAPI zlib : public filter {
+class NXAPI zlib_t : public filter_t {
 public:
     enum { default_level = 6 };
 
-    zlib(int level = default_level);
-    virtual ~zlib();
+    zlib_t(int level = default_level);
+    virtual ~zlib_t();
 
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
@@ -174,17 +174,17 @@ private:
     void* zlib_ctx_;
 };
 
-class NXAPI unzlib : public filter {
+class NXAPI unzlib_t : public filter_t {
 public:
-    unzlib();
-    virtual ~unzlib();
+    unzlib_t();
+    virtual ~unzlib_t();
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
 private:
     void* zlib_ctx_;
 };
 
-class NXAPI digest : public filter {
+class NXAPI digest_t : public filter_t {
 public:
     /**
      * @brief      { function_description }
@@ -211,8 +211,8 @@ public:
                                 "ssl3-md5",
                                 "ssl3-sha1",
      */
-    digest(const char* algorithm);
-    virtual ~digest();
+    digest_t(const char* algorithm);
+    virtual ~digest_t();
 
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
@@ -220,7 +220,7 @@ private:
     void* digest_ctx_;
 };
 
-class NXAPI cipher : public filter {
+class NXAPI cipher_t : public filter_t {
 public:
     /**
      * @brief      { function_description }
@@ -311,9 +311,9 @@ public:
 
     enum { decrypt = 0, encrypt = 1 };
 
-    cipher(const char* algorithm, int mode, const uint8_t key[],
+    cipher_t(const char* algorithm, int mode, const uint8_t key[],
         const uint8_t iv[]);
-    virtual ~cipher();
+    virtual ~cipher_t();
 
     virtual bool transform(ringbuf&, ringbuf&, bool upstream_eof);
 
@@ -321,36 +321,36 @@ private:
     void* cipher_ctx_;
 };
 
-class NXAPI encrypt : public cipher {
+class NXAPI encrypt_t : public cipher_t {
 public:
-    encrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
-    : cipher(algorithm, cipher::encrypt, key, iv)
+    encrypt_t(const char* algorithm, const uint8_t key[], const uint8_t iv[])
+    : cipher_t(algorithm, cipher_t::encrypt, key, iv)
     {
     }
-    virtual ~encrypt() { }
+    virtual ~encrypt_t() { }
 };
 
-class NXAPI decrypt : public cipher {
+class NXAPI decrypt_t : public cipher_t {
 public:
-    decrypt(const char* algorithm, const uint8_t key[], const uint8_t iv[])
-    : cipher(algorithm, cipher::decrypt, key, iv)
+    decrypt_t(const char* algorithm, const uint8_t key[], const uint8_t iv[])
+    : cipher_t(algorithm, cipher_t::decrypt, key, iv)
     {
     }
-    virtual ~decrypt() { }
+    virtual ~decrypt_t() { }
 };
 
-NXAPI filter::proxy_t operator|(
-    filter::proxy_t p_source, filter::proxy_t p_filter);
+NXAPI filter_t::proxy_t operator|(
+    filter_t::proxy_t p_source, filter_t::proxy_t p_filter);
 
 }; // namespace filter
 
-using filter_proxy = filter::filter::proxy_t;
+using filter_proxy_t = filter::filter_t::proxy_t;
 
-NXAPI bool operator|(source p_source, sink p_sink);
+NXAPI bool operator|(source_t p_source, sink_t p_sink);
 
-NXAPI bool operator|(filter::filter::proxy_t p_filter, sink p_sink);
+NXAPI bool operator|(filter::filter_t::proxy_t p_filter, sink_t p_sink);
 
-NXAPI filter_proxy operator|(source p_source, filter_proxy p_filter);
+NXAPI filter_proxy_t operator|(source_t p_source, filter_proxy_t p_filter);
 
 } // namespace nx::pipe
 

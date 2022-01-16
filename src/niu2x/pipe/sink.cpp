@@ -4,14 +4,14 @@
 
 namespace nx::pipe {
 
-sink::sink(std::ostream& stream)
+sink_t::sink_t(std::ostream& stream)
 : delegate_(&stream)
 {
 }
 
-sink::~sink() { }
+sink_t::~sink_t() { }
 
-int sink::write(const void* data, size_t bytes)
+int sink_t::write(const void* data, size_t bytes)
 {
     return std::visit(
         [data, bytes](auto&& arg) {
