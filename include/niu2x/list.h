@@ -1,5 +1,5 @@
-#ifndef NX_LIST_HEAD_H
-#define NX_LIST_HEAD_H
+#ifndef NX_LIST_H
+#define NX_LIST_H
 
 #include <stdlib.h>
 
@@ -54,11 +54,11 @@ NXAPI inline void list_init(struct list_t* entry)
 
 } // namespace nx
 
-#define NX_LIST_HEAD_INIT(name)                                                \
+#define NX_LIST_INIT(name)                                                     \
     {                                                                          \
         &(name), &(name)                                                       \
     }
-#define NX_LIST_HEAD(name) struct list_t name = NX_LIST_HEAD_INIT(name)
+#define NX_LIST(name) struct list_t name = NX_LIST_INIT(name)
 
 #define NX_LIST_ENTRY(ptr, clazz, field)                                       \
     ((clazz*)(((uint8_t*)(ptr)) - NX_OFFSET_OF(clazz, field)))
@@ -66,4 +66,4 @@ NXAPI inline void list_init(struct list_t* entry)
 #define NX_LIST_FOR_EACH(ptr, head)                                            \
     for (list_t* ptr = (head)->next; ptr != (head); ptr = ptr->next)
 
-#endif /* NX_LIST_HEAD_H */
+#endif /* NX_LIST_H */

@@ -59,7 +59,7 @@ static freelist<framebuffer_t, 256> framebuffer_freelist;
 static freelist<font_t, 256> font_freelist;
 static freelist<mesh_t, 1024> mesh_freelist;
 static freelist<mesh_group_t, 1024> mesh_group_freelist;
-static NX_LIST_HEAD(auto_destroy_head);
+static NX_LIST(auto_destroy_head);
 
 static void framebuffer_destroy(framebuffer_t* obj)
 {
