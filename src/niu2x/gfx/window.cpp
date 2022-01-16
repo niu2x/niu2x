@@ -34,7 +34,7 @@ void imgui_update(double dt);
 
 } // namespace
 
-math::vec2 window_size;
+math::vec2 window_size, window_origin;
 
 double now_seconds = 0;
 
@@ -142,6 +142,9 @@ GLFWwindow* create_glfw_window(const window_config_t& c)
     window_size[0] = c.width;
     window_size[1] = c.height;
 
+    window_origin[0] = 0;
+    window_origin[1] = 0;
+
     glfwMakeContextCurrent(glfw_window);
     glfwSwapInterval(1);
     NX_ASSERT(glewInit() == GLEW_OK, "glew init failed");
@@ -234,6 +237,10 @@ void framebuffer_size_callback(GLFWwindow* window, int w, int h)
         int viewport_height = scale * c->height;
         int viewport_x = (w - viewport_width) >> 1;
         int viewport_y = (h - viewport_height) >> 1;
+
+        window_origin[0] = viewport_x;
+        window_origin[1] = viewport_y;
+
         glViewport(viewport_x, viewport_y, viewport_width, viewport_height);
 
         window_size[0] = viewport_width;

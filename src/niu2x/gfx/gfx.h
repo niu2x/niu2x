@@ -34,6 +34,7 @@ extern indice_buffer_t* sprite_ib;
 extern program_t* sprite_program;
 
 extern math::vec2 window_size;
+extern math::vec2 window_origin;
 
 void auto_destroy_objects();
 

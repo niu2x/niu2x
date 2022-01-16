@@ -169,7 +169,8 @@ static void draw_layer(renderlayer_t& layer)
 
     } else {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glViewport(0, 0, window_size[0], window_size[1]);
+        glViewport(
+            window_origin[0], window_origin[1], window_size[0], window_size[1]);
     }
 
     NX_LIST_FOR_EACH(ptr, &(layer.cmd_list))
