@@ -19,15 +19,15 @@ NX_LOG_F(format, ...);
 
 #### read stdin -> compress -> write to stdout.
 ````
-nx::pipe::filter::zlib zlib;
-nx::pipe::source(std::cin) | zlib | nx::pipe::sink(std::cout);
+nx::pipe::filter::zlib_t zlib;
+nx::pipe::source_t(std::cin) | zlib | nx::pipe::sink_t(std::cout);
 ````
 
 #### read stdin -> remove all '\n' -> unbase64 -> write to stdout
 ````
-nx::pipe::filter::unbase64 unbase64;
-nx::pipe::filter::cut cut('\n');
-nx::pipe::source(std::cin) | cut | unbase64 | nx::pipe::sink(std::cout);
+nx::pipe::filter::unbase64_t unbase64;
+nx::pipe::filter::cut_t cut('\n');
+nx::pipe::source_t(std::cin) | cut | unbase64 | nx::pipe::sink_t(std::cout);
 
 ````
 - supported filters
