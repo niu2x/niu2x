@@ -2,7 +2,7 @@
 
 namespace nx {
 
-memory::~memory() { }
-memory::memory() { }
+memory_t::~memory_t() { }
+memory_t::memory_t() { }
 
 } // namespace nx

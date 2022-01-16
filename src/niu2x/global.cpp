@@ -4,12 +4,12 @@
 namespace nx {
 
 #if defined(NX_MAX_MEM)
-static freelist_memory memory(NX_MAX_MEM);
+static freelist_memory_t memory(NX_MAX_MEM);
 #else
-static mallocfree_memory memory;
+static mallocfree_memory_t memory;
 #endif
 
-memory_proxy global::mem(&memory);
+memory_proxy_t global::mem(&memory);
 
 } // namespace nx
 

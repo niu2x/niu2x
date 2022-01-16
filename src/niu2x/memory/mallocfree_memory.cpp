@@ -4,14 +4,14 @@
 
 namespace nx {
 
-mallocfree_memory::mallocfree_memory() { }
-mallocfree_memory::~mallocfree_memory() { }
+mallocfree_memory_t::mallocfree_memory_t() { }
+mallocfree_memory_t::~mallocfree_memory_t() { }
 
-void* mallocfree_memory::allocate(size_t size) noexcept
+void* mallocfree_memory_t::allocate(size_t size) noexcept
 {
     return ::malloc(size);
 }
 
-void mallocfree_memory::free(void* ptr) noexcept { ::free(ptr); }
+void mallocfree_memory_t::free(void* ptr) noexcept { ::free(ptr); }
 
 } // namespace nx

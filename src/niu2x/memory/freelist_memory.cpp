@@ -7,7 +7,7 @@
 
 namespace nx {
 
-freelist_memory::freelist_memory(size_t mem_size)
+freelist_memory_t::freelist_memory_t(size_t mem_size)
 {
     auto* allocator
         = new FreeListAllocator(mem_size, FreeListAllocator::FIND_FIRST);
@@ -15,26 +15,26 @@ freelist_memory::freelist_memory(size_t mem_size)
     delegate_ = allocator;
 }
 
-freelist_memory::~freelist_memory()
+freelist_memory_t::~freelist_memory_t()
 {
     auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);
     delete allocator;
 }
 
-void* freelist_memory::allocate(size_t size) noexcept
+void* freelist_memory_t::allocate(size_t size) noexcept
 {
     auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);
     // FreeListAllocator-Node's size is 16.
     return allocator->Allocate(std::max(size, 16ul), alignof(std::max_align_t));
 }
 
-void freelist_memory::free(void* ptr) noexcept
+void freelist_memory_t::free(void* ptr) noexcept
 {
     auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);
     allocator->Free(ptr);
 }
 
-uint64_t freelist_memory::used() noexcept
+uint64_t freelist_memory_t::used() noexcept
 {
 
     auto* allocator = reinterpret_cast<FreeListAllocator*>(delegate_);

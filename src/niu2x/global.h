@@ -6,7 +6,7 @@
 namespace nx {
 
 struct global {
-    static memory_proxy mem;
+    static memory_proxy_t mem;
 };
 
 #define NX_ALLOC(type, n)                                                      \

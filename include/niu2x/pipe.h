@@ -14,8 +14,6 @@
 
 namespace nx::pipe {
 
-extern NXAPI memory_proxy mem;
-
 enum NXAPI status {
     ok = 0,
     again,
