@@ -53,7 +53,7 @@ private:
 
 namespace filter {
 
-using ringbuf = nx::ringbuf<uint8_t, 4096>;
+using ringbuf = nx::ringbuf_t<uint8_t, 4096>;
 
 class NXAPI filter_t : private boost::noncopyable {
 public:

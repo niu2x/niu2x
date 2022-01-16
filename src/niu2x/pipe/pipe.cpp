@@ -8,7 +8,7 @@ namespace nx::pipe {
 
 bool operator|(source_t p_source, sink_t p_sink)
 {
-    ringbuf<unsigned char> buf;
+    filter::ringbuf buf;
 
     bool source_eof = false;
 
@@ -46,7 +46,7 @@ bool operator|(source_t p_source, sink_t p_sink)
 
 bool operator|(filter_proxy_t p_source, sink_t p_sink)
 {
-    ringbuf<unsigned char> buf;
+    filter::ringbuf buf;
     bool source_eof = false;
     do {
         while ((!buf.full()) && (!source_eof)) {

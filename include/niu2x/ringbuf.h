@@ -11,7 +11,7 @@
 namespace nx {
 
 template <class Elem, size_t capacity = 1024>
-class ringbuf {
+class ringbuf_t {
 public:
     template <class T>
     struct arrayref {
@@ -21,15 +21,15 @@ public:
 
     static constexpr size_t user_capacity = capacity - 1;
 
-    ringbuf()
+    ringbuf_t()
     : head_(0)
     , tail_(0)
     {
     }
-    ~ringbuf() { }
+    ~ringbuf_t() { }
 
-    ringbuf(const ringbuf&) = default;
-    ringbuf& operator=(const ringbuf&) = default;
+    ringbuf_t(const ringbuf_t&) = default;
+    ringbuf_t& operator=(const ringbuf_t&) = default;
 
     bool full() const noexcept { return size() == user_capacity; }
 
