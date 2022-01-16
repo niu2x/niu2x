@@ -162,9 +162,9 @@ private:
 };
 
 class NXAPI zlib_t : public filter_t {
-public:
     enum { default_level = 6 };
 
+public:
     zlib_t(int level = default_level);
     virtual ~zlib_t();
 
@@ -324,7 +324,7 @@ private:
 class NXAPI encrypt_t : public cipher_t {
 public:
     encrypt_t(const char* algorithm, const uint8_t key[], const uint8_t iv[])
-    : cipher_t(algorithm, cipher_t::encrypt, key, iv)
+    : cipher_t(algorithm, encrypt, key, iv)
     {
     }
     virtual ~encrypt_t() { }
@@ -333,7 +333,7 @@ public:
 class NXAPI decrypt_t : public cipher_t {
 public:
     decrypt_t(const char* algorithm, const uint8_t key[], const uint8_t iv[])
-    : cipher_t(algorithm, cipher_t::decrypt, key, iv)
+    : cipher_t(algorithm, decrypt, key, iv)
     {
     }
     virtual ~decrypt_t() { }

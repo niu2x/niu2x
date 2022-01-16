@@ -204,7 +204,7 @@ inline color_t rgba(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 
 using layer_t = uint8_t;
 
-enum NXAPI render_state_constant {
+enum NXAPI render_state_bits {
     CULL_FRONT = 1 << 0,
     CULL_BACK = 1 << 1,
     WRITE_R = 1 << 2,
@@ -219,7 +219,7 @@ enum NXAPI render_state_constant {
     BLEND = 1 << 10,
 };
 
-enum class NXAPI comparator {
+enum class NXAPI comparator : uint8_t {
     equal,
     never,
     less,
@@ -270,16 +270,19 @@ NXAPI void draw_texture(layer_t layer, texture_t* texture);
 NXAPI void draw_mesh(layer_t layer, mesh_t*);
 NXAPI void draw_mesh_group(layer_t layer, mesh_group_t*);
 
+NXAPI void set_view(layer_t layer, texture_t* texture);
+
+NXAPI void set_view_transform(const mat4x4);
+NXAPI void set_projection_transform(const mat4x4);
+
 NXAPI void set_vertex_buffer(vertex_buffer_t* vbo);
 NXAPI void set_indice_buffer(indice_buffer_t* vbo);
 NXAPI void set_program(program_t* program);
-NXAPI void set_render_state(render_state_t rs);
 NXAPI void set_texture(texture_id_t tex_id, texture_t* tex);
-NXAPI void set_blend_func(blend src_func, blend dst_func);
 NXAPI void set_model_transform(const mat4x4);
-NXAPI void set_view_transform(const mat4x4);
-NXAPI void set_projection_transform(const mat4x4);
-NXAPI void set_view(layer_t layer, texture_t* texture);
+
+NXAPI void set_render_state(render_state_t rs);
+NXAPI void set_blend_func(blend src_func, blend dst_func);
 NXAPI void set_stencil_func(comparator cmp, uint8_t ref, uint8_t mask);
 NXAPI void set_stencil_op(
     stencil_op sfail, stencil_op dpfail, stencil_op dppass);

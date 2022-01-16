@@ -29,40 +29,30 @@ static struct cmd_t {
     uint32_t start;
     uint32_t count;
 
+    render_state_t render_state;
+
     union {
         struct {
-            render_state_t render_state;
-
-            blend bf_src;
-            blend bf_dst;
-
-            comparator stencil_comparator;
-            uint8_t stencil_mask;
-            uint8_t stencil_ref;
-            stencil_op stencil_op_sfail;
-            stencil_op stencil_op_dpfail;
-            stencil_op stencil_op_dppass;
+            blend src;
+            blend dst;
         };
+        uint16_t hash;
+    } blend_state;
 
+    union {
         struct {
-            uint32_t reversed[3];
-        } render_state_md5;
-    };
+            comparator cmp;
+            uint8_t mask;
+            uint8_t ref;
+            stencil_op sfail;
+            stencil_op dpfail;
+            stencil_op dppass;
+        };
+        uint64_t hash;
+    } stencil_state;
 
     int environment_idx;
 } cmds[cmds_count];
-
-// static uint64_t render_state_md5(cmd_t* cmd)
-// {
-// #define T(name) (uint64_t)(cmd->name)
-//         // return T(render_state) ^ T(bf_src) ^ T(bf_dst) ^
-//         // T(stencil_comparator)
-//         //     ^ T(stencil_mask) ^ T(stencil_ref) ^ T(stencil_op_sfail)
-//         //     ^ T(stencil_op_dpfail) ^ T(stencil_op_dppass);
-//     return T(render_state_region[0] ) ^ T(render_state_region[1])
-//         ^ T(render_state_region[2]);
-// #undef T
-// }
 
 struct environment_t {
     mat4x4 view;
@@ -90,10 +80,17 @@ static int next_cmd_idx = 0;
 #define CHECK_CMD_COUNT()                                                      \
     NX_ASSERT(next_cmd_idx < cmds_count, "too many commands");
 
-static void handle_cmd_clear(cmd_t*);
-static void handle_cmd_draw_array(cmd_t* cmd);
-static void handle_cmd_draw_element(cmd_t* cmd);
-static void handle_render_state(cmd_t* cmd);
+static void handle_cmd_clear(const cmd_t*);
+static void handle_cmd_draw_array(const cmd_t* cmd);
+static void handle_cmd_draw_element(const cmd_t* cmd);
+static void handle_render_state(const cmd_t* cmd);
+static void handle_stencil_state(const cmd_t* cmd);
+static void handle_blend_state(const cmd_t* cmd);
+
+#define prepare_render(cmd)                                                    \
+    handle_render_state(cmd);                                                  \
+    handle_stencil_state(cmd);                                                 \
+    handle_blend_state(cmd);
 
 static constexpr int renderlayers_count = 16;
 
@@ -297,9 +294,9 @@ void set_program(program_t* program)
     (current_builder->cmd).program = program;
 }
 
-static void handle_cmd_clear(cmd_t* cmd)
+static void handle_cmd_clear(const cmd_t* cmd)
 {
-    handle_render_state(cmd);
+    prepare_render(cmd);
 #define BIT(name) GL_##name##_BUFFER_BIT
     static constexpr auto all = BIT(COLOR) | BIT(DEPTH) | BIT(STENCIL);
 #undef BIT
@@ -400,16 +397,49 @@ static auto gl_stencil_op(stencil_op op)
     return gl_stencil_op_map[(uint8_t)op];
 }
 
-static void handle_render_state(cmd_t* cmd)
+static void handle_blend_state(const cmd_t* cmd)
 {
-    // uint64_t rs_md5 = render_state_md5(cmd);
+    static NX_TYPE_OF(cmd->blend_state.hash) last;
 
-    // NX_LOG_D("rs_md5 %u", rs_md5);
+    if (cmd->render_state & BLEND) {
+        if (!(last == cmd->blend_state.hash)) {
+            last = cmd->blend_state.hash;
 
-    static decltype(cmd->render_state_md5) last_rs_md5 { 0 };
+            glBlendFunc(blend_func_map[(uint8_t)(cmd->blend_state.src)],
+                blend_func_map[(uint8_t)(cmd->blend_state.dst)]);
+        }
+    }
+}
 
-    if (memcmp(&last_rs_md5, &(cmd->render_state_md5), sizeof(last_rs_md5))) {
-        memcpy(&last_rs_md5, &(cmd->render_state_md5), sizeof(last_rs_md5));
+static void handle_stencil_state(const cmd_t* cmd)
+{
+    static NX_TYPE_OF(cmd->stencil_state.hash) last;
+
+    if (cmd->render_state & STENCIL_TEST) {
+        if (last != cmd->stencil_state.hash) {
+            last = cmd->stencil_state.hash;
+
+            if (cmd->render_state & WRITE_STENCIL)
+                glStencilMask(cmd->stencil_state.mask);
+            else
+                glStencilMask(0);
+
+            glStencilFunc(gl_comparator(cmd->stencil_state.cmp),
+                cmd->stencil_state.ref, cmd->stencil_state.mask);
+
+            glStencilOp(gl_stencil_op(cmd->stencil_state.sfail),
+                gl_stencil_op(cmd->stencil_state.dpfail),
+                gl_stencil_op(cmd->stencil_state.dppass));
+        }
+    }
+}
+
+static void handle_render_state(const cmd_t* cmd)
+{
+    static NX_TYPE_OF(cmd->render_state) last = -1;
+
+    if (last != cmd->render_state) {
+        last = cmd->render_state;
 
         auto rs = cmd->render_state;
         auto should_cull_front = (rs & CULL_FRONT);
@@ -444,18 +474,6 @@ static void handle_render_state(cmd_t* cmd)
 
         glDepthMask((rs & WRITE_DEPTH) ? GL_TRUE : GL_FALSE);
 
-        if (rs & WRITE_STENCIL)
-            glStencilMask(cmd->stencil_mask);
-        else
-            glStencilMask(0);
-
-        glStencilFunc(gl_comparator(cmd->stencil_comparator), cmd->stencil_ref,
-            cmd->stencil_mask);
-
-        glStencilOp(gl_stencil_op(cmd->stencil_op_sfail),
-            gl_stencil_op(cmd->stencil_op_dpfail),
-            gl_stencil_op(cmd->stencil_op_dppass));
-
         if (rs & DEPTH_TEST) {
             glEnable(GL_DEPTH_TEST);
         } else {
@@ -470,14 +488,13 @@ static void handle_render_state(cmd_t* cmd)
 
         if (rs & BLEND) {
             glEnable(GL_BLEND);
-            glBlendFunc(blend_func_map[(uint8_t)(cmd->bf_src)],
-                blend_func_map[(uint8_t)(cmd->bf_dst)]);
+
         } else
             glDisable(GL_BLEND);
     }
 }
 
-static void program_active(cmd_t* cmd)
+static void program_active(const cmd_t* cmd)
 {
     auto& env = environments[cmd->environment_idx];
     // NX_LOG_D("cmd->environment_idx %d %p", cmd->environment_idx, cmd);
@@ -532,8 +549,8 @@ static void program_active(cmd_t* cmd)
 void set_blend_func(blend src_func, blend dst_func)
 {
     auto& cmd_builder = current_builder->cmd;
-    cmd_builder.bf_src = src_func;
-    cmd_builder.bf_dst = dst_func;
+    cmd_builder.blend_state.src = src_func;
+    cmd_builder.blend_state.dst = dst_func;
 }
 
 void set_texture(texture_id_t tex_id, texture_t* tex)
@@ -544,18 +561,18 @@ void set_texture(texture_id_t tex_id, texture_t* tex)
     cmd_builder.textures[tex_id] = tex;
 }
 
-static void handle_cmd_draw_array(cmd_t* cmd)
+static void handle_cmd_draw_array(const cmd_t* cmd)
 {
-    handle_render_state(cmd);
+    prepare_render(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     vertex_layout_active(cmd->vbo->layout);
     program_active(cmd);
     glDrawArrays(GL_TRIANGLES, cmd->start, cmd->count);
 }
 
-static void handle_cmd_draw_element(cmd_t* cmd)
+static void handle_cmd_draw_element(const cmd_t* cmd)
 {
-    handle_render_state(cmd);
+    prepare_render(cmd);
     glBindBuffer(GL_ARRAY_BUFFER, cmd->vbo->name);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd->ibo->name);
     vertex_layout_active(cmd->vbo->layout);
@@ -602,16 +619,16 @@ void set_view(layer_t layer, texture_t* texture)
 
 void set_stencil_func(comparator cmp, uint8_t ref, uint8_t mask)
 {
-    current_builder->cmd.stencil_comparator = cmp;
-    current_builder->cmd.stencil_ref = ref;
-    current_builder->cmd.stencil_mask = mask;
+    current_builder->cmd.stencil_state.cmp = cmp;
+    current_builder->cmd.stencil_state.ref = ref;
+    current_builder->cmd.stencil_state.mask = mask;
 }
 
 void set_stencil_op(stencil_op sfail, stencil_op dpfail, stencil_op dppass)
 {
-    current_builder->cmd.stencil_op_sfail = sfail;
-    current_builder->cmd.stencil_op_dpfail = dpfail;
-    current_builder->cmd.stencil_op_dppass = dppass;
+    current_builder->cmd.stencil_state.sfail = sfail;
+    current_builder->cmd.stencil_state.dpfail = dpfail;
+    current_builder->cmd.stencil_state.dppass = dppass;
 }
 
 } // namespace nx::gfx

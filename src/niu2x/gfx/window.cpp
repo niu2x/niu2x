@@ -89,7 +89,7 @@ void run(const window_config_t& c)
         imgui_update(dt);
 
         average_dt = average_dt * 0.99 + dt * 0.01;
-        printf(0, 0, "FP_S: %.2f", (1 / average_dt));
+        printf(0, 0, "FPS: %.2f", (1 / average_dt));
         glfwSwapBuffers(glfw_window);
     }
 

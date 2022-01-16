@@ -27,3 +27,6 @@ target_link_libraries(shadow_map PUBLIC niu2x)
 
 add_executable(stencil "stencil.cpp")
 target_link_libraries(stencil PUBLIC niu2x)
+
+add_executable(display_model "display_model.cpp")
+target_link_libraries(display_model PUBLIC niu2x)
