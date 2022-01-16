@@ -11,7 +11,7 @@
 #include <niu2x/api.h>
 #include <niu2x/memory.h>
 #include <niu2x/linmath.h>
-#include <niu2x/list_head.h>
+#include <niu2x/list.h>
 
 namespace nx::gfx {
 
@@ -39,7 +39,7 @@ NXAPI void exit();
 struct NXAPI object_t {
     uint8_t type;
     uint64_t id;
-    list_head list;
+    list_t list;
 };
 
 enum class NXAPI pixel_format_t {

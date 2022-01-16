@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "niu2x/utils.h"
-#include "niu2x/list_head.h"
+#include "niu2x/list.h"
 #include "niu2x/assert.h"
 
 namespace nx::gfx {
@@ -19,7 +19,7 @@ static constexpr int max_cmd_textures = 8;
 static struct cmd_t {
     texture_t* textures[max_cmd_textures];
     mat4x4 model;
-    list_head list;
+    list_t list;
     struct {
         vertex_buffer_t* vbo;
         indice_buffer_t* ibo;
@@ -98,7 +98,7 @@ static void handle_render_state(cmd_t* cmd);
 static constexpr int renderlayers_count = 16;
 
 static struct renderlayer_t {
-    list_head cmd_list;
+    list_t cmd_list;
     texture_t* view;
 } layers[renderlayers_count];
 

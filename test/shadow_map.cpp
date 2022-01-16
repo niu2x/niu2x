@@ -282,7 +282,7 @@ static void setup()
     mesh_group = gfx::mesh_group_create_from_file(
         model_file.c_str(), gfx::MESH_AUTO_CENTER);
 
-    tex = gfx::texture_create(2048, 2048, gfx::pixel_format::rgba8, 0);
+    tex = gfx::texture_create(2048, 2048, gfx::pixel_format_t::rgba8, 0);
 
     float floor_vertices[][9] = {
         { -100000, -100000, -0, 0, 0, 1, 0, 0, 0 },
@@ -292,8 +292,8 @@ static void setup()
     };
 
     floor_vb = gfx::vertex_buffer_create(
-        gfx::vertex_layout(gfx::vertex_attr::position, gfx::vertex_attr::normal,
-            gfx::vertex_attr::uv),
+        gfx::vertex_layout(gfx::vertex_attr_t::position,
+            gfx::vertex_attr_t::normal, gfx::vertex_attr_t::uv),
         4, floor_vertices);
 
     uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };

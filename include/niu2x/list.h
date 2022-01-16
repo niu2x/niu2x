@@ -5,17 +5,14 @@
 
 namespace nx {
 
-struct NXAPI list_head {
-    struct list_head* prev;
-    struct list_head* next;
+struct NXAPI list_t {
+    struct list_t* prev;
+    struct list_t* next;
 };
 
-NXAPI inline bool list_empty(struct list_head* head)
-{
-    return head->prev == head;
-}
+NXAPI inline bool list_empty(struct list_t* head) { return head->prev == head; }
 
-NXAPI inline void list_add(struct list_head* entry, struct list_head* head)
+NXAPI inline void list_add(struct list_t* entry, struct list_t* head)
 {
     head->next->prev = entry;
     entry->prev = head;
@@ -24,7 +21,7 @@ NXAPI inline void list_add(struct list_head* entry, struct list_head* head)
     head->next = entry;
 }
 
-NXAPI inline void list_add_tail(struct list_head* entry, struct list_head* head)
+NXAPI inline void list_add_tail(struct list_t* entry, struct list_t* head)
 {
     head->prev->next = entry;
     entry->next = head;
@@ -33,7 +30,7 @@ NXAPI inline void list_add_tail(struct list_head* entry, struct list_head* head)
     head->prev = entry;
 }
 
-NXAPI inline void list_del(struct list_head* entry)
+NXAPI inline void list_del(struct list_t* entry)
 {
     entry->prev->next = entry->next;
     entry->next->prev = entry->prev;
@@ -41,7 +38,7 @@ NXAPI inline void list_del(struct list_head* entry)
     entry->next = nullptr;
 }
 
-NXAPI inline void list_del_init(struct list_head* entry)
+NXAPI inline void list_del_init(struct list_t* entry)
 {
     entry->prev->next = entry->next;
     entry->next->prev = entry->prev;
@@ -49,7 +46,7 @@ NXAPI inline void list_del_init(struct list_head* entry)
     entry->next = entry;
 }
 
-NXAPI inline void list_init(struct list_head* entry)
+NXAPI inline void list_init(struct list_t* entry)
 {
     entry->prev = entry;
     entry->next = entry;
@@ -61,12 +58,12 @@ NXAPI inline void list_init(struct list_head* entry)
     {                                                                          \
         &(name), &(name)                                                       \
     }
-#define NX_LIST_HEAD(name) struct list_head name = NX_LIST_HEAD_INIT(name)
+#define NX_LIST_HEAD(name) struct list_t name = NX_LIST_HEAD_INIT(name)
 
 #define NX_LIST_ENTRY(ptr, clazz, field)                                       \
     ((clazz*)(((uint8_t*)(ptr)) - NX_OFFSET_OF(clazz, field)))
 
 #define NX_LIST_FOR_EACH(ptr, head)                                            \
-    for (list_head* ptr = (head)->next; ptr != (head); ptr = ptr->next)
+    for (list_t* ptr = (head)->next; ptr != (head); ptr = ptr->next)
 
 #endif /* NX_LIST_HEAD_H */

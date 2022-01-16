@@ -13,7 +13,7 @@
 #include <niu2x/fs.h>
 
 #include "niu2x/utils.h"
-#include "niu2x/list_head.h"
+#include "niu2x/list.h"
 #include "niu2x/assert.h"
 #include "niu2x/freelist.h"
 

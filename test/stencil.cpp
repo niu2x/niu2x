@@ -176,8 +176,8 @@ public:
             { 200, -200, -0, 0, 0, 1, 1, 0, 0 },
         };
 
-        auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr::position,
-            gfx::vertex_attr::normal, gfx::vertex_attr::uv);
+        auto vertex_layout = gfx::vertex_layout(gfx::vertex_attr_t::position,
+            gfx::vertex_attr_t::normal, gfx::vertex_attr_t::uv);
         floor_vb = gfx::vertex_buffer_create(vertex_layout, 4, floor_vertices);
 
         uint32_t floor_indices[] = { 0, 1, 2, 0, 2, 3 };

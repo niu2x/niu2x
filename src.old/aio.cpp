@@ -19,14 +19,14 @@ struct idle_item {
     rid id;
     uv_idle_t uv_obj;
     idle_handle callback;
-    list_head list;
+    list_t list;
 };
 
 struct tcp_connect_item;
 struct tcp_item {
     rid id;
     uv_tcp_t uv_obj;
-    list_head list;
+    list_t list;
     tcp_connect_item* con;
     tcp_read_callback read_cb;
     tcp_connect_callback client_connect_cb;
@@ -37,7 +37,7 @@ struct tcp_item {
 struct tcp_connect_item {
     rid id;
     tcp_item* tcp;
-    list_head list;
+    list_t list;
     uv_connect_t uv_obj;
     struct sockaddr_in dest;
     tcp_connect_callback callback;

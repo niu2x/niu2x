@@ -6,20 +6,20 @@
 #include "niu2x/assert.h"
 #include "niu2x/utils.h"
 #include "niu2x/global.h"
-#include "niu2x/list_head.h"
+#include "niu2x/list.h"
 
 namespace nx {
 
 struct hashtab_t {
-    struct list_head* entries;
+    struct list_t* entries;
     size_t capacity;
     size_t size;
-    struct list_head all;
+    struct list_t all;
 };
 
 struct hashtab_entry_t {
-    struct list_head list;
-    struct list_head all;
+    struct list_t list;
+    struct list_t all;
     union {
         uint64_t u64;
     } key;
@@ -30,7 +30,7 @@ struct hashtab_entry_t {
 inline void hashtab_setup(struct hashtab_t* ht, size_t capacity = 32)
 {
     NX_ASSERT(capacity != 0, "invalid capacity");
-    ht->entries = NX_ALLOC(struct list_head, capacity);
+    ht->entries = NX_ALLOC(struct list_t, capacity);
 
     NX_ASSERT(ht->entries, "out of memory");
     ht->capacity = capacity;
@@ -62,7 +62,7 @@ inline void __hashtab_set(
     list_add(&(entry->all), &(ht->all));
 }
 
-inline struct list_head* __hashtab_get(struct hashtab_t* ht, uint64_t hash)
+inline struct list_t* __hashtab_get(struct hashtab_t* ht, uint64_t hash)
 {
     auto idx = hash % ht->capacity;
     auto* head = &(ht->entries[idx]);
@@ -80,7 +80,7 @@ inline uint64_t hashtab_hash(uint64_t x)
 
 inline struct hashtab_entry_t* hashtab_get(struct hashtab_t* ht, uint64_t key)
 {
-    struct list_head* head = __hashtab_get(ht, hashtab_hash(key));
+    struct list_t* head = __hashtab_get(ht, hashtab_hash(key));
 
     struct hashtab_entry_t* entry;
     NX_LIST_FOR_EACH(ptr, head)
@@ -127,7 +127,7 @@ inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity)
     struct hashtab_t new_ht;
     hashtab_setup(&new_ht, new_capacity);
     for (size_t idx = 0; idx < ht->capacity; idx++) {
-        struct list_head* head = &(ht->entries[idx]);
+        struct list_t* head = &(ht->entries[idx]);
         while (!list_empty(head)) {
             struct hashtab_entry_t* entry
                 = NX_LIST_ENTRY(head->next, struct hashtab_entry_t, list);
