@@ -45,6 +45,8 @@ public:
         math::vec3 center { 0, 0, 0 };
         math::vec3 up { 0, 0, 1 };
         camera_.look_at(eye, center, up);
+
+        right_button_pressing_ = false;
     }
 
     virtual void cleanup()
@@ -83,29 +85,34 @@ public:
         static double last_x = x;
         static double last_y = y;
 
-        camera_.pitch((y - last_y) / math::pi / 100.0);
-        camera_.yaw((x - last_x) / math::pi / 100.0);
-
+        if (right_button_pressing_) {
+            camera_.pitch((y - last_y) / math::pi / 100.0);
+            camera_.yaw((x - last_x) / math::pi / 100.0);
+        }
         last_x = x;
         last_y = y;
     }
 
     virtual void input_key(int keycode, int action, int mods)
     {
-        if (action == gfx::KEY_PRESS || action == gfx::KEY_REPEAT) {
-            if (keycode == gfx::KEY_W) {
-                camera_.move(10);
-            }
-            if (keycode == gfx::KEY_S) {
-                camera_.move(-10);
-            }
-        }
+        // if (action == gfx::KEY_PRESS || action == gfx::KEY_REPEAT) {
+        //     if (keycode == gfx::KEY_W) {
+        //         camera_.move(10);
+        //     }
+        //     if (keycode == gfx::KEY_S) {
+        //         camera_.move(-10);
+        //     }
+        // }
+
+        right_button_pressing_ = keycode == gfx::MOUSE_RIGHT_BUTTON
+            && (action == gfx::KEY_PRESS || action == gfx::KEY_REPEAT);
     }
 
 private:
     gfx::mesh_t* floor_;
     gfx::program_t* ambient_;
     gfh::camera_t camera_;
+    bool right_button_pressing_;
 };
 
 NX_GFH_ENTRY(my_app_t);

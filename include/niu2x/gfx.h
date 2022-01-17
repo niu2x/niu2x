@@ -417,6 +417,8 @@ enum NXAPI keycode_constant {
     KEY_RIGHT_ALT = 346,
     KEY_RIGHT_SUPER = 347,
     KEY_MENU = 348,
+    MOUSE_LEFT_BUTTON = GLFW_MOUSE_BUTTON_LEFT,
+    MOUSE_RIGHT_BUTTON = GLFW_MOUSE_BUTTON_RIGHT,
 };
 
 enum NXAPI key_action_constant {
