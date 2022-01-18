@@ -217,6 +217,11 @@ enum NXAPI render_state_bits {
     DEPTH_TEST = 1 << 8,
     STENCIL_TEST = 1 << 9,
     BLEND = 1 << 10,
+    PLOYGON_MODE_POINT = 1 << 11,
+    PLOYGON_MODE_LINE = 1 << 12,
+    PLOYGON_MODE_FILL = 1 << 13,
+    PLOYGON_MODE_MASK
+    = PLOYGON_MODE_LINE | PLOYGON_MODE_FILL | PLOYGON_MODE_POINT,
 };
 
 enum class NXAPI comparator : uint8_t {
