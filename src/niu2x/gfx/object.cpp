@@ -12,10 +12,9 @@
 
 #include <niu2x/fs.h>
 
-#include "niu2x/utils.h"
+#include <niu2x/utils.h>
 #include "niu2x/list.h"
-#include "niu2x/assert.h"
-#include "niu2x/freelist.h"
+#include "niu2x/obj_pool.h"
 
 namespace nx::gfx {
 
@@ -36,41 +35,31 @@ struct object_type {
 
 } // namespace
 
-#define object_create(freelist, type_t)                                        \
+#define object_create(pool, type_t)                                            \
     {                                                                          \
-        auto id = freelist.alloc();                                            \
-        NX_ASSERT(id != freelist.nil, "too many object");                      \
-        auto* obj = freelist.get(id);                                          \
+        auto obj = pool.alloc();                                               \
+        NX_ASSERT(obj != nullptr, "too many object");                          \
         obj->type = object_type::type_t;                                       \
-        obj->id = id;                                                          \
         list_init(&(obj->list));                                               \
         obj;                                                                   \
     }
 
-#define object_destroy(freelist, obj)                                          \
-    freelist.free(obj->id);                                                    \
+#define object_destroy(pool, obj)                                              \
+    pool.free(obj);                                                            \
     list_del_init(&(obj->list));
 
-static freelist<vertex_buffer_t, 4096> vertex_buffer_freelist;
-static freelist<indice_buffer_t, 4096> indice_buffer_freelist;
-static freelist<program_t, 1024> program_freelist;
-static freelist<texture_t, 4096> texture_freelist;
-static freelist<framebuffer_t, 256> framebuffer_freelist;
-static freelist<font_t, 256> font_freelist;
-static freelist<mesh_t, 1024> mesh_freelist;
-static freelist<mesh_group_t, 1024> mesh_group_freelist;
 static NX_LIST(auto_destroy_head);
 
 static void framebuffer_destroy(framebuffer_t* obj)
 {
     glDeleteRenderbuffers(1, &(obj->stencil_depth));
     glDeleteFramebuffers(1, &(obj->name));
-    object_destroy(framebuffer_freelist, obj);
+    object_destroy(framebuffer_pool, obj);
 }
 
 framebuffer_t* framebuffer_create(texture_t* texture)
 {
-    auto* obj = (object_create(framebuffer_freelist, framebuffer));
+    auto* obj = (object_create(framebuffer_pool, framebuffer));
 
     glGenFramebuffers(1, &(obj->name));
     glBindFramebuffer(GL_FRAMEBUFFER, obj->name);
@@ -131,7 +120,7 @@ size_t vertex_sizeof(vertex_layout_t layout)
 
 mesh_group_t* mesh_group_create_from_file(const char* path, int flags)
 {
-    auto* obj = (object_create(mesh_group_freelist, mesh_group));
+    auto* obj = (object_create(mesh_group_pool, mesh_group));
     obj->texture = 0;
     mesh_group_init_from_file(obj, path, flags);
     return obj;
@@ -139,7 +128,7 @@ mesh_group_t* mesh_group_create_from_file(const char* path, int flags)
 
 mesh_t* mesh_create_from_file(const char* path, int idx, int flags)
 {
-    auto* obj = (object_create(mesh_freelist, mesh));
+    auto* obj = (object_create(mesh_pool, mesh));
     obj->texture = 0;
     mesh_init_from_file(obj, path, idx, flags);
     return obj;
@@ -152,7 +141,7 @@ mesh_t* mesh_create_from_file(const char* path, int idx, int flags)
 vertex_buffer_t* vertex_buffer_create(vertex_layout_t layout,
     uint32_t vertices_count, void* data, bool auto_destroy)
 {
-    auto* obj = (object_create(vertex_buffer_freelist, vertex_buffer));
+    auto* obj = (object_create(vertex_buffer_pool, vertex_buffer));
     obj->size = vertices_count;
     glGenBuffers(1, &(obj->name));
     obj->layout = layout;
@@ -171,7 +160,7 @@ vertex_buffer_t* vertex_buffer_create(vertex_layout_t layout,
 
 font_t* font_create(int font_size)
 {
-    auto* obj = (object_create(font_freelist, font));
+    auto* obj = (object_create(font_pool, font));
     obj->private_data = NX_ALLOC(struct font::font_altas_t, 1);
     font::font_altas_setup((font::font_altas_t*)(obj->private_data), font_size);
 
@@ -189,7 +178,7 @@ indice_buffer_t* indice_buffer_create(
     uint32_t indices_count, void* data, bool auto_destroy)
 {
 
-    auto* obj = (object_create(indice_buffer_freelist, indice_buffer));
+    auto* obj = (object_create(indice_buffer_pool, indice_buffer));
     obj->size = indices_count;
 
     if (auto_destroy) {
@@ -209,13 +198,13 @@ indice_buffer_t* indice_buffer_create(
 static void indice_buffer_destroy(indice_buffer_t* obj)
 {
     glDeleteBuffers(1, &(obj->name));
-    object_destroy(indice_buffer_freelist, obj);
+    object_destroy(indice_buffer_pool, obj);
 }
 
 static void vertex_buffer_destroy(vertex_buffer_t* obj)
 {
     glDeleteBuffers(1, &(obj->name));
-    object_destroy(vertex_buffer_freelist, obj);
+    object_destroy(vertex_buffer_pool, obj);
 }
 
 font_char_info_t font_char_info(font_t* self, uint32_t code)
@@ -273,14 +262,14 @@ static void texture_destroy(texture_t* obj)
     }
 
     glDeleteTextures(1, &(obj->name));
-    object_destroy(texture_freelist, obj);
+    object_destroy(texture_pool, obj);
 }
 
 static void font_destroy(font_t* obj)
 {
     font::font_altas_cleanup((font::font_altas_t*)(obj->private_data));
     NX_FREE(obj->private_data);
-    object_destroy(font_freelist, obj);
+    object_destroy(font_pool, obj);
 }
 
 static GLuint program_create(GLuint vert, GLuint frag)
@@ -322,7 +311,7 @@ program_t* program_create(const char* vert, const char* frag)
     shader_destroy(vert_name);
     shader_destroy(frag_name);
 
-    auto* obj = (object_create(program_freelist, program));
+    auto* obj = (object_create(program_pool, program));
     obj->name = progame_name;
 
     GLint uniforms_size;
@@ -357,14 +346,14 @@ static void program_destroy(program_t* obj)
 {
 
     program_destroy(obj->name);
-    object_destroy(program_freelist, obj);
+    object_destroy(program_pool, obj);
 }
 
 static void mesh_destroy(mesh_t* obj)
 {
     destroy(obj->vb);
     destroy(obj->ib);
-    object_destroy(mesh_freelist, obj);
+    object_destroy(mesh_pool, obj);
 }
 
 static void mesh_group_destroy_node(mesh_group_t::node_t* node)
@@ -378,7 +367,7 @@ static void mesh_group_destroy_node(mesh_group_t::node_t* node)
 
 mesh_t* mesh_create()
 {
-    auto* obj = (object_create(mesh_freelist, mesh));
+    auto* obj = (object_create(mesh_pool, mesh));
     obj->texture = 0;
     obj->ib = nullptr;
     obj->vb = nullptr;
@@ -393,7 +382,7 @@ static void mesh_group_destroy(mesh_group_t* obj)
     NX_FREE(obj->meshes);
     
     mesh_group_destroy_node(&(obj->root));
-    object_destroy(mesh_freelist, obj);
+    object_destroy(mesh_group_pool, obj);
 }
 
 void destroy(object_t* obj)
@@ -513,7 +502,7 @@ void texture_update_region(
 
 texture_t* texture_create(int w, int h, pixel_format_t pf, const void* data)
 {
-    auto* obj = (object_create(texture_freelist, texture));
+    auto* obj = (object_create(texture_pool, texture));
     glGenTextures(1, &(obj->name));
     glBindTexture(GL_TEXTURE_2D, obj->name);
     switch (pf) {

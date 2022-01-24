@@ -3,6 +3,9 @@
 #include <niu2x/log.h>
 
 #include "niu2x/gfx.h"
+#include "niu2x/global.h"
+#include "niu2x/assert.h"
+
 #include "noto_scans_sc_regular.h"
 
 #define FONT_LOAD_FLAGS                                                        \

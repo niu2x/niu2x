@@ -303,6 +303,7 @@ static void setup()
 
 static void cleanup()
 {
+    gfx::destroy(program000);
     gfx::destroy(ambient_program);
     gfx::destroy(floor_ib);
     gfx::destroy(floor_vb);

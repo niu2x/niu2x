@@ -16,6 +16,9 @@ void camera_t::pitch(double delta) { math::mat4x4_rotate_x(transform_, delta); }
 void camera_t::yaw(double delta) { math::mat4x4_rotate_y(transform_, delta); }
 void camera_t::roll(double delta) { math::mat4x4_rotate_z(transform_, delta); }
 
-void camera_t::move(double z) { math::mat4x4_translate(transform_, 0, 0, z); }
+void camera_t::move(double dx, double dy, double dz)
+{
+    math::mat4x4_translate(transform_, dx, dy, dz);
+}
 
 } // namespace nx::gfh

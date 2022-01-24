@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 
+#include <niu2x/api.h>
+#include <niu2x/utils.h>
+
 namespace nx {
 
 struct NXAPI list_t {

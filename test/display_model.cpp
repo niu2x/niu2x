@@ -83,7 +83,7 @@ public:
         static double last_x = x;
         static double last_y = y;
 
-        camera_.pitch((y - last_y) / math::pi / 100.0);
+        // camera_.pitch((y - last_y) / math::pi / 100.0);
         camera_.yaw((x - last_x) / math::pi / 100.0);
 
         last_x = x;
@@ -93,11 +93,23 @@ public:
     virtual void input_key(int keycode, int action, int mods)
     {
         if (action == gfx::KEY_PRESS || action == gfx::KEY_REPEAT) {
-            if (keycode == gfx::KEY_W) {
-                camera_.move(10);
-            }
-            if (keycode == gfx::KEY_S) {
-                camera_.move(-10);
+            switch (keycode) {
+                case gfx::KEY_W: {
+                    camera_.move(0, 0, 10);
+                    break;
+                }
+                case gfx::KEY_S: {
+                    camera_.move(0, 0, -10);
+                    break;
+                }
+                case gfx::KEY_Q: {
+                    camera_.move(0, -10, 0);
+                    break;
+                }
+                case gfx::KEY_E: {
+                    camera_.move(0, 10, 0);
+                    break;
+                }
             }
         }
     }

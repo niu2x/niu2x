@@ -1,5 +1,8 @@
-#ifndef NX_SRC_UTILS_H
-#define NX_SRC_UTILS_H
+#ifndef NX_UTILS_H
+#define NX_UTILS_H
+
+#include <cstdint>
+#include <cstddef>
 
 namespace nx {
 
@@ -44,8 +47,7 @@ constexpr inline int stoi(const char* str, int value)
 } // namespace nx
 
 #define NX_OFFSET_OF(mt, field) (ptrdiff_t)(&(((mt*)nullptr)->field))
-
-#define NX_TYPE_OF(name) std::decay_t<decltype(name)>
+#define NX_TYPE_OF(name)        std::decay_t<decltype(name)>
 // #define NX_ALLOC_ARRAY(type, num) (type*) malloc(sizeof(type) * (num))
 // #define NX_ALLOC_FREE(type, num) (type*) malloc(sizeof(type) * (num))
 
