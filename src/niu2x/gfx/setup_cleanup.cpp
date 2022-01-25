@@ -20,10 +20,10 @@ static const char* sprite_program_source[] = { R"RAW(
 #version 300 es
 
 layout(location = 0) in highp vec3 position;
-layout(location = 1) in highp vec3 uv;
+layout(location = 1) in lowp vec3 uv;
 
 uniform mat4 MVP;
-out highp vec3 v_uv;
+out lowp vec3 v_uv;
 
 void main()
 {
@@ -36,9 +36,8 @@ void main()
 #version 300 es
 
 uniform sampler2D TEX0;
-in highp vec3 v_uv;
-
-out highp vec4 color;
+in lowp vec3 v_uv;
+out lowp vec4 color;
 
 void main()
 {

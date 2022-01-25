@@ -1,4 +1,4 @@
-#include <niu2x/gfh.h>
+#include "gfh.h"
 
 namespace nx::gfh {
 

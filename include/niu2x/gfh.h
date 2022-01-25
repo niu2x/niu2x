@@ -6,6 +6,7 @@
 #include <niu2x/gfx.h>
 #include <niu2x/linmath.h>
 #include <niu2x/hashtab.h>
+#include <niu2x/object.h>
 
 namespace nx::gfh {
 
@@ -99,13 +100,21 @@ private:
 };
 
 using component_id_t = uint32_t;
-using component_type_t = uint8_t;
 
-struct NXAPI component_t {
+struct NXAPI object_type {
     enum {
+        game_object,
         transform,
     };
-    component_type_t type;
+};
+
+using object_type_t = uint8_t;
+
+struct NXAPI object_t : nx::object_t {
+    object_type_t type;
+};
+
+struct NXAPI component_t : object_t {
     hashtab_entry_t hash;
 };
 
@@ -115,12 +124,16 @@ struct NXAPI transform_t : component_t {
     math::vec3 scale;
 };
 
-struct NXAPI game_object_t {
+struct NXAPI game_object_t : object_t {
     hashtab_t component_registry;
 };
 
-game_object_t* game_object_create();
-void destroy(game_object_t*);
+NXAPI game_object_t* game_object_create();
+NXAPI transform_t* transform_create();
+NXAPI void destroy(object_t*);
+
+NXAPI void setup();
+NXAPI void cleanup();
 
 } // namespace nx::gfh
 
