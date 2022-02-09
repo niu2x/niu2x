@@ -5,6 +5,7 @@
 
 #include <niu2x/gfx.h>
 #include <niu2x/linmath.h>
+#include <niu2x/hashtab.h>
 
 namespace nx::gfh {
 
@@ -86,13 +87,40 @@ public:
     void pitch(double x);
     void yaw(double x);
     void roll(double x);
-    void move(double x);
+    void move(double dx, double dy, double dz);
 
     const math::mat4x4& transform() const { return transform_; }
 
 private:
     math::mat4x4 transform_;
+    math::vec3 eye_;
+    math::vec3 up_;
+    math::vec3 center_;
 };
+
+using component_id_t = uint32_t;
+using component_type_t = uint8_t;
+
+struct NXAPI component_t {
+    enum {
+        transform,
+    };
+    component_type_t type;
+    hashtab_entry_t hash;
+};
+
+struct NXAPI transform_t : component_t {
+    math::vec3 position;
+    math::vec3 rotation;
+    math::vec3 scale;
+};
+
+struct NXAPI game_object_t {
+    hashtab_t component_registry;
+};
+
+game_object_t* game_object_create();
+void destroy(game_object_t*);
 
 } // namespace nx::gfh
 

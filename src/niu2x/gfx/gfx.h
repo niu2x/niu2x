@@ -8,6 +8,7 @@
 #include <niu2x/gfx.h>
 
 #include "niu2x/hashtab.h"
+#include "niu2x/obj_pool.h"
 
 namespace nx::gfx {
 
@@ -83,6 +84,15 @@ void render_setup();
 void render_cleanup();
 
 framebuffer_t* framebuffer_create(texture_t* texture);
+
+extern nx::obj_pool_t<vertex_buffer_t> vertex_buffer_pool;
+extern nx::obj_pool_t<indice_buffer_t> indice_buffer_pool;
+extern nx::obj_pool_t<program_t> program_pool;
+extern nx::obj_pool_t<texture_t> texture_pool;
+extern nx::obj_pool_t<framebuffer_t> framebuffer_pool;
+extern nx::obj_pool_t<font_t> font_pool;
+extern nx::obj_pool_t<mesh_t> mesh_pool;
+extern nx::obj_pool_t<mesh_group_t> mesh_group_pool;
 
 } // namespace nx::gfx
 

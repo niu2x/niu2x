@@ -1,5 +1,5 @@
 #include "niu2x/global.h"
-#include "niu2x/utils.h"
+#include <niu2x/utils.h>
 
 namespace nx {
 
@@ -12,5 +12,3 @@ static mallocfree_memory_t memory;
 memory_proxy_t global::mem(&memory);
 
 } // namespace nx
-
-#include "hashtab.h"

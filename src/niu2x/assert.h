@@ -10,4 +10,9 @@
         NX_THROW((message));                                                   \
     }
 
+#define NX_ASSERT_NO_THROW(condition, message, ...)                            \
+    if (!(condition)) {                                                        \
+        NX_LOG_F(message, ##__VA_ARGS__);                                      \
+    }
+
 #endif

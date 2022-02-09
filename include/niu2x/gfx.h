@@ -12,6 +12,7 @@
 #include <niu2x/memory.h>
 #include <niu2x/linmath.h>
 #include <niu2x/list.h>
+#include <niu2x/object.h>
 
 namespace nx::gfx {
 
@@ -36,9 +37,8 @@ struct NXAPI window_config_t {
 NXAPI void run(const window_config_t& c);
 NXAPI void exit();
 
-struct NXAPI object_t {
+struct NXAPI object_t : nx::object_t {
     uint8_t type;
-    uint64_t id;
     list_t list;
 };
 

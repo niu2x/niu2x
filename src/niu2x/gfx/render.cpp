@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "niu2x/utils.h"
+#include <niu2x/utils.h>
 #include "niu2x/list.h"
 #include "niu2x/assert.h"
 

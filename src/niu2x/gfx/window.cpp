@@ -3,9 +3,11 @@
 #include <chrono>
 
 #include <niu2x/log.h>
+#include <niu2x/utils.h>
 
 #include "niu2x/assert.h"
-#include "niu2x/utils.h"
+#include "niu2x/global.h"
+#include "niu2x/obj_pool.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -41,6 +43,8 @@ double now_seconds = 0;
 static GLFWwindow* current_glfw_window = nullptr;
 // static int window_width, window_height;
 
+static void test() { }
+
 void run(const window_config_t& c)
 {
     NX_ASSERT(current_glfw_window == nullptr, "already had a glfw_window.");
@@ -69,6 +73,8 @@ void run(const window_config_t& c)
 
     if (c.setup)
         c.setup();
+
+    test();
 
 #define duration_cast(t)                                                       \
     std::chrono::duration_cast<std::chrono::microseconds>((t))

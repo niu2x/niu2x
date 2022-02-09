@@ -3,7 +3,7 @@
 #include <assimp/postprocess.h> // Post processing flags
 
 #include "niu2x/assert.h"
-#include "niu2x/utils.h"
+#include <niu2x/utils.h>
 #include "niu2x/gfx.h"
 #include "niu2x/global.h"
 

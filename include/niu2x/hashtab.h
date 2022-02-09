@@ -3,21 +3,21 @@
 
 #include <string.h>
 
-#include "niu2x/assert.h"
-#include "niu2x/utils.h"
-#include "niu2x/global.h"
-#include "niu2x/list.h"
+#include <cstdint>
+
+#include <niu2x/api.h>
+#include <niu2x/list.h>
 
 namespace nx {
 
-struct hashtab_t {
+struct NXAPI hashtab_t {
     struct list_t* entries;
     size_t capacity;
     size_t size;
     struct list_t all;
 };
 
-struct hashtab_entry_t {
+struct NXAPI hashtab_entry_t {
     struct list_t list;
     struct list_t all;
     union {
@@ -27,33 +27,11 @@ struct hashtab_entry_t {
     struct hashtab_t* hashtab;
 };
 
-inline void hashtab_setup(struct hashtab_t* ht, size_t capacity = 32)
-{
-    NX_ASSERT(capacity != 0, "invalid capacity");
-    ht->entries = NX_ALLOC(struct list_t, capacity);
+NXAPI void hashtab_setup(struct hashtab_t* ht, size_t capacity = 32);
 
-    NX_ASSERT(ht->entries, "out of memory");
-    ht->capacity = capacity;
-    ht->size = 0;
+NXAPI void hashtab_cleanup(struct hashtab_t* ht);
 
-    for (size_t i = 0; i < capacity; i++) {
-        auto* head = &(ht->entries[i]);
-        head->prev = head->next = head;
-    }
-
-    ht->all.prev = ht->all.next = &(ht->all);
-}
-
-inline void hashtab_cleanup(struct hashtab_t* ht)
-{
-    NX_ASSERT(ht && ht->entries != nullptr && ht->capacity != 0, "");
-    NX_FREE(ht->entries);
-    ht->capacity = 0;
-    ht->size = 0;
-    ht->all.prev = ht->all.next = &(ht->all);
-}
-
-inline void __hashtab_set(
+NXAPI inline void __hashtab_set(
     struct hashtab_t* ht, uint64_t hash, struct hashtab_entry_t* entry)
 {
     auto idx = hash % ht->capacity;
@@ -62,14 +40,14 @@ inline void __hashtab_set(
     list_add(&(entry->all), &(ht->all));
 }
 
-inline struct list_t* __hashtab_get(struct hashtab_t* ht, uint64_t hash)
+NXAPI inline struct list_t* __hashtab_get(struct hashtab_t* ht, uint64_t hash)
 {
     auto idx = hash % ht->capacity;
     auto* head = &(ht->entries[idx]);
     return head;
 }
 
-inline uint64_t hashtab_hash(uint64_t x)
+NXAPI inline uint64_t hashtab_hash(uint64_t x)
 {
     x = (x ^ (x >> 30)) * uint64_t(0xbf58476d1ce4e5b9);
     x = (x ^ (x >> 27)) * uint64_t(0x94d049bb133111eb);
@@ -77,8 +55,8 @@ inline uint64_t hashtab_hash(uint64_t x)
     return x;
 }
 
-
-inline struct hashtab_entry_t* hashtab_get(struct hashtab_t* ht, uint64_t key)
+NXAPI inline struct hashtab_entry_t* hashtab_get(
+    struct hashtab_t* ht, uint64_t key)
 {
     struct list_t* head = __hashtab_get(ht, hashtab_hash(key));
 
@@ -93,7 +71,7 @@ inline struct hashtab_entry_t* hashtab_get(struct hashtab_t* ht, uint64_t key)
     return nullptr;
 }
 
-inline void hashtab_del(struct hashtab_entry_t* entry)
+NXAPI inline void hashtab_del(struct hashtab_entry_t* entry)
 {
     --entry->hashtab->size;
     entry->hashtab = nullptr;
@@ -101,9 +79,9 @@ inline void hashtab_del(struct hashtab_entry_t* entry)
     list_del(&(entry->all));
 }
 
-inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity);
+NXAPI inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity);
 
-inline void hashtab_set(
+NXAPI inline void hashtab_set(
     struct hashtab_t* ht, uint64_t key, struct hashtab_entry_t* entry)
 {
     auto* hh = hashtab_get(ht, key);
@@ -122,7 +100,7 @@ inline void hashtab_set(
     ++ht->size;
 }
 
-inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity)
+NXAPI inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity)
 {
     struct hashtab_t new_ht;
     hashtab_setup(&new_ht, new_capacity);
@@ -140,7 +118,7 @@ inline void hashtab_resize(struct hashtab_t* ht, size_t new_capacity)
     *ht = new_ht;
 }
 
-inline struct hashtab_entry_t* hashtab_first(struct hashtab_t* ht)
+NXAPI inline struct hashtab_entry_t* hashtab_first(struct hashtab_t* ht)
 {
     if (ht->size > 0) {
         return NX_LIST_ENTRY(ht->all.next, struct hashtab_entry_t, all);

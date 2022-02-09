@@ -2,7 +2,7 @@
 #include <niu2x/log.h>
 #include <niu2x/ringbuf.h>
 
-#include "niu2x/utils.h"
+#include <niu2x/utils.h>
 
 namespace nx::pipe {
 

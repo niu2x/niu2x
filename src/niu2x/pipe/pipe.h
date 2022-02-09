@@ -3,7 +3,7 @@
 
 #include <niu2x/pipe.h>
 
-#include "niu2x/utils.h"
+#include <niu2x/utils.h>
 
 namespace nx::pipe {
 

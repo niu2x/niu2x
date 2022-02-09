@@ -138,19 +138,33 @@ public:
     {
         static double last_x = x;
         static double last_y = y;
-
-        if (right_button_pressing_) {
-            camera_.pitch((y - last_y) / math::pi / 100.0);
-            camera_.yaw((x - last_x) / math::pi / 100.0);
-        }
+        camera_.yaw((x - last_x) / math::pi / 100.0);
         last_x = x;
         last_y = y;
     }
 
     virtual void input_key(int keycode, int action, int mods)
     {
-        right_button_pressing_ = keycode == gfx::MOUSE_RIGHT_BUTTON
-            && (action == gfx::KEY_PRESS || action == gfx::KEY_REPEAT);
+        if (action == gfx::KEY_PRESS || action == gfx::KEY_REPEAT) {
+            switch (keycode) {
+                case gfx::KEY_W: {
+                    camera_.move(0, 0, 10);
+                    break;
+                }
+                case gfx::KEY_S: {
+                    camera_.move(0, 0, -10);
+                    break;
+                }
+                case gfx::KEY_Q: {
+                    camera_.move(0, -10, 0);
+                    break;
+                }
+                case gfx::KEY_E: {
+                    camera_.move(0, 10, 0);
+                    break;
+                }
+            }
+        }
     }
 
 private:

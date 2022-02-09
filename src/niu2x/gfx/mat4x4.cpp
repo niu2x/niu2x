@@ -1,5 +1,7 @@
 #include "gfx.h"
 
+#include <niu2x/log.h>
+
 namespace nx::gfx {
 
 void mat4x4_dump(const mat4x4 a)
