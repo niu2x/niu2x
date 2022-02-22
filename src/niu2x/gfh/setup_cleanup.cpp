@@ -1,11 +1,13 @@
-#include <niu2x/gfh.h>
+#include "gfh.h"
 
 namespace nx::gfh {
+
+NX_OBJ_POOL_DEFINE2(game_object, 0);
 
 static int64_t counter = 0;
 
 static void __setup() { }
-static void __cleanup() { }
+static void __cleanup() { game_object_pool.clear(); }
 
 void setup()
 {

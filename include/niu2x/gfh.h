@@ -54,16 +54,33 @@ struct NXAPI transform_t : component_t {
 };
 
 struct NXAPI game_object_t : nx::object_t {
-    hashtab_t component_registry;
+    hashtab_t components;
+    list_t children;
+
     game_object_t* parent;
+    list_t self_in_children; // valid if only parent is't nullptr
+    uint64_t ref;
 };
 
 struct NXAPI world_t : nx::object_t {
     game_object_t* root;
 };
 
+NXAPI void world_setup(world_t* self);
+NXAPI void world_cleanup(world_t* self);
+
 NXAPI game_object_t* game_object_create();
+NXAPI void game_object_add_child(game_object_t* self, game_object_t* child);
 NXAPI void destroy(game_object_t*);
+NXAPI void game_object_remove_children(game_object_t* self);
+
+NXAPI inline void game_object_retain(game_object_t* self) { self->ref++; }
+NXAPI inline void game_object_release(game_object_t* self)
+{
+    if (--self->ref == 0) {
+        destroy(self);
+    }
+}
 
 class NXAPI app_t : boost::noncopyable {
 public:
@@ -91,6 +108,32 @@ public:
 private:
 };
 
+class NXAPI game_app_t : public app_t {
+public:
+    game_app_t();
+    virtual ~game_app_t();
+
+    virtual void setup() override;
+    virtual void cleanup() override;
+    virtual void update(double dt) override;
+    virtual std::string title() const override { return ""; }
+    virtual uint64_t window_options() const override { return gfx::MSAA; }
+    virtual math::vec2_t window_size() const override { return { 800, 600 }; };
+    virtual void input_mouse_move(double xpos, double ypos) override
+    {
+        (void)(xpos), (void)ypos;
+    }
+    virtual void input_key(int keycode, int action, int mods) override
+    {
+        (void)keycode;
+        (void)action;
+        (void)mods;
+    }
+
+private:
+    world_t world;
+};
+
 NXAPI void setup();
 NXAPI void cleanup();
 
@@ -101,8 +144,16 @@ NXAPI void cleanup();
     static nx::gfh::app_t* app;                                                \
                                                                                \
     static void update(double dt) { app->update(dt); }                         \
-    static void setup() { app->setup(); }                                      \
-    static void cleanup() { app->cleanup(); }                                  \
+    static void setup()                                                        \
+    {                                                                          \
+        nx::gfh::setup();                                                      \
+        app->setup();                                                          \
+    }                                                                          \
+    static void cleanup()                                                      \
+    {                                                                          \
+        app->cleanup();                                                        \
+        nx::gfh::cleanup();                                                    \
+    }                                                                          \
     static void key_callback(int keycode, int action, int mods)                \
     {                                                                          \
         app->input_key(keycode, action, mods);                                 \
