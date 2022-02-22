@@ -85,14 +85,14 @@ void render_cleanup();
 
 framebuffer_t* framebuffer_create(texture_t* texture);
 
-extern nx::obj_pool_t<vertex_buffer_t> vertex_buffer_pool;
-extern nx::obj_pool_t<indice_buffer_t> indice_buffer_pool;
-extern nx::obj_pool_t<program_t> program_pool;
-extern nx::obj_pool_t<texture_t> texture_pool;
-extern nx::obj_pool_t<framebuffer_t> framebuffer_pool;
-extern nx::obj_pool_t<font_t> font_pool;
-extern nx::obj_pool_t<mesh_t> mesh_pool;
-extern nx::obj_pool_t<mesh_group_t> mesh_group_pool;
+extern NX_OBJ_POOL_DECLARE2(vertex_buffer);
+extern NX_OBJ_POOL_DECLARE2(indice_buffer);
+extern NX_OBJ_POOL_DECLARE2(program);
+extern NX_OBJ_POOL_DECLARE2(texture);
+extern NX_OBJ_POOL_DECLARE2(framebuffer);
+extern NX_OBJ_POOL_DECLARE2(font);
+extern NX_OBJ_POOL_DECLARE2(mesh);
+extern NX_OBJ_POOL_DECLARE2(mesh_group);
 
 } // namespace nx::gfx
 

@@ -101,7 +101,7 @@ private:
 using component_id_t = uint32_t;
 using component_type_t = uint8_t;
 
-struct NXAPI component_t {
+struct NXAPI component_t : nx::object_t {
     enum {
         transform,
     };
@@ -115,12 +115,17 @@ struct NXAPI transform_t : component_t {
     math::vec3 scale;
 };
 
-struct NXAPI game_object_t {
+struct NXAPI game_object_t : nx::object_t {
     hashtab_t component_registry;
+    game_object_t* parent;
 };
 
-game_object_t* game_object_create();
-void destroy(game_object_t*);
+struct NXAPI world_t : nx::object_t {
+    game_object_t* root;
+};
+
+NXAPI game_object_t* game_object_create();
+NXAPI void destroy(game_object_t*);
 
 } // namespace nx::gfh
 

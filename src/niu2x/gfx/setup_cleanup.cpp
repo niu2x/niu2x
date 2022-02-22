@@ -7,14 +7,14 @@ program_t* sprite_program = nullptr;
 vertex_buffer_t* sprite_vb = nullptr;
 indice_buffer_t* sprite_ib = nullptr;
 
-nx::obj_pool_t<vertex_buffer_t> vertex_buffer_pool(0);
-nx::obj_pool_t<indice_buffer_t> indice_buffer_pool(0);
-nx::obj_pool_t<program_t> program_pool(0);
-nx::obj_pool_t<texture_t> texture_pool(0);
-nx::obj_pool_t<framebuffer_t> framebuffer_pool(0);
-nx::obj_pool_t<font_t> font_pool(0);
-nx::obj_pool_t<mesh_t> mesh_pool(0);
-nx::obj_pool_t<mesh_group_t> mesh_group_pool(0);
+NX_OBJ_POOL_DEFINE2(vertex_buffer, 0);
+NX_OBJ_POOL_DEFINE2(indice_buffer, 0);
+NX_OBJ_POOL_DEFINE2(program, 0);
+NX_OBJ_POOL_DEFINE2(texture, 0);
+NX_OBJ_POOL_DEFINE2(framebuffer, 0);
+NX_OBJ_POOL_DEFINE2(font, 0);
+NX_OBJ_POOL_DEFINE2(mesh, 0);
+NX_OBJ_POOL_DEFINE2(mesh_group, 0);
 
 static const char* sprite_program_source[] = { R"RAW(
 #version 300 es

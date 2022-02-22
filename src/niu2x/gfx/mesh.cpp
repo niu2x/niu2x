@@ -11,6 +11,7 @@ namespace nx::gfx {
 
 static void mesh_init(mesh_t* mesh, const aiMesh* ai_mesh)
 {
+    NX_LOG_D("mesh_init");
     NX_ASSERT(ai_mesh->mPrimitiveTypes == aiPrimitiveType_TRIANGLE,
         "not TRIANGLE mesh: %d", ai_mesh->mPrimitiveTypes);
 
@@ -83,6 +84,8 @@ static void mesh_group_init_node(
         node->meshes[i] = ai_node->mMeshes[i];
     }
 
+    NX_LOG_D("mesh_group_init_node meshes_size: %d", node->meshes_size);
+
     node->transform[0][0] = ai_node->mTransformation.a1;
     node->transform[0][1] = ai_node->mTransformation.a2;
     node->transform[0][2] = ai_node->mTransformation.a3;
@@ -105,8 +108,8 @@ static void mesh_group_init_node(
 
     math::mat4x4_transpose(node->transform);
 
-    NX_LOG_D("meshes_size %d", node->meshes_size);
-    gfx::mat4x4_dump(node->transform);
+    // NX_LOG_D("meshes_size %d", node->meshes_size);
+    // gfx::mat4x4_dump(node->transform);
 
     node->children_size = ai_node->mNumChildren;
     node->children = NX_ALLOC(mesh_group_t::node_t, node->children_size);
@@ -119,6 +122,7 @@ static void mesh_group_init_node(
 void mesh_group_init_from_file(
     mesh_group_t* mesh_group, const char* file, int flags)
 {
+    NX_LOG_D("mesh_group_init_from_file");
     unused(flags);
 
     Assimp::Importer importer;
