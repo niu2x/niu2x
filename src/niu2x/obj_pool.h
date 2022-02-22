@@ -104,7 +104,7 @@ private:
 
 #define NX_OBJ_POOL_DECLARE(type, name) nx::obj_pool_t<type> name;
 #define NX_OBJ_POOL_DEFINE(type, name, capacity)                               \
-    nx::obj_pool_t<type> name(capacity);
+    nx::obj_pool_t<type> name((capacity));
 
 #define NX_OBJ_POOL_DECLARE2(type) NX_OBJ_POOL_DECLARE(type##_t, type##_pool)
 #define NX_OBJ_POOL_DEFINE2(type, capacity)                                    \
