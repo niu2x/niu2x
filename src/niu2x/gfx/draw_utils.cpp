@@ -58,9 +58,10 @@ static void draw_mesh_group_node(layer_t layer, mesh_group_t* mesh_group,
 {
     mat4x4 model;
     math::mat4x4_dup(model, node->transform);
+    // math::mat4x4_mul(model, transform);
     math::mat4x4_mul(model, transform);
-
     set_model_transform(model);
+    unused(transform);
     for (uint32_t i = 0; i < node->meshes_size; i++) {
         auto* mesh = mesh_group->meshes[node->meshes[i]];
         mesh->texture = mesh_group->texture;

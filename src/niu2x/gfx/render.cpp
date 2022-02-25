@@ -492,6 +492,20 @@ static void handle_render_state(const cmd_t* cmd)
 
         } else
             glDisable(GL_BLEND);
+
+        switch (rs & PLOYGON_MODE_MASK) {
+            case PLOYGON_MODE_POINT: {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+                break;
+            }
+            case PLOYGON_MODE_LINE: {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                break;
+            }
+            default: {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+        }
     }
 }
 

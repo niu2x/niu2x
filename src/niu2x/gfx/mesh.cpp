@@ -11,6 +11,7 @@ namespace nx::gfx {
 
 static void mesh_init(mesh_t* mesh, const aiMesh* ai_mesh)
 {
+    NX_LOG_D("mesh_init");
     NX_ASSERT(ai_mesh->mPrimitiveTypes == aiPrimitiveType_TRIANGLE,
         "not TRIANGLE mesh: %d", ai_mesh->mPrimitiveTypes);
 
@@ -47,6 +48,8 @@ static void mesh_init(mesh_t* mesh, const aiMesh* ai_mesh)
         vertices[i].nx = ai_mesh->mNormals[i].x;
         vertices[i].ny = ai_mesh->mNormals[i].y;
         vertices[i].nz = ai_mesh->mNormals[i].z;
+        NX_LOG_D("vertex %d: %f %f %f", i, vertices[i].x, vertices[i].y,
+            vertices[i].z);
     }
 
     mesh->vb
@@ -59,20 +62,13 @@ static void mesh_init(mesh_t* mesh, const aiMesh* ai_mesh)
     std::vector<uint32_t> indices;
     indices.resize(faces_num * 3);
 
-    uint32_t max_indice = 0, min_indice = 999999;
-
     for (uint32_t i = 0; i < faces_num; i++) {
         indices[i * 3 + 0] = ai_mesh->mFaces[i].mIndices[0];
         indices[i * 3 + 1] = ai_mesh->mFaces[i].mIndices[1];
         indices[i * 3 + 2] = ai_mesh->mFaces[i].mIndices[2];
 
-        max_indice = std::max(max_indice, indices[i * 3 + 0]);
-        max_indice = std::max(max_indice, indices[i * 3 + 1]);
-        max_indice = std::max(max_indice, indices[i * 3 + 2]);
-
-        min_indice = std::min(min_indice, indices[i * 3 + 0]);
-        min_indice = std::min(min_indice, indices[i * 3 + 1]);
-        min_indice = std::min(min_indice, indices[i * 3 + 2]);
+        NX_LOG_D("face %d: %d %d %d", i, indices[i * 3 + 0], indices[i * 3 + 1],
+            indices[i * 3 + 2]);
     }
 
     mesh->ib = indice_buffer_create(faces_num * 3, indices.data());
@@ -87,6 +83,8 @@ static void mesh_group_init_node(
     for (uint32_t i = 0; i < node->meshes_size; i++) {
         node->meshes[i] = ai_node->mMeshes[i];
     }
+
+    NX_LOG_D("mesh_group_init_node meshes_size: %d", node->meshes_size);
 
     node->transform[0][0] = ai_node->mTransformation.a1;
     node->transform[0][1] = ai_node->mTransformation.a2;
@@ -110,6 +108,9 @@ static void mesh_group_init_node(
 
     math::mat4x4_transpose(node->transform);
 
+    // NX_LOG_D("meshes_size %d", node->meshes_size);
+    // gfx::mat4x4_dump(node->transform);
+
     node->children_size = ai_node->mNumChildren;
     node->children = NX_ALLOC(mesh_group_t::node_t, node->children_size);
 
@@ -121,6 +122,7 @@ static void mesh_group_init_node(
 void mesh_group_init_from_file(
     mesh_group_t* mesh_group, const char* file, int flags)
 {
+    NX_LOG_D("mesh_group_init_from_file");
     unused(flags);
 
     Assimp::Importer importer;
@@ -128,6 +130,9 @@ void mesh_group_init_from_file(
     auto import_flags = aiProcessPreset_TargetRealtime_Quality;
     import_flags |= aiProcess_FlipUVs;
     import_flags |= aiProcess_SortByPType;
+    import_flags |= aiProcess_Triangulate;
+    import_flags |= aiProcess_GenSmoothNormals;
+    import_flags |= aiProcess_JoinIdenticalVertices;
 
     const aiScene* scene = importer.ReadFile(file, import_flags);
     NX_ASSERT(nullptr != scene, "%s", importer.GetErrorString());
@@ -152,6 +157,9 @@ void mesh_init_from_file(mesh_t* mesh, const char* file, int idx, int flags)
     auto import_flags = aiProcessPreset_TargetRealtime_Quality;
     import_flags |= aiProcess_FlipUVs;
     import_flags |= aiProcess_SortByPType;
+    import_flags |= aiProcess_Triangulate;
+    import_flags |= aiProcess_GenSmoothNormals;
+    import_flags |= aiProcess_JoinIdenticalVertices;
 
     const aiScene* scene = importer.ReadFile(file, import_flags);
     NX_ASSERT(nullptr != scene, "%s", importer.GetErrorString());
