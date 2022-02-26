@@ -69,6 +69,7 @@ struct NXAPI world_t : nx::object_t {
 
 NXAPI void world_setup(world_t* self);
 NXAPI void world_cleanup(world_t* self);
+NXAPI void world_update(world_t* self, double dt);
 
 NXAPI game_object_t* game_object_create();
 NXAPI void game_object_add_child(game_object_t* self, game_object_t* child);
@@ -132,7 +133,7 @@ public:
     }
 
 private:
-    world_t world;
+    world_t world_;
 };
 
 NXAPI void setup();
@@ -183,66 +184,6 @@ NXAPI void cleanup();
         nx::gfx::run(config);                                                  \
         return 0;                                                              \
     }
-
-// https://learnopengl.com/img/getting-started/camera_pitch_yaw_roll.png
-class NXAPI camera_t {
-public:
-    camera_t();
-    ~camera_t();
-    camera_t(const camera_t&) = default;
-    camera_t& operator=(const camera_t&) = default;
-    void look_at(
-        math::vec3 const eye, math::vec3 const center, math::vec3 const up);
-
-    void pitch(double x);
-    void yaw(double x);
-    void roll(double x);
-    void move(double dx, double dy, double dz);
-
-    const math::mat4x4& transform() const { return transform_; }
-
-private:
-    math::mat4x4 transform_;
-    math::vec3 eye_;
-    math::vec3 up_;
-    math::vec3 center_;
-};
-
-using component_id_t = uint32_t;
-
-struct NXAPI object_type {
-    enum {
-        game_object,
-        transform,
-    };
-};
-
-using object_type_t = uint8_t;
-
-struct NXAPI object_t : nx::object_t {
-    object_type_t type;
-};
-
-struct NXAPI component_t : object_t {
-    hashtab_entry_t hash;
-};
-
-struct NXAPI transform_t : component_t {
-    math::vec3 position;
-    math::vec3 rotation;
-    math::vec3 scale;
-};
-
-struct NXAPI game_object_t : object_t {
-    hashtab_t component_registry;
-};
-
-NXAPI game_object_t* game_object_create();
-NXAPI transform_t* transform_create();
-NXAPI void destroy(object_t*);
-
-NXAPI void setup();
-NXAPI void cleanup();
 
 } // namespace nx::gfh
 

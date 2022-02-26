@@ -20,8 +20,8 @@ void game_object_remove_children(game_object_t* self)
     NX_LIST_FOR_EACH(ptr, &(self->children))
     {
         auto child = NX_LIST_ENTRY(ptr, game_object_t, self_in_children);
-        game_object_release(child);
         child->parent = nullptr;
+        game_object_release(child);
     }
     list_init(&(self->children));
 }

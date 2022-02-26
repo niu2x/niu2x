@@ -2,6 +2,8 @@
 
 namespace nx::gfh {
 
+NX_OBJ_POOL_DEFINE2(game_object, 0);
+
 static int64_t counter = 0;
 
 static void __setup() { }
