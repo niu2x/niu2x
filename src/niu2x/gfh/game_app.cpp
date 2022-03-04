@@ -15,6 +15,6 @@ void game_app_t::cleanup()
     world_cleanup(&world_);
     gfh::cleanup();
 }
-void game_app_t::update(double dt) { world_update(world_, dt); }
+void game_app_t::update(double dt) { world_update(&world_, dt); }
 
 } // namespace nx::gfh

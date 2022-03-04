@@ -3,11 +3,16 @@
 namespace nx::gfh {
 
 NX_OBJ_POOL_DEFINE2(game_object, 0);
+NX_OBJ_POOL_DEFINE2(transform, 0);
+
 
 static int64_t counter = 0;
 
 static void __setup() { }
-static void __cleanup() { game_object_pool.clear(); }
+static void __cleanup() { 
+    transform_pool.clear();
+    game_object_pool.clear();
+}
 
 void setup()
 {

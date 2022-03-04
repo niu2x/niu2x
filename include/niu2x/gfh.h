@@ -46,6 +46,7 @@ struct NXAPI component_t : nx::object_t {
     };
     component_type_t type;
     hashtab_entry_t hash;
+    uint64_t ref;
 };
 
 struct NXAPI transform_t : component_t {
@@ -71,18 +72,16 @@ NXAPI void world_setup(world_t* self);
 NXAPI void world_cleanup(world_t* self);
 NXAPI void world_update(world_t* self, double dt);
 
-NXAPI game_object_t* game_object_create();
 NXAPI void game_object_add_child(game_object_t* self, game_object_t* child);
-NXAPI void destroy(game_object_t*);
 NXAPI void game_object_remove_children(game_object_t* self);
 
+NXAPI game_object_t* game_object_create();
 NXAPI inline void game_object_retain(game_object_t* self) { self->ref++; }
-NXAPI inline void game_object_release(game_object_t* self)
-{
-    if (--self->ref == 0) {
-        destroy(self);
-    }
-}
+NXAPI void game_object_release(game_object_t* self);
+
+NXAPI transform_t* transform_create();
+NXAPI void transform_retain(transform_t *);
+NXAPI void transform_release(transform_t *);
 
 class NXAPI app_t : boost::noncopyable {
 public:

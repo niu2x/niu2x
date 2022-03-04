@@ -33,7 +33,7 @@ game_object_t* game_object_create()
     return game_object;
 }
 
-void destroy(game_object_t* self)
+static void destroy(game_object_t* self)
 {
     game_object_cleanup(self);
     game_object_pool.free(self);
@@ -44,6 +44,13 @@ void game_object_add_child(game_object_t* self, game_object_t* child)
     child->parent = self;
     game_object_retain(child);
     list_add_tail(&(child->self_in_children), &(self->children));
+}
+
+void game_object_release(game_object_t* self)
+{
+    if (--self->ref == 0) {
+        destroy(self);
+    }
 }
 
 } // namespace nx::gfh
