@@ -80,8 +80,8 @@ NXAPI inline void game_object_retain(game_object_t* self) { self->ref++; }
 NXAPI void game_object_release(game_object_t* self);
 
 NXAPI transform_t* transform_create();
-NXAPI void transform_retain(transform_t *);
-NXAPI void transform_release(transform_t *);
+NXAPI void transform_retain(transform_t*);
+NXAPI void transform_release(transform_t*);
 
 class NXAPI app_t : boost::noncopyable {
 public:
