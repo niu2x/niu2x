@@ -32,9 +32,9 @@ namespace nx::crypto {
             ++ptr;                                                             \
         }                                                                      \
         auto* algorithm = EVP_get_digestbyname(alg_name);                      \
-        NX_FAIL_COND_V(algorithm == nullptr, -E_ALO);                          \
+        NX_FAIL_COND_V(algorithm == nullptr, -E_CRYPTO_ALGORITHM);             \
         auto* ctx = EVP_MD_CTX_new();                                          \
-        NX_FAIL_COND_V(ctx == nullptr, -E_CTX);                                \
+        NX_FAIL_COND_V(ctx == nullptr, -E_CRYPTO_CONTEXT);                     \
         EVP_DigestInit_ex2(ctx, algorithm, nullptr);                           \
         EVP_DigestUpdate(ctx, input, size);                                    \
         uint32_t out_size;                                                     \

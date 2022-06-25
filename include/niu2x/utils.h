@@ -3,8 +3,11 @@
 
 #include <string>
 #include <exception>
+#include <functional>
 #include <boost/preprocessor.hpp>
+#include <boost/noncopyable.hpp>
 #include <niu2x/api.h>
+#include <niu2x/errcode.h>
 
 namespace nx {
 
@@ -32,14 +35,32 @@ private:
     char msg_[buffer_size];
 };
 
+// on exit functinoc
+class func_atexit_t : private boost::noncopyable {
+public:
+    template <class T>
+    func_atexit_t(T&& d)
+    {
+        delegate_ = std::forward<T>(d);
+    }
+    ~func_atexit_t() { }
+
+private:
+    std::function<void()> delegate_;
+};
+
 } // namespace nx
 
+#define NX_FUNC_AT_EXIT(name, delegate) func_atexit_t name((delegate));
+
+// unused
 #define NX_UNUSED_ONE(r, data, elem) (void)(elem);
 
 #define NX_UNUSED(...)                                                         \
     BOOST_PP_SEQ_FOR_EACH(                                                     \
         NX_UNUSED_ONE, ~, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__));
 
+// fail check
 #define NX_FAIL_COND_V(cond, result)                                           \
     if (cond) {                                                                \
         return result;                                                         \

@@ -5,6 +5,7 @@
 #include <boost/preprocessor.hpp>
 #include <niu2x/utils.h>
 #include <niu2x/api.h>
+#include <niu2x/errcode.h>
 
 // clang-format off
 #define NX_CRYPTO_DIGEST_ALGORITHMS()          \
@@ -32,11 +33,6 @@
 // clang-format on
 
 namespace nx::crypto {
-
-enum errcode {
-    E_ALO,
-    E_CTX,
-};
 
 #define DECLARE_DIGEST(r, data, alo)                                           \
     NXAPI int BOOST_PP_CAT(alo, _size)(const void* input, int size);           \
