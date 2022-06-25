@@ -3,6 +3,7 @@
 
 #include <string>
 #include <boost/preprocessor.hpp>
+#include <niu2x/utils.h>
 #include <niu2x/api.h>
 
 // clang-format off

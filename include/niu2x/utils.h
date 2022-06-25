@@ -4,6 +4,7 @@
 #include <string>
 #include <exception>
 #include <boost/preprocessor.hpp>
+#include <niu2x/api.h>
 
 namespace nx {
 
