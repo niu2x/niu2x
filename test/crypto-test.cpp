@@ -35,7 +35,6 @@ TEST(crypto, cipher)
 
     EXPECT_EQ(result, target);
 
-    result = nx::crypto::aes_128_cbc(
-        nx::crypto::decrypt, cipher.c_str(), cipher.size(), key, iv);
+    result = nx::crypto::aes_128_cbc(nx::crypto::decrypt, cipher, key, iv);
     EXPECT_EQ(result, std::string(muwanqing, muwanqing + muwanqing_length));
 }

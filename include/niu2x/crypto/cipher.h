@@ -113,6 +113,10 @@ NXAPI extern encrypt_tag_t encrypt;
     NXAPI std::string alo(decrypt_tag_t, const void* input, int size,          \
         const void* key, const void* iv);                                      \
     NXAPI std::string alo(encrypt_tag_t, const void* input, int size,          \
+        const void* key, const void* iv);                                      \
+    NXAPI std::string alo(encrypt_tag_t, const std::string& input,             \
+        const void* key, const void* iv);                                      \
+    NXAPI std::string alo(decrypt_tag_t, const std::string& input,             \
         const void* key, const void* iv);
 
 BOOST_PP_SEQ_FOR_EACH(DECLARE_CIPHER, ~, NX_CRYPTO_CIPHER_ALGORITHMS())

@@ -46,7 +46,8 @@ namespace nx::crypto {
 #define DEFINE_DIGEST(r, data, name)                                           \
     DEFINE_SIZE_FUNC(name)                                                     \
     DEFINE_DIGEST_FUNC(name)                                                   \
-    DEFINE_CRYPTO_STR_FUNC(name)
+    DEFINE_CRYPTO_STR_FUNC(name)                                               \
+    DEFINE_CRYPTO_STR2_FUNC(name)
 
 BOOST_PP_SEQ_FOR_EACH(DEFINE_DIGEST, ~, NX_CRYPTO_DIGEST_ALGORITHMS())
 

@@ -107,10 +107,23 @@ static int cipher(const char* p_algorithm_name, void* out, int mode,
         return result;                                                         \
     }
 
+#define DEFINE_CIPHER_STR2_FUNC(name)                                          \
+    std::string name(encrypt_tag_t tag, const std::string& input,              \
+        const void* key, const void* iv)                                       \
+    {                                                                          \
+        return name(tag, input.c_str(), input.size(), key, iv);                \
+    }                                                                          \
+    std::string name(decrypt_tag_t tag, const std::string& input,              \
+        const void* key, const void* iv)                                       \
+    {                                                                          \
+        return name(tag, input.c_str(), input.size(), key, iv);                \
+    }
+
 #define DEFINE_DIGEST(r, data, name)                                           \
     DEFINE_SIZE_FUNC(name)                                                     \
     DEFINE_CRYPTO_FUNC(name)                                                   \
-    DEFINE_CIPHER_STR_FUNC(name)
+    DEFINE_CIPHER_STR_FUNC(name)                                               \
+    DEFINE_CIPHER_STR2_FUNC(name)
 
 BOOST_PP_SEQ_FOR_EACH(DEFINE_DIGEST, ~, NX_CRYPTO_CIPHER_ALGORITHMS())
 

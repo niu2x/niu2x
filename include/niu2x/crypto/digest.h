@@ -8,7 +8,7 @@
 #include <niu2x/errcode.h>
 
 // clang-format off
-#define NX_CRYPTO_DIGEST_ALGORITHMS()          \
+#define NX_CRYPTO_DIGEST_ALGORITHMS()   \
                         (md5)           \
                         (sha256)        \
                         (blake2b512)    \
@@ -37,7 +37,8 @@ namespace nx::crypto {
 #define DECLARE_DIGEST(r, data, alo)                                           \
     NXAPI int BOOST_PP_CAT(alo, _size)(const void* input, int size);           \
     NXAPI int alo(void* out, const void* input, int size);                     \
-    NXAPI std::string alo(const void* input, int size);
+    NXAPI std::string alo(const void* input, int size);                        \
+    NXAPI std::string alo(const std::string&);
 
 BOOST_PP_SEQ_FOR_EACH(DECLARE_DIGEST, ~, NX_CRYPTO_DIGEST_ALGORITHMS())
 

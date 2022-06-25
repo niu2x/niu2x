@@ -242,6 +242,9 @@ int unbase64(void* out, const void* input, int size)
 }
 
 DEFINE_CRYPTO_STR_FUNC(base64)
+DEFINE_CRYPTO_STR2_FUNC(base64)
+
 DEFINE_CRYPTO_STR_FUNC(unbase64)
+DEFINE_CRYPTO_STR2_FUNC(unbase64)
 
 } // namespace nx::crypto
