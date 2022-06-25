@@ -13,4 +13,10 @@
         return result;                                                         \
     }
 
+#define DEFINE_CRYPTO_STR2_FUNC(name)                                          \
+    std::string name(const std::string& input)                                 \
+    {                                                                          \
+        return name(input.c_str(), input.size());                              \
+    }
+
 #endif

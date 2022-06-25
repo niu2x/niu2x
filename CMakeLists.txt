@@ -89,4 +89,10 @@ set(CPACK_GENERATOR ZIP)
 include(CPack)
 
 
-add_subdirectory(tests)
+# test
+include(CTest)
+if(BUILD_TESTING)
+	add_subdirectory(lib/googletest)
+	add_subdirectory(test)
+endif()
+
