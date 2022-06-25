@@ -3,5 +3,6 @@
 
 #include <niu2x/utils.h>
 #include <niu2x/crypto.h>
+#include <niu2x/list.h>
 
 #endif

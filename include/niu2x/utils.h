@@ -82,4 +82,8 @@ inline void unused(...) { }
         NX_UNUSED_ONE, ~, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__));
 // unused
 
+// NX_OFFSET_OF
+#define NX_OFFSET_OF(clazz, field) ((size_t) & (((clazz*)(nullptr))->field))
+// NX_OFFSET_OF
+
 #endif
