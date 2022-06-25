@@ -92,6 +92,7 @@ include(CPack)
 # test
 include(CTest)
 if(BUILD_TESTING)
+	set(INSTALL_GTEST OFF)
 	add_subdirectory(lib/googletest)
 	add_subdirectory(test)
 endif()
