@@ -86,4 +86,7 @@ inline void unused(...) { }
 #define NX_OFFSET_OF(clazz, field) ((size_t) & (((clazz*)(nullptr))->field))
 // NX_OFFSET_OF
 
+#define NX_ADDRESS_OFFSET(type, base, offset)                                  \
+    (type)((uint8_t*)((base)) + (offset))
+
 #endif
