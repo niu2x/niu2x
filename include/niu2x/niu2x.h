@@ -2,7 +2,10 @@
 #define NX_H
 
 #include <niu2x/utils.h>
-#include <niu2x/crypto.h>
+#include <niu2x/uuid.h>
 #include <niu2x/list.h>
+#include <niu2x/ringbuf.h>
+#include <niu2x/algorithm.h>
+#include <niu2x/crypto.h>
 
 #endif
