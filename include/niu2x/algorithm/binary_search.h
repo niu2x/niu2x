@@ -17,7 +17,6 @@ template <class T>
 inline typename std::enable_if<not std::is_arithmetic<T>::value, int>::type
 compare(const void* a, const void* b)
 {
-    printf("xxxxxx\n");
     if (*((const T*)a) == *((const T*)b))
         return 0;
     if (*((const T*)a) < *((const T*)b))
@@ -29,7 +28,6 @@ template <class T>
 inline typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(
     const void* a, const void* b)
 {
-    printf("yyyy\n");
     return (*((const T*)a) - *((const T*)b));
 }
 
