@@ -32,7 +32,7 @@ inline typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(
 }
 
 template <class T>
-int binary_search(const T* base, const int nr, const T* target)
+inline int binary_search(const T* base, const int nr, const T* target)
 {
     return binary_search(base, nr, sizeof(T), target, compare<T>);
 }
