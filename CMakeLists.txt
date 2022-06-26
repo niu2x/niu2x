@@ -40,11 +40,18 @@ generate_export_header(niu2x
 
 find_package(Boost REQUIRED)
 find_package(OpenSSL 3 REQUIRED)
+find_package(FFmpeg REQUIRED)
+find_package(ZLIB REQUIRED)
 
 target_link_libraries(niu2x PUBLIC 
 	Boost::headers
 	OpenSSL::Crypto
 	OpenSSL::SSL
+	FFmpeg::avformat
+	FFmpeg::avcodec
+	FFmpeg::avutil
+	FFmpeg::swresample
+	ZLIB::ZLIB
 )
 
 

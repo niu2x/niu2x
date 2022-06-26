@@ -11,5 +11,7 @@ target_sources(${TEST} PRIVATE
 	${cpp_source}
 )
 
+target_compile_definitions(${TEST} PRIVATE -DDIR="${CMAKE_CURRENT_SOURCE_DIR}/")
+
 include(GoogleTest)
 gtest_add_tests(TARGET ${TEST})

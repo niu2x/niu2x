@@ -61,6 +61,17 @@ private:
         return result;                                                         \
     }
 
+#define NX_FAIL_COND(cond)                                                     \
+    if (cond) {                                                                \
+        return;                                                                \
+    }
+
+#define NX_FAIL_COND_V_MSG(cond, result, ...)                                  \
+    if (cond) {                                                                \
+        NX_LOG_E(__VA_ARGS__);                                                 \
+        return result;                                                         \
+    }
+
 #define NX_THROW_COND_MSG(cond, msg)                                           \
     if (cond) {                                                                \
         throw nx::exception((msg), __FILE__, __LINE__);                        \
@@ -88,5 +99,11 @@ inline void unused(...) { }
 
 #define NX_ADDRESS_OFFSET(type, base, offset)                                  \
     (type)((uint8_t*)((base)) + (offset))
+
+#define NX_LOG_E(...)                                                          \
+    {                                                                          \
+        fprintf(stderr, __VA_ARGS__);                                          \
+        fprintf(stderr, "\n");                                                 \
+    }
 
 #endif
