@@ -3,6 +3,7 @@
 #include <mutex>
 #include <boost/preprocessor.hpp>
 #include <niu2x/ffmpeg.h>
+#include <niu2x/errcode.h>
 #include "gtest/gtest.h"
 
 TEST(ffmpeg, media)
@@ -20,5 +21,14 @@ TEST(ffmpeg, media)
     EXPECT_EQ(metadata["encoder"], "HandBrake 0.9.9 2013052900");
     EXPECT_EQ(metadata["major_brand"], "mp42");
     EXPECT_EQ(metadata["minor_version"], "0");
+
+    EXPECT_EQ(560, media.width());
+    EXPECT_EQ(320, media.height());
+
+    uint8_t* buffer = new uint8_t[560 * 320 * 3];
+    while (media.read(buffer) == nx::E_OK)
+        ;
+    delete[] buffer;
+
     media.close();
 }

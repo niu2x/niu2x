@@ -5,6 +5,8 @@ namespace nx {
 enum errcode {
     E_OK = 0,
     E_BUSY,
+    E_EOF,
+    E_OPERATION,
     E_CRYPTO_ALGORITHM,
     E_CRYPTO_CONTEXT,
     E_CRYPTO_UPDATE,
