@@ -11,7 +11,7 @@ namespace nx::async {
 
 class io_context_t : private boost::noncopyable {
 public:
-    using task_t = std::function<void()>;
+    using task_t = std::function<void(void*)>;
 
     io_context_t();
     ~io_context_t();
@@ -19,7 +19,7 @@ public:
     io_context_t(io_context_t&&) = default;
     io_context_t& operator=(io_context_t&&) = default;
 
-    void run();
+    void run(void* data);
     void stop();
 
     void post(task_t task);

@@ -28,7 +28,7 @@ int io_context_t::tasks()
     return tasks_.size();
 }
 
-void io_context_t::run()
+void io_context_t::run(void* data)
 {
     std::unique_lock<std::mutex> lk(tasks_mutex_);
     active_++;
@@ -40,7 +40,7 @@ void io_context_t::run()
 
             busy_++;
             lk.unlock();
-            task();
+            task(data);
             lk.lock();
             busy_--;
         }

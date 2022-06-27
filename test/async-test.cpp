@@ -42,7 +42,7 @@ TEST(async, io_context)
     nx::async::io_context_t context;
 
     for (int i = 0; i < 1024 * 1024; i++) {
-        context.post([&k, &tids, &mutex]() {
+        context.post([&k, &tids, &mutex](void*) {
             for (int i = 0; i < 4; i++)
                 ++k;
 
@@ -54,7 +54,7 @@ TEST(async, io_context)
     }
 
     for (int i = 0; i < 2; i++) {
-        ths.add_thread([&context]() { context.run(); });
+        ths.add_thread([&context]() { context.run(nullptr); });
     }
 
     ths.join_all();
