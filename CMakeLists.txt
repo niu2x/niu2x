@@ -42,6 +42,7 @@ find_package(Boost REQUIRED)
 find_package(OpenSSL 3 REQUIRED)
 find_package(FFmpeg REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(libuv REQUIRED)
 
 target_link_libraries(niu2x PUBLIC 
 	Boost::headers
@@ -52,6 +53,7 @@ target_link_libraries(niu2x PUBLIC
 	FFmpeg::avutil
 	FFmpeg::swresample
 	ZLIB::ZLIB
+	uv_a
 )
 
 

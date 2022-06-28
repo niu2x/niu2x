@@ -45,7 +45,6 @@ TEST(async, io_context)
         context.post([&k, &tids, &mutex](void*) {
             for (int i = 0; i < 4; i++)
                 ++k;
-
             {
                 std::lock_guard<std::mutex> _(mutex);
                 tids.insert(std::this_thread::get_id());

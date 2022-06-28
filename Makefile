@@ -4,6 +4,7 @@ all:
 	git add .
 	cmake -S . -B build -DBUILD_SHARED_LIBS=OFF \
 	-DOpenSSL_ROOT=/home/niu2x/project/openssl/dist/usr/local	\
+	-Dlibuv_DIR=/home/niu2x/project/libuv/build/dist/usr/local/lib/cmake/libuv \
 	-DFFmpeg_ROOT=/home/niu2x/project/ffmpeg/dist/usr/local
 	cmake --build build
 	make -C build test
