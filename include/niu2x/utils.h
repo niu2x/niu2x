@@ -66,6 +66,11 @@ private:
         return;                                                                \
     }
 
+#define NX_FAIL_COND_MSG(cond, ...)                                            \
+    if (cond) {                                                                \
+        NX_LOG_E(__VA_ARGS__);                                                 \
+        return;                                                                \
+    }
 #define NX_FAIL_COND_V_MSG(cond, result, ...)                                  \
     if (cond) {                                                                \
         NX_LOG_E(__VA_ARGS__);                                                 \
@@ -103,10 +108,12 @@ inline void unused(...) { }
 #define NX_CONTAINER_OF(ptr, clazz, field)                                     \
     ((clazz*)(((uint8_t*)(ptr)) - NX_OFFSET_OF(clazz, field)))
 
-#define NX_LOG_E(...)                                                          \
-    {                                                                          \
-        fprintf(stderr, __VA_ARGS__);                                          \
-        fprintf(stderr, "\n");                                                 \
-    }
+#if !defined(NX_LOG_E)
+    #define NX_LOG_E(...)                                                      \
+        {                                                                      \
+            fprintf(stderr, __VA_ARGS__);                                      \
+            fprintf(stderr, "\n");                                             \
+        }
+#endif
 
 #endif

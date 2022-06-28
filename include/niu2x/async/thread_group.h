@@ -6,10 +6,11 @@
 #include <mutex>
 #include <list>
 #include <boost/noncopyable.hpp>
+#include <niu2x/api.h>
 
 namespace nx::async {
 
-class thread_group_t : private boost::noncopyable {
+class NXAPI thread_group_t : private boost::noncopyable {
 public:
     thread_group_t();
     ~thread_group_t();

@@ -7,9 +7,11 @@
 #include <condition_variable>
 #include <boost/noncopyable.hpp>
 
+#include <niu2x/api.h>
+
 namespace nx::async {
 
-class io_context_t : private boost::noncopyable {
+class NXAPI io_context_t : private boost::noncopyable {
 public:
     using task_t = std::function<void(void*)>;
 

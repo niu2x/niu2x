@@ -13,6 +13,8 @@ enum errcode {
     E_CRYPTO_FINAL,
     E_FFMPEG_OPEN,
     E_FFMPEG_NOT_OPEN,
+    E_ASYNC_CURL,
+    E_ASYNC_HTTP,
 };
 }
 
