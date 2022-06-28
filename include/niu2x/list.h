@@ -63,8 +63,7 @@ inline void list_init(struct list_t* entry)
     }
 #define NX_LIST_DEFINE(name) struct list_t name = NX_LIST_INIT(name)
 
-#define NX_LIST_ENTRY(ptr, clazz, field)                                       \
-    ((clazz*)(((uint8_t*)(ptr)) - NX_OFFSET_OF(clazz, field)))
+#define NX_LIST_ENTRY(ptr, clazz, field) NX_CONTAINER_OF(ptr, clazz, field)
 
 #define NX_LIST_FOR_EACH(ptr, head)                                            \
     for (list_t* ptr = (head)->next; ptr != (head); ptr = ptr->next)

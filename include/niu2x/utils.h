@@ -100,6 +100,9 @@ inline void unused(...) { }
 #define NX_ADDRESS_OFFSET(type, base, offset)                                  \
     (type)((uint8_t*)((base)) + (offset))
 
+#define NX_CONTAINER_OF(ptr, clazz, field)                                     \
+    ((clazz*)(((uint8_t*)(ptr)) - NX_OFFSET_OF(clazz, field)))
+
 #define NX_LOG_E(...)                                                          \
     {                                                                          \
         fprintf(stderr, __VA_ARGS__);                                          \
