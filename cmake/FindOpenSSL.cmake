@@ -32,6 +32,11 @@ if(NOT TARGET OpenSSL::Crypto)
 	)
 	# install(FILES ${OpenSSL_Crypto_LIBRARY} TYPE LIB)
 	# install(DIRECTORY ${OpenSSL_INCLUDE_DIR}/ TYPE INCLUDE)
+
+	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		target_link_libraries(OpenSSL::Crypto INTERFACE dl)
+	endif()
+
 endif()
 
 if(NOT TARGET OpenSSL::SSL)
