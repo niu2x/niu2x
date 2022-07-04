@@ -18,7 +18,7 @@ public:
     {
         delegate_ = std::forward<T>(d);
     }
-    ~func_atexit_t() { }
+    ~func_atexit_t() { delegate_(); }
 
 private:
     std::function<void()> delegate_;

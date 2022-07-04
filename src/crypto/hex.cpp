@@ -16,10 +16,11 @@ int hex(void* out, const void* input, int size)
     const uint8_t* end = p + size;
     char* o = (char*)out;
 
+    char buf[4];
     while (p < end) {
-        sprintf(o, "%02x", *p++);
-        ++o;
-        ++o;
+        sprintf(buf, "%02x", *p++);
+        *(o++) = buf[0];
+        *(o++) = buf[1];
     }
     return size * 2;
 }
