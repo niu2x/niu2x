@@ -6,7 +6,6 @@
     {                                                                          \
         int buffer_size = name##_size(input, size);                            \
         uint8_t* buffer = new uint8_t[buffer_size];                            \
-        NX_THROW_COND_MSG(!buffer, "alloc buffer failed");                     \
         int out_size = name(buffer, input, size);                              \
         std::string result(buffer, buffer + out_size);                         \
         delete[] buffer;                                                       \

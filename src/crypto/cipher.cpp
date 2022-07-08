@@ -84,7 +84,6 @@ static int cipher(const char* p_algorithm_name, void* out, int mode,
         unused(tag);                                                           \
         int buffer_size = name##_size(tag, input, size);                       \
         uint8_t* buffer = new uint8_t[buffer_size];                            \
-        NX_THROW_COND_MSG(!buffer, "alloc buffer failed");                     \
         int out_size = name(buffer, tag, input, size, key, iv);                \
         NX_THROW_COND_MSG(                                                     \
             out_size < 0, std::string("fail: ") + std::to_string(out_size));   \
@@ -98,7 +97,6 @@ static int cipher(const char* p_algorithm_name, void* out, int mode,
         unused(tag);                                                           \
         int buffer_size = name##_size(tag, input, size);                       \
         uint8_t* buffer = new uint8_t[buffer_size];                            \
-        NX_THROW_COND_MSG(!buffer, "alloc buffer failed");                     \
         int out_size = name(buffer, tag, input, size, key, iv);                \
         NX_THROW_COND_MSG(out_size < 0,                                        \
             std::string("crypto fail: ") + std::to_string(out_size));          \
