@@ -28,15 +28,10 @@ if(NOT TARGET OpenSSL::Crypto)
 	set_target_properties(OpenSSL::Crypto PROPERTIES
 		IMPORTED_LOCATION "${OpenSSL_Crypto_LIBRARY}"
 		INTERFACE_INCLUDE_DIRECTORIES "${OpenSSL_INCLUDE_DIR}"
-		# IMPORTED_LINK_INTERFACE_LANGUAGES "C"
 	)
-	# install(FILES ${OpenSSL_Crypto_LIBRARY} TYPE LIB)
-	# install(DIRECTORY ${OpenSSL_INCLUDE_DIR}/ TYPE INCLUDE)
-
 	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-		target_link_libraries(OpenSSL::Crypto INTERFACE dl)
+		# target_link_libraries(OpenSSL::Crypto INTERFACE dl)
 	endif()
-
 endif()
 
 if(NOT TARGET OpenSSL::SSL)
@@ -44,8 +39,5 @@ if(NOT TARGET OpenSSL::SSL)
 	set_target_properties(OpenSSL::SSL PROPERTIES
 		IMPORTED_LOCATION "${OpenSSL_SSL_LIBRARY}"
 		INTERFACE_INCLUDE_DIRECTORIES "${OpenSSL_INCLUDE_DIR}"
-		# IMPORTED_LINK_INTERFACE_LANGUAGES "C"
 	)
-	# install(FILES ${OpenSSL_SSL_LIBRARY} TYPE LIB)
-	# install(DIRECTORY ${OpenSSL_INCLUDE_DIR}/ TYPE INCLUDE)
 endif()

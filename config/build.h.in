@@ -1,0 +1,6 @@
+#ifndef NX_BUILD_H
+#define NX_BUILD_H
+
+#cmakedefine FFmpeg_FOUND
+
+#endif

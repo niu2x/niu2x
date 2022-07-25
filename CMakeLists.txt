@@ -40,19 +40,28 @@ generate_export_header(niu2x
 
 find_package(Boost REQUIRED)
 find_package(OpenSSL 3 REQUIRED)
-find_package(FFmpeg REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(libuv REQUIRED)
 find_package(CURL REQUIRED)
+
+find_package(FFmpeg)
+
+if(FFmpeg_FOUND)
+	list(APPEND FFmpeg_LIBS 
+		FFmpeg::avformat
+		FFmpeg::avcodec
+		FFmpeg::avutil
+		FFmpeg::swresample
+	)
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/build.h.in include/niu2x/build.h)
 
 target_link_libraries(niu2x PUBLIC 
 	Boost::headers
 	OpenSSL::Crypto
 	OpenSSL::SSL
-	FFmpeg::avformat
-	FFmpeg::avcodec
-	FFmpeg::avutil
-	FFmpeg::swresample
+	${FFmpeg_LIBS}
 	ZLIB::ZLIB
 	uv_a
 	curl

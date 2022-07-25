@@ -1,8 +1,8 @@
-#ifndef NX_LIST_H
-#define NX_LIST_H
+#ifndef NX_TYPE_H
+#define NX_TYPE_H
 
 #include <stdlib.h>
-
+#include <boost/circular_buffer.hpp>
 #include <niu2x/api.h>
 #include <niu2x/utils.h>
 
@@ -68,4 +68,16 @@ inline void list_init(struct list_t* entry)
 #define NX_LIST_FOR_EACH(ptr, head)                                            \
     for (list_t* ptr = (head)->next; ptr != (head); ptr = ptr->next)
 
-#endif /* NX_LIST_H */
+namespace nx {
+template <class T>
+using ringbuf_t = boost::circular_buffer<T>;
+}
+
+namespace nx {
+void bitmap_zero(void* base, int nr);
+void bitmap_set(void* base, int bit);
+void bitmap_clear(void* base, int bit);
+void bitmap_get(void* base, int bit);
+}; // namespace nx
+
+#endif /* NX_TYPE_H */

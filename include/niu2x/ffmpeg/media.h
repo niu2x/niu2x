@@ -1,6 +1,9 @@
 #ifndef NX_FFMPEG_MEDIA_H
 #define NX_FFMPEG_MEDIA_H
 
+#include <niu2x/build.h>
+#if defined(FFmpeg_FOUND)
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
@@ -57,5 +60,7 @@ private:
 };
 
 } // namespace nx::ffmpeg
+
+#endif
 
 #endif

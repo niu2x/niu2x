@@ -6,10 +6,12 @@
 #include <niu2x/errcode.h>
 #include "gtest/gtest.h"
 
+#if defined(FFmpeg_FOUND)
+
 TEST(ffmpeg, media)
 {
     nx::ffmpeg::media_t media;
-    EXPECT_EQ(0, media.open(DIR "gizmo.mp4"));
+    EXPECT_EQ(0, media.open(NXDIR "gizmo.mp4"));
 
     EXPECT_NEAR(5.59, media.duration(), 0.01);
     EXPECT_NEAR(0, media.start_time(), 0.01);
@@ -32,3 +34,5 @@ TEST(ffmpeg, media)
 
     media.close();
 }
+
+#endif

@@ -1,6 +1,6 @@
 #include <niu2x/utils.h>
 #include <niu2x/crypto.h>
-#include <niu2x/ringbuf.h>
+#include <niu2x/type.h>
 
 void hidden_symbol_function() { }
 int hidden_symbol_variable = 0;

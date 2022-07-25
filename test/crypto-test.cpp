@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "mu-wan-qing.h"
 #include <niu2x/crypto.h>
-#include <niu2x/list.h>
+#include <niu2x/type.h>
 
 struct test_t {
     struct nx::list_t list;

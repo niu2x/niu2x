@@ -1,5 +1,8 @@
 #include <niu2x/ffmpeg/media.h>
 
+#include <niu2x/build.h>
+#if defined(FFmpeg_FOUND)
+
 extern "C" {
 #include <libavutil/imgutils.h>
 #include <libavutil/samplefmt.h>
@@ -242,3 +245,5 @@ int media_t::read(uint8_t* buffer)
 }
 
 } // namespace nx::ffmpeg
+
+#endif
