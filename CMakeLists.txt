@@ -39,9 +39,9 @@ generate_export_header(niu2x
 	INCLUDE_GUARD_NAME NX_API_H
 )
 
-# find_package(ZLIB)
-# find_package(libuv)
-# find_package(CURL)
+find_package(ZLIB)
+find_package(libuv)
+find_package(CURL)
 
 # find_package(OpenSSL 3)
 # find_package(FFmpeg)
