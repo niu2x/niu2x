@@ -1,21 +1,23 @@
 // Copyright 2016 Adrien Descamps
 // Distributed under BSD 3-Clause License
+#include <niu2x/build.h>
+#if defined(FFmpeg_FOUND)
 
-#include "yuv_rgb.h"
+    #include "yuv_rgb.h"
 
-#include <emmintrin.h>
+    #include <emmintrin.h>
 
-#ifdef _MSC_VER
-// MSVC does not have __SSE2__ macro
-    #if (defined(_M_AMD64) || defined(_M_X64) || (_M_IX86_FP == 2))
-        #define _YUVRGB_SSE2_
-    #endif
-#else
-// For everything else than MSVC
-    #ifdef __SSE2__
-        #define _YUVRGB_SSE2_
-    #endif // __SSE2__
-#endif // _MSC_VER
+    #ifdef _MSC_VER
+    // MSVC does not have __SSE2__ macro
+        #if (defined(_M_AMD64) || defined(_M_X64) || (_M_IX86_FP == 2))
+            #define _YUVRGB_SSE2_
+        #endif
+    #else
+    // For everything else than MSVC
+        #ifdef __SSE2__
+            #define _YUVRGB_SSE2_
+        #endif // __SSE2__
+    #endif // _MSC_VER
 
 uint8_t clamp(int16_t value)
 {
@@ -1487,3 +1489,4 @@ void nv21_rgb24_sseu(uint32_t width, uint32_t height, const uint8_t* Y,
 }
 
 #endif //_YUVRGB_SSE2_
+#endif

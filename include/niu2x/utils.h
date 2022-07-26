@@ -2,6 +2,7 @@
 #define NX_UTILS_H
 
 #include <functional>
+#include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/preprocessor.hpp>
 

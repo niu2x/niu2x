@@ -18,9 +18,6 @@ public:
     io_context_t();
     ~io_context_t();
 
-    io_context_t(io_context_t&&) = default;
-    io_context_t& operator=(io_context_t&&) = default;
-
     void run(void* data);
     void stop();
 

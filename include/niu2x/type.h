@@ -2,7 +2,6 @@
 #define NX_TYPE_H
 
 #include <stdlib.h>
-#include <boost/circular_buffer.hpp>
 #include <niu2x/api.h>
 #include <niu2x/utils.h>
 

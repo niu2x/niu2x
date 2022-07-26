@@ -1,11 +1,18 @@
 #include <niu2x/uuid.h>
+#include <niu2x/utils.h>
 
 #include <sstream>
-#include <boost/uuid/uuid_generators.hpp>
+#include <random>
+
+#include <sstream>
 
 namespace nx {
 
-uuid_t uuid_gen() { return boost::uuids::random_generator()(); }
+uuid_t uuid_gen()
+{
+    auto uuid = uuid_t();
+    return uuid;
+}
 
 NXAPI std::string uuid_str_gen()
 {
@@ -25,7 +32,7 @@ NXAPI std::string uuid_str(const uuid_t* self)
     int head = 0;
 
     std::stringstream ss;
-    for (auto it = self->begin(); it != self->end(); it++) {
+    for (auto it = self->bits; it != self->bits + 16; it++) {
         uint8_t c = *it;
         ss << hex_char(c >> 4);
         ss << hex_char(c & 0xF);

@@ -15,9 +15,6 @@ public:
     thread_group_t();
     ~thread_group_t();
 
-    thread_group_t(thread_group_t&&) = default;
-    thread_group_t& operator=(thread_group_t&&) = default;
-
     template <class Func, class... Args>
     void add_thread(Func&& func, Args&&... args)
     {

@@ -13,4 +13,38 @@ all:
 clean:
 	rm -rf build
 
-.PHONY: all clean
+
+build-android: build-android-aremabi-v7a build-android-arm64-v8a
+
+build-android-aremabi-v7a:
+	cmake -S . -B build/android/aremabi-v7a -DBUILD_SHARED_LIBS=ON -DANDROID_PLATFORM=android-21 \
+		-DCMAKE_TOOLCHAIN_FILE=/home/niu2x/Android/Sdk/ndk/21.2.6472646/build/cmake/android.toolchain.cmake
+	cmake --build build/android/aremabi-v7a
+
+build-android-arm64-v8a:
+	cmake -S . -B build/android/arm64-v8a -DBUILD_SHARED_LIBS=ON -DANDROID_PLATFORM=android-21 \
+		-DCMAKE_TOOLCHAIN_FILE=/home/niu2x/Android/Sdk/ndk/21.2.6472646/build/cmake/android.toolchain.cmake
+	cmake --build build/android/arm64-v8a
+
+dist-android-aremabi-v7a: build-android-aremabi-v7a
+	cd build/android/aremabi-v7a && make install DESTDIR=dist
+
+dist-android-arm64-v8a: build-android-arm64-v8a
+	cd build/android/arm64-v8a && make install DESTDIR=dist
+
+dist-android: dist-android-aremabi-v7a dist-android-arm64-v8a
+	mkdir -p dist/android/arm64-v8a
+	mkdir -p dist/android/aremabi-v7a
+	cp -r build/android/arm64-v8a/dist/* dist/android/arm64-v8a/
+	cp -r build/android/aremabi-v7a/dist/* dist/android/aremabi-v7a/
+
+dist-linux: build-linux
+	cd build/linux && make install DESTDIR=dist
+	mkdir -p dist/linux
+	cp -r build/linux/dist/* dist/linux/
+
+build-linux:
+	cmake -S . -B build/linux -DBUILD_SHARED_LIBS=ON
+	cmake --build build/linux
+
+.PHONY: all clean build-android
