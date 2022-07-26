@@ -1,16 +1,19 @@
 #include <niu2x/crypto/cipher.h>
 
-#include <string.h>
+#include <niu2x/build.h>
+#if defined(OpenSSL_FOUND)
 
-#define OPENSSL_NO_DEPRECATED 1
-#include <openssl/evp.h>
-#include <openssl/err.h>
+    #include <string.h>
 
-#include <niu2x/utils.h>
+    #define OPENSSL_NO_DEPRECATED 1
+    #include <openssl/evp.h>
+    #include <openssl/err.h>
 
-#include "common.h"
+    #include <niu2x/utils.h>
 
-#define OPENSSL_ERR_MSG() ERR_reason_error_string(ERR_peek_last_error())
+    #include "common.h"
+
+    #define OPENSSL_ERR_MSG() ERR_reason_error_string(ERR_peek_last_error())
 
 namespace nx::crypto {
 
@@ -129,3 +132,5 @@ struct encrypt_tag_t encrypt;
 struct decrypt_tag_t decrypt;
 
 } // namespace nx::crypto
+
+#endif

@@ -2,5 +2,9 @@
 #define NX_BUILD_H
 
 #cmakedefine FFmpeg_FOUND
+#cmakedefine libuv_FOUND
+#cmakedefine ZLIB_FOUND
+#cmakedefine CURL_FOUND
+#cmakedefine OpenSSL_FOUND
 
 #endif

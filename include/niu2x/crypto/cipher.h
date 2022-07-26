@@ -1,12 +1,15 @@
 #ifndef NX_CRYPTO_CIPHER_H
 #define NX_CRYPTO_CIPHER_H
 
-#include <string>
-#include <boost/preprocessor.hpp>
-#include <niu2x/utils.h>
-#include <niu2x/api.h>
+#include <niu2x/build.h>
+#if defined(OpenSSL_FOUND)
 
-// clang-format off
+    #include <string>
+    #include <boost/preprocessor.hpp>
+    #include <niu2x/utils.h>
+    #include <niu2x/api.h>
+
+    // clang-format off
 #define NX_CRYPTO_CIPHER_ALGORITHMS()               \
     (aes_128_cbc)                                   \
     (aes_128_cfb)                                   \
@@ -125,4 +128,5 @@ BOOST_PP_SEQ_FOR_EACH(DECLARE_CIPHER, ~, NX_CRYPTO_CIPHER_ALGORITHMS())
 
 } // namespace nx::crypto
 
+#endif
 #endif

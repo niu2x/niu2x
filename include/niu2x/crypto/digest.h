@@ -1,13 +1,15 @@
 #ifndef NX_CRYPTO_DIGEST_H
 #define NX_CRYPTO_DIGEST_H
+#include <niu2x/build.h>
+#if defined(OpenSSL_FOUND)
 
-#include <string>
-#include <boost/preprocessor.hpp>
-#include <niu2x/utils.h>
-#include <niu2x/api.h>
-#include <niu2x/errcode.h>
+    #include <string>
+    #include <boost/preprocessor.hpp>
+    #include <niu2x/utils.h>
+    #include <niu2x/api.h>
+    #include <niu2x/errcode.h>
 
-// clang-format off
+    // clang-format off
 #define NX_CRYPTO_DIGEST_ALGORITHMS()   \
                         (md5)           \
                         (sha256)        \
@@ -46,4 +48,5 @@ BOOST_PP_SEQ_FOR_EACH(DECLARE_DIGEST, ~, NX_CRYPTO_DIGEST_ALGORITHMS())
 
 } // namespace nx::crypto
 
+#endif
 #endif

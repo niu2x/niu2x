@@ -68,10 +68,10 @@ inline void list_init(struct list_t* entry)
 #define NX_LIST_FOR_EACH(ptr, head)                                            \
     for (list_t* ptr = (head)->next; ptr != (head); ptr = ptr->next)
 
-namespace nx {
-template <class T>
-using ringbuf_t = boost::circular_buffer<T>;
-}
+// namespace nx {
+// template <class T>
+// using ringbuf_t = boost::circular_buffer<T>;
+// }
 
 namespace nx {
 void bitmap_zero(void* base, int nr);

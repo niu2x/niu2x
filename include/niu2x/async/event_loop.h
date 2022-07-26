@@ -1,12 +1,15 @@
 #ifndef NX_ASYNC_EVENT_LOOP_H
 #define NX_ASYNC_EVENT_LOOP_H
 
-#include <vector>
-#include <map>
-#include <functional>
-#include <boost/noncopyable.hpp>
-#include <niu2x/api.h>
-#include <uv.h>
+#include <niu2x/build.h>
+#if defined(libuv_FOUND)
+
+    #include <vector>
+    #include <map>
+    #include <functional>
+    #include <boost/noncopyable.hpp>
+    #include <niu2x/api.h>
+    #include <uv.h>
 
 namespace nx::async {
 
@@ -40,4 +43,5 @@ private:
 
 } // namespace nx::async
 
+#endif
 #endif

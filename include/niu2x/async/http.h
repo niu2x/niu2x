@@ -1,12 +1,15 @@
 #ifndef NX_ASYNC_HTTP_H
 #define NX_ASYNC_HTTP_H
 
-#include <functional>
-#include <string>
-#include <sstream>
+#include <niu2x/build.h>
+#if defined(CURL_FOUND)
 
-#include <niu2x/api.h>
-#include <niu2x/async/io_context.h>
+    #include <functional>
+    #include <string>
+    #include <sstream>
+
+    #include <niu2x/api.h>
+    #include <niu2x/async/io_context.h>
 
 namespace nx::async {
 
@@ -36,4 +39,5 @@ NXAPI void http_wait();
 
 } // namespace nx::async
 
+#endif
 #endif

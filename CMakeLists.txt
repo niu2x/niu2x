@@ -16,6 +16,7 @@ target_sources(${LIB_NAME} PRIVATE ${c_source})
 
 target_include_directories(${LIB_NAME} PUBLIC 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/niu2x/3rd>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
 )
 
@@ -38,16 +39,15 @@ generate_export_header(niu2x
 	INCLUDE_GUARD_NAME NX_API_H
 )
 
-find_package(Boost REQUIRED)
-find_package(OpenSSL 3 REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(libuv REQUIRED)
-find_package(CURL REQUIRED)
+# find_package(ZLIB)
+# find_package(libuv)
+# find_package(CURL)
 
-find_package(FFmpeg)
+# find_package(OpenSSL 3)
+# find_package(FFmpeg)
 
 if(FFmpeg_FOUND)
-	list(APPEND FFmpeg_LIBS 
+	list(APPEND thirdparty_LIBS 
 		FFmpeg::avformat
 		FFmpeg::avcodec
 		FFmpeg::avutil
@@ -55,16 +55,47 @@ if(FFmpeg_FOUND)
 	)
 endif()
 
+if(OpenSSL_FOUND)
+	list(APPEND thirdparty_LIBS 
+		OpenSSL::Crypto
+		OpenSSL::SSL
+	)
+
+	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		list(APPEND thirdparty_LIBS dl)
+	endif()
+endif()
+
+if(CURL_FOUND)
+	list(APPEND thirdparty_LIBS 
+		curl
+	)
+endif()
+
+if(libuv_FOUND)
+	list(APPEND thirdparty_LIBS 
+		uv_a
+	)
+endif()
+
+
+if(ZLIB_FOUND)
+	list(APPEND thirdparty_LIBS 
+		ZLIB::ZLIB
+	)
+endif()
+
+
+message(STATUS "NX ZLIB_FOUND ${ZLIB_FOUND}")
+message(STATUS "NX libuv_FOUND ${libuv_FOUND}")
+message(STATUS "NX CURL_FOUND ${CURL_FOUND}")
+message(STATUS "NX OpenSSL_FOUND ${OpenSSL_FOUND}")
+message(STATUS "NX FFmpeg_FOUND ${FFmpeg_FOUND}")
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/build.h.in include/niu2x/build.h)
 
 target_link_libraries(niu2x PUBLIC 
-	Boost::headers
-	OpenSSL::Crypto
-	OpenSSL::SSL
-	${FFmpeg_LIBS}
-	ZLIB::ZLIB
-	uv_a
-	curl
+	${thirdparty_LIBS}
 )
 
 

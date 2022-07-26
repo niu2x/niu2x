@@ -1,14 +1,17 @@
 #include <niu2x/crypto/digest.h>
 
-#include <string.h>
+#include <niu2x/build.h>
+#if defined(OpenSSL_FOUND)
 
-#define OPENSSL_NO_DEPRECATED 1
-#include <openssl/evp.h>
-#include <openssl/err.h>
+    #include <string.h>
 
-#include <niu2x/utils.h>
+    #define OPENSSL_NO_DEPRECATED 1
+    #include <openssl/evp.h>
+    #include <openssl/err.h>
 
-#include "common.h"
+    #include <niu2x/utils.h>
+
+    #include "common.h"
 
 namespace nx::crypto {
 
@@ -52,3 +55,4 @@ namespace nx::crypto {
 BOOST_PP_SEQ_FOR_EACH(DEFINE_DIGEST, ~, NX_CRYPTO_DIGEST_ALGORITHMS())
 
 } // namespace nx::crypto
+#endif

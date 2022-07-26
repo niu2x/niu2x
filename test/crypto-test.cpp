@@ -2,6 +2,8 @@
 #include "mu-wan-qing.h"
 #include <niu2x/crypto.h>
 #include <niu2x/type.h>
+#include <niu2x/build.h>
+#if defined(OpenSSL_FOUND)
 
 struct test_t {
     struct nx::list_t list;
@@ -43,3 +45,5 @@ TEST(crypto, cipher)
     result = nx::crypto::aes_128_cbc(nx::crypto::decrypt, cipher, key, iv);
     EXPECT_EQ(result, std::string(muwanqing, muwanqing + muwanqing_length));
 }
+
+#endif

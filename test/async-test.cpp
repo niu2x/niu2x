@@ -62,13 +62,16 @@ TEST(async, io_context)
     EXPECT_EQ(4 * (1 << 20), k);
 }
 
+#include <niu2x/build.h>
+#if defined(CURL_FOUND)
+
 TEST(async, curl_context)
 {
     int err;
     std::string result;
 
     nx::async::setup();
-    nx::async::http_get("http://127.0.0.1/i-want-404.html",
+    nx::async::http_get("http://www.baidu.com/i-want-404.html",
         [&err, &result](int p_err, std::string p_result) {
             err = p_err;
             result = std::move(p_result);
@@ -80,3 +83,5 @@ TEST(async, curl_context)
     EXPECT_EQ(err, -nx::E_ASYNC_HTTP);
     EXPECT_EQ(result, "404");
 }
+
+#endif

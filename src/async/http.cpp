@@ -1,7 +1,11 @@
 #include <niu2x/async/http.h>
-#include <curl/curl.h>
-#include <niu2x/utils.h>
-#include <niu2x/async/thread_group.h>
+
+#include <niu2x/build.h>
+#if defined(CURL_FOUND)
+
+    #include <curl/curl.h>
+    #include <niu2x/utils.h>
+    #include <niu2x/async/thread_group.h>
 
 namespace nx::async {
 
@@ -110,3 +114,4 @@ void http_ensure_worker(int n)
 void http_wait() { default_thread_group.join_all(); }
 
 } // namespace nx::async
+#endif

@@ -1,6 +1,9 @@
 #include <niu2x/async/event_loop.h>
 #include <niu2x/utils.h>
 
+#include <niu2x/build.h>
+#if defined(libuv_FOUND)
+
 namespace nx::async {
 
 event_loop_t::event_loop_t() { uv_loop_init(&loop_); }
@@ -45,3 +48,4 @@ void event_loop_t::id_free(id_t) { }
 void event_loop_t::uv_idle_cb(uv_idle_t* handle) { unused(handle); }
 
 } // namespace nx::async
+#endif
