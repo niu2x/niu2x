@@ -2,10 +2,10 @@ all:
 	git add .
 	git-clang-format
 	git add .
-	cmake -S . -B build -DBUILD_SHARED_LIBS=ON \
+	cmake -S . -B build -DBUILD_SHARED_LIBS=OFF \
 	-Dlibuv_DIR=/home/niu2x/project/libuv/build/dist/usr/local/lib/cmake/libuv \
 	-DCURL_DIR=/home/niu2x/project/curl/build-linux/dist/usr/local/lib/cmake/CURL \
-	-DOpenSSL_ROOT=/home/niu2x/project/openssl/dist/usr/local
+	-DOpenSSL1_ROOT=/home/niu2x/project/openssl/dist/usr/local
 	cmake --build build
 	make -C build test
 	make -C build install DESTDIR=dist
@@ -44,7 +44,7 @@ dist-linux: build-linux
 	cp -r build/linux/dist/* dist/linux/
 
 build-linux:
-	cmake -S . -B build/linux -DBUILD_SHARED_LIBS=ON
+	cmake -S . -B build/linux -DBUILD_SHARED_LIBS=OFF
 	cmake --build build/linux
 
 .PHONY: all clean build-android
