@@ -22,6 +22,7 @@ target_include_directories(${LIB_NAME} PUBLIC
 
 target_include_directories(${LIB_NAME} PRIVATE
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/3rd>
 )
 
 target_compile_features(${LIB_NAME} PRIVATE cxx_std_17)
