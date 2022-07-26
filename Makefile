@@ -5,7 +5,7 @@ all:
 	cmake -S . -B build -DBUILD_SHARED_LIBS=OFF \
 	-Dlibuv_DIR=/home/niu2x/project/libuv/build/dist/usr/local/lib/cmake/libuv \
 	-DCURL_DIR=/home/niu2x/project/curl/build-linux/dist/usr/local/lib/cmake/CURL \
-	-DOpenSSL1_ROOT=/home/niu2x/project/openssl/dist/usr/local
+	-DOpenSSL_ROOT=/home/niu2x/project/openssl/dist/usr/local
 	cmake --build build
 	make -C build test
 	make -C build install DESTDIR=dist
@@ -17,12 +17,12 @@ clean:
 build-android: build-android-armeabi-v7a build-android-arm64-v8a
 
 build-android-armeabi-v7a:
-	cmake -S . -B build/android/armeabi-v7a -DBUILD_SHARED_LIBS=ON -DANDROID_PLATFORM=android-21 -DANDROID_ABI=armeabi-v7a \
+	cmake -S . -B build/android/armeabi-v7a -DBUILD_SHARED_LIBS=OFF -DANDROID_PLATFORM=android-21 -DANDROID_ABI=armeabi-v7a \
 		-DCMAKE_TOOLCHAIN_FILE=/home/niu2x/Android/Sdk/ndk/21.2.6472646/build/cmake/android.toolchain.cmake
 	cmake --build build/android/armeabi-v7a
 
 build-android-arm64-v8a:
-	cmake -S . -B build/android/arm64-v8a -DBUILD_SHARED_LIBS=ON -DANDROID_PLATFORM=android-21 -DANDROID_ABI=arm64-v8a \
+	cmake -S . -B build/android/arm64-v8a -DBUILD_SHARED_LIBS=OFF -DANDROID_PLATFORM=android-21 -DANDROID_ABI=arm64-v8a \
 		-DCMAKE_TOOLCHAIN_FILE=/home/niu2x/Android/Sdk/ndk/21.2.6472646/build/cmake/android.toolchain.cmake
 	cmake --build build/android/arm64-v8a
 

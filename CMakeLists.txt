@@ -48,6 +48,7 @@ find_package(OpenSSL 3.0.0)
 include(CheckSymbolExists)
 
 if(OpenSSL_FOUND)
+	set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
 	check_symbol_exists(EVP_CipherInit_ex2 openssl/evp.h HAS_EVP_CipherInit_ex2)
 	message(STATUS "HAS_EVP_CipherInit_ex2 ${HAS_EVP_CipherInit_ex2}")
 	if(NOT HAS_EVP_CipherInit_ex2)
