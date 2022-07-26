@@ -25,7 +25,7 @@ target_include_directories(${LIB_NAME} PRIVATE
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/3rd>
 )
 
-target_compile_features(${LIB_NAME} PRIVATE cxx_std_17)
+target_compile_features(${LIB_NAME} PUBLIC cxx_std_17)
 set_target_properties(niu2x PROPERTIES
 	C_VISIBILITY_PRESET hidden
 	CXX_VISIBILITY_PRESET hidden
@@ -43,8 +43,17 @@ generate_export_header(niu2x
 find_package(ZLIB)
 find_package(libuv)
 find_package(CURL)
+find_package(OpenSSL 3.0.0)
 
-# find_package(OpenSSL 3)
+include(CheckSymbolExists)
+
+if(OpenSSL_FOUND)
+	check_symbol_exists(EVP_CipherInit_ex2 openssl/evp.h HAS_EVP_CipherInit_ex2)
+	message(STATUS "HAS_EVP_CipherInit_ex2 ${HAS_EVP_CipherInit_ex2}")
+	if(NOT HAS_EVP_CipherInit_ex2)
+		set(OpenSSL_FOUND OFF)
+	endif()
+endif()
 # find_package(FFmpeg)
 
 if(FFmpeg_FOUND)
@@ -151,3 +160,5 @@ if(BUILD_TESTING)
 	add_subdirectory(test)
 endif()
 
+
+add_subdirectory(app/nx)
