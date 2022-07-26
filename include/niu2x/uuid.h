@@ -8,8 +8,10 @@
 namespace nx {
 
 using uuid_t = struct {
-    uint8_t bits[16];
+    enum { size = 16 };
+    uint8_t bits[size];
 };
+
 NXAPI uuid_t uuid_gen();
 NXAPI std::string uuid_str_gen();
 NXAPI std::string uuid_str(const uuid_t* self);
