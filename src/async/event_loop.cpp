@@ -2,6 +2,7 @@
 #include <niu2x/utils.h>
 
 #include <niu2x/build.h>
+#include <niu2x/bitmap.h>
 
 #if defined(libuv_FOUND)
     #include <uv.h>
@@ -21,6 +22,11 @@ event_loop_t::event_loop_t()
     loop_ = (uv_loop_t*)malloc(sizeof(uv_loop_t));
     NX_THROW_COND_MSG(!loop_, "out of memory");
     uv_loop_init((uv_loop_t*)loop_);
+
+    id_alloc_ = 64;
+    id_nr_ = 0;
+    id_bitmap_ = bitmap_zalloc(id_alloc_);
+    NX_THROW_COND_MSG(!id_bitmap_, "out of memory");
 }
 
 event_loop_t::~event_loop_t()

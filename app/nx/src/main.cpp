@@ -53,6 +53,7 @@ int main(int argc, char* argv[])
         show_features();
     }
 
+#if defined(libuv_FOUND)
     nx::async::event_loop_t event_loop;
     event_loop.idle_start([&event_loop](auto id) {
         static int k = 0;
@@ -61,7 +62,7 @@ int main(int argc, char* argv[])
             event_loop.idle_stop(id);
     });
     event_loop.run();
-    printf("long bits %ld\n", NX_BITS_PER_U32);
+#endif
     printf("long long bits %ld\n", NX_BITS_PER_U64);
 
     return 0;

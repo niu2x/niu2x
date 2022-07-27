@@ -32,6 +32,11 @@ private:
 
     void* loop_;
     std::map<id_t, void*> idles_;
+
+    uint64_t* id_bitmap_;
+    int id_alloc_;
+    int id_nr_;
+
     // static void uv_idle_cb(uv_idle_t* handle);
 };
 

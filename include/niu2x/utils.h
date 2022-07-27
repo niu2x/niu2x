@@ -117,26 +117,27 @@ inline void unused(...) { }
         }
 #endif
 
+#define NX_ROUND_MASK(x, y) ((__typeof__(x))((y)-1))
+#define NX_ROUND_UP(x, y)   ((((x)-1) | NX_ROUND_MASK(x, y)) + 1)
+#define NX_ROUND_DOWN(x, y) ((x) & ~NX_ROUND_MASK(x, y))
+
 #define NX_U64(n) ((uint64_t)(n))
-#define NX_U32(n) ((uint32_t)(n))
+// #define NX_U32(n) ((uint32_t)(n))
 
 #define NX_BITS_PER_BYTE       8
 #define NX_BITS_PER_TYPE(type) (sizeof(type) * NX_BITS_PER_BYTE)
-#define NX_BITS_PER_U32        NX_BITS_PER_TYPE(uint32_t)
+// #define NX_BITS_PER_U32        NX_BITS_PER_TYPE(uint32_t)
 #define NX_BITS_PER_U64        NX_BITS_PER_TYPE(uint64_t)
 
 #define NX_BIT_U64(nr) (NX_U64(1) << (nr))
-#define NX_BIT_U32(nr) (NX_U32(1) << (nr))
 
-#define NX_BIT_U32_MASK(nr) (NX_U32(1) << ((nr) % NX_BITS_PER_U32))
-#define NX_BIT_U32_WORD(nr) ((nr) / NX_BITS_PER_U32)
 #define NX_BIT_U64_MASK(nr) (NX_U64(1) << ((nr) % NX_BITS_PER_U64))
 #define NX_BIT_U64_WORD(nr) ((nr) / NX_BITS_PER_U64)
 
 #define NX_DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 
 #define NX_BITS_TO_U64(nr)   NX_DIV_ROUND_UP(nr, NX_BITS_PER_TYPE(uint64_t))
-#define NX_BITS_TO_U32(nr)   NX_DIV_ROUND_UP(nr, NX_BITS_PER_TYPE(uint32_t))
+// #define NX_BITS_TO_U32(nr)   NX_DIV_ROUND_UP(nr, NX_BITS_PER_TYPE(uint32_t))
 #define NX_BITS_TO_BYTES(nr) NX_DIV_ROUND_UP(nr, NX_BITS_PER_TYPE(char))
 
 #endif

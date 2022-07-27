@@ -105,9 +105,15 @@ message(STATUS "NX FFmpeg_FOUND ${FFmpeg_FOUND}")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/build.h.in include/niu2x/build.h)
 
-target_link_libraries(niu2x PUBLIC 
-	${thirdparty_LIBS}
-)
+if(BUILD_SHARED_LIBS)
+	target_link_libraries(niu2x PRIVATE
+		${thirdparty_LIBS}
+	)
+else()
+	target_link_libraries(niu2x PUBLIC
+		${thirdparty_LIBS}
+	)
+endif()
 
 
 warning_as_error_enable(niu2x)
