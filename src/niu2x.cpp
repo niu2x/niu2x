@@ -14,3 +14,5 @@ void unused_test(int a, int b)
     // nx::ringbuf_t<int> rb;
     // nx::unused(rb);
 }
+
+#include <niu2x/ref.h>

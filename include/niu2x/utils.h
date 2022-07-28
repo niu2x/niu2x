@@ -140,4 +140,14 @@ inline void unused(...) { }
 // #define NX_BITS_TO_U32(nr)   NX_DIV_ROUND_UP(nr, NX_BITS_PER_TYPE(uint32_t))
 #define NX_BITS_TO_BYTES(nr) NX_DIV_ROUND_UP(nr, NX_BITS_PER_TYPE(char))
 
+namespace nx {
+
+template <class T>
+void call_destructor(T* obj)
+{
+    obj->~T();
+}
+
+} // namespace nx
+
 #endif
