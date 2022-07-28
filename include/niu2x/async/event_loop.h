@@ -9,10 +9,11 @@
     #include <functional>
     #include <boost/noncopyable.hpp>
     #include <niu2x/api.h>
+    #include <niu2x/bitmap.h>
 
 namespace nx::async {
 
-class event_loop_t : private boost::noncopyable {
+class NXAPI event_loop_t : private boost::noncopyable {
 public:
     using id_t = int;
     enum { INVALID_ID = -1 };
@@ -33,7 +34,7 @@ private:
     void* loop_;
     std::map<id_t, void*> idles_;
 
-    uint64_t* id_bitmap_;
+    bitmap_t id_bitmap_;
     int id_alloc_;
     int id_nr_;
 

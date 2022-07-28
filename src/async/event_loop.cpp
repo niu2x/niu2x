@@ -2,7 +2,6 @@
 #include <niu2x/utils.h>
 
 #include <niu2x/build.h>
-#include <niu2x/bitmap.h>
 
 #if defined(libuv_FOUND)
     #include <uv.h>
@@ -26,6 +25,7 @@ event_loop_t::event_loop_t()
     id_alloc_ = 64;
     id_nr_ = 0;
     id_bitmap_ = bitmap_zalloc(id_alloc_);
+
     NX_THROW_COND_MSG(!id_bitmap_, "out of memory");
 }
 
@@ -46,6 +46,11 @@ event_loop_t::id_t event_loop_t::idle_start(idle_callback_t callback)
     NX_FAIL_COND_V_MSG(!idle, INVALID_ID, "out of memory");
 
     idle->id = id_alloc();
+    if (idle->id < 0) {
+        delete idle;
+        return -1;
+    }
+
     idle->callback = std::move(callback);
     uv_idle_init((uv_loop_t*)loop_, &(idle->idle));
     idle->idle.data = idle;
@@ -63,8 +68,23 @@ void event_loop_t::idle_stop(id_t id)
     delete (idle_t*)idle;
 }
 
-event_loop_t::id_t event_loop_t::id_alloc() { return 0; }
-void event_loop_t::id_free(id_t) { }
+event_loop_t::id_t event_loop_t::id_alloc()
+{
+    if (id_nr_ == id_alloc_) {
+        return -1;
+    }
+
+    int id = bitmap_find_next_zero(id_bitmap_, id_alloc_, 0);
+    bitmap_set(id_bitmap_, id);
+    id_nr_++;
+
+    return id;
+}
+void event_loop_t::id_free(id_t id)
+{
+    bitmap_clear(id_bitmap_, id);
+    id_nr_--;
+}
 
 static void uv_idle_cb(uv_idle_t* handle)
 {
