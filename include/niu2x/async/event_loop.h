@@ -27,12 +27,16 @@ public:
     id_t idle_start(idle_callback_t callback);
     void idle_stop(id_t);
 
+    id_t tcp_alloc();
+    void tcp_free(id_t id);
+
 private:
     id_t id_alloc();
     void id_free(id_t);
 
     void* loop_;
     std::map<id_t, void*> idles_;
+    std::map<id_t, void*> tcps_;
 
     bitmap_t id_bitmap_;
     int id_alloc_;

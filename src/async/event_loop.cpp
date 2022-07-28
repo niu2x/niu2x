@@ -15,6 +15,10 @@ struct idle_t {
     event_loop_t::idle_callback_t callback;
     int id;
 };
+struct tcp_t {
+    uv_tcp_t tcp;
+    int id;
+};
 
 event_loop_t::event_loop_t()
 {
@@ -40,6 +44,37 @@ event_loop_t::~event_loop_t()
 
 void event_loop_t::run() { uv_run((uv_loop_t*)loop_, UV_RUN_DEFAULT); }
 
+event_loop_t::id_t event_loop_t::tcp_alloc()
+{
+    auto tcp = new (std::nothrow) tcp_t;
+    NX_FAIL_COND_V_MSG(!tcp, INVALID_ID, "out of memory");
+
+    tcp->id = id_alloc();
+    if (tcp->id < 0) {
+        delete tcp;
+        return INVALID_ID;
+    }
+
+    uv_tcp_init((uv_loop_t*)loop_, &(tcp->tcp));
+    tcp->tcp.data = tcp;
+    tcps_[tcp->id] = tcp;
+    return tcp->id;
+}
+
+static void tcp_close_cb(uv_handle_t* handle)
+{
+    auto tcp = handle->data;
+    delete (tcp_t*)tcp;
+}
+
+void event_loop_t::tcp_free(event_loop_t::id_t id)
+{
+    auto tcp = tcps_[id];
+    tcps_.erase(id);
+    uv_close((uv_handle_t*)&(((tcp_t*)tcp)->tcp), tcp_close_cb);
+    id_free(((tcp_t*)tcp)->id);
+}
+
 event_loop_t::id_t event_loop_t::idle_start(idle_callback_t callback)
 {
     auto idle = new (std::nothrow) idle_t;
@@ -48,11 +83,12 @@ event_loop_t::id_t event_loop_t::idle_start(idle_callback_t callback)
     idle->id = id_alloc();
     if (idle->id < 0) {
         delete idle;
-        return -1;
+        return INVALID_ID;
     }
 
     idle->callback = std::move(callback);
     uv_idle_init((uv_loop_t*)loop_, &(idle->idle));
+
     idle->idle.data = idle;
     idles_[idle->id] = idle;
     uv_idle_start(&(idle->idle), uv_idle_cb);
@@ -71,7 +107,7 @@ void event_loop_t::idle_stop(id_t id)
 event_loop_t::id_t event_loop_t::id_alloc()
 {
     if (id_nr_ == id_alloc_) {
-        return -1;
+        return INVALID_ID;
     }
 
     int id = bitmap_find_next_zero(id_bitmap_, id_alloc_, 0);
